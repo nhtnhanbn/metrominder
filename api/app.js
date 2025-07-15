@@ -38,7 +38,7 @@ let cache = { timestamp: 0 };
 const app = express();
 
 app.use(
-    cors({ origin: "http://10.0.0.238:8080" }),
+    cors(),
     async (req, res) => {
         if (Date.now() - cache.timestamp > 3000) {
             cache = await updateFeed();
