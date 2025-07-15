@@ -16,5 +16,8 @@
     "webpack": "^5.100.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
   }
 }
