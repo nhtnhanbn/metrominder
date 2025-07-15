@@ -4,8 +4,8 @@
   "description": "MetroMinder tracker website",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "dev": "webpack serve"
+    "build": "npx webpack",
+    "dev": "npx webpack serve"
   },
   "author": "Nht Nhan",
   "license": "MIT",

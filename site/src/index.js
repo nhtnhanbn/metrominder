@@ -4,11 +4,12 @@ import L from "leaflet";
 
 let feed;
 fetch(
-    "http://10.0.0.238:3000"
+    "https://metrominder.onrender.com"
 ).then((response) => {
     return response.json();
 }).then((response) => {
     feed = response;
+    console.log(feed);
 });
 
 const map = L.map("map").setView([-37.8, 145], 11);
