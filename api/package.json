@@ -1,0 +1,15 @@
+{
+  "name": "metrominder-api",
+  "version": "1.0.0",
+  "description": "Get realtime metro train vehicle position data from DTP",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nht Nhan",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0",
+    "gtfs-realtime-bindings": "^1.1.1"
+  }
+}
