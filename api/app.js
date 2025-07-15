@@ -1,5 +1,6 @@
 import express from "express";
 import "dotenv/config";
+import cors from "cors";
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 
 const PORT = 3000;
@@ -36,13 +37,16 @@ let cache = { timestamp: 0 };
 
 const app = express();
 
-app.use(async (req, res) => {
-    if (Date.now() - cache.timestamp > 3000) {
-        cache = await updateFeed();
+app.use(
+    cors({ origin: "http://10.0.0.238:8080" }),
+    async (req, res) => {
+        if (Date.now() - cache.timestamp > 3000) {
+            cache = await updateFeed();
+        }
+        
+        res.json(cache);
     }
-    
-    res.json(cache);
-});
+);
 
 app.use((err, req, res, next) => {
     res.status(500).send("Internal server error :(");
