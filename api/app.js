@@ -3,7 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 async function updateFeed() {
     const response = await fetch(
