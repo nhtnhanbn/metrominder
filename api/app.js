@@ -4,9 +4,7 @@ import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 
 const PORT = 3000;
 
-const app = express();
-
-app.use(async (req, res) => {
+async function updateFeed() {
     const response = await fetch(
         "https://data-exchange-api.vicroads.vic.gov.au/opendata/v1/gtfsr/metrotrain-vehicleposition-updates",
         {
@@ -31,7 +29,19 @@ app.use(async (req, res) => {
         new Uint8Array(buffer)
     );
     
-    res.json(feed);
+    return { timestamp: Date.now(), feed: feed };
+}
+
+let cache = { timestamp: 0 };
+
+const app = express();
+
+app.use(async (req, res) => {
+    if (Date.now() - cache.timestamp > 3000) {
+        cache = await updateFeed();
+    }
+    
+    res.json(cache);
 });
 
 app.use((err, req, res, next) => {
