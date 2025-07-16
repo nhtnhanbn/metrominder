@@ -5,6 +5,7 @@ import L from "leaflet";
 class RouteMap {
     constructor(routeId) {
         this.routeId = routeId;
+        this.layerGroup = L.layerGroup();
     }
     
     getLongRouteId() {
@@ -32,17 +33,13 @@ const routeMaps = {
 };
 
 let feed;
-fetch(
-    "https://metrominder.onrender.com"
-).then((response) => {
-    return response.json();
-}).then((response) => {
-    feed = response;
-    console.log(feed);
+setInterval(async () => {
+    const response = await fetch("https://metrominder.onrender.com");
+    const feed = await response.json();
     
     const layerGroups = {};
     for (const routeMap of Object.values(routeMaps)) {
-        layerGroups[routeMap.getLongRouteId()] = L.layerGroup();
+        layerGroups[routeMap.getLongRouteId()] = routeMap.layerGroup.clearLayers();
     }
     
     for (const train of feed.feed.entity) {
@@ -58,7 +55,7 @@ fetch(
     for (const routeMap of Object.values(routeMaps)) {
         routeMap.layerGroup = layerGroups[routeMap.getLongRouteId()];
     }
-});
+}, 3000);
 
 const map = L.map("map").setView([-37.8, 145], 11);
 
