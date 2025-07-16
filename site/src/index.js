@@ -2,36 +2,11 @@ import "./style.css";
 import geojson from "./metro_lines.geojson";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { routeMaps } from "./routeMaps.js";
 
-class RouteMap {
-    constructor(routeId) {
-        this.routeId = routeId;
-        this.layerGroup = L.layerGroup();
-    }
-    
-    getLongRouteId() {
-        return `aus:vic:vic-02-${this.routeId}:`;
-    }
+for (const routeMap of Object.values(routeMaps)) {
+    routeMap.layerGroup = L.layerGroup();
 }
-
-const routeMaps = {
-    "Alamein": new RouteMap("ALM"),
-    "Belgrave": new RouteMap("BEG"),
-    "Cranbourne": new RouteMap("CBE"),
-    "Craigieburn": new RouteMap("CGB"),
-    "Frankston": new RouteMap("FKN"),
-    "Glen Waverley": new RouteMap("GWY"),
-    "Hurstbridge": new RouteMap("HBE"),
-    "Lilydale": new RouteMap("LIL"),
-    "Mernda": new RouteMap("MDD"),
-    "Pakenham": new RouteMap("PKM"),
-    "Sandringham": new RouteMap("SHM"),
-    "Stony Point": new RouteMap("STY"),
-    "Sunbury": new RouteMap("SUY"),
-    "Upfield": new RouteMap("UFD"),
-    "Werribee": new RouteMap("WER"),
-    "Williamstown": new RouteMap("WIL")
-};
 
 let feed;
 setInterval(async () => {
@@ -40,7 +15,14 @@ setInterval(async () => {
     
     const layerGroups = {};
     for (const routeMap of Object.values(routeMaps)) {
-        layerGroups[routeMap.getLongRouteId()] = routeMap.layerGroup.clearLayers();
+        layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers().addLayer(
+            L.geoJSON(
+                geojson.features.filter((feature) => {
+                    return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
+                }),
+                { style: { color: routeMap.colour } }
+            )
+        );
     }
     
     for (const train of feed.feed.entity) {
@@ -54,7 +36,7 @@ setInterval(async () => {
     }
     
     for (const routeMap of Object.values(routeMaps)) {
-        routeMap.layerGroup = layerGroups[routeMap.getLongRouteId()];
+        routeMap.layerGroup = layerGroups[routeMap.routeId];
     }
 }, 3000);
 
@@ -64,17 +46,23 @@ L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
         maxZoom: 19,
+        opacity: 0.5,
         attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
     }
 ).addTo(map);
 
-L.geoJSON(geojson, {
-    style: (f) => {
-        return {
-            color: "#" + Math.floor(Math.random()*16777215).toString(16)
-        };
-    }
-}).addTo(map);
+function addShape(shapeId) {
+    L.geoJSON(geojson.features.filter((f)=>f.properties.SHAPE_ID==shapeId), {
+        style: (f) => {
+            return {
+                color: "#" + Math.floor(Math.random()*16777215).toString(16)
+            };
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(feature.properties.HEADSIGN + feature.properties.SHAPE_ID);
+        }
+    }).addTo(map);
+}
 
 const body = document.querySelector("body");
 for (const route in routeMaps) {
@@ -97,3 +85,12 @@ for (const route in routeMaps) {
     
     body.appendChild(label);
 }
+
+const text = document.createElement("input");
+text.type = "text";
+body.appendChild(text);
+
+const button = document.createElement("button");
+button.textContent = "go";
+button.addEventListener("click", () => { addShape(text.value); });
+body.appendChild(button);
