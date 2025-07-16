@@ -1,0 +1,2 @@
+﻿service_id,date,exception_type
+"T6_2","20250926","2"
