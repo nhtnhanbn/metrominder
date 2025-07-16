@@ -72,14 +72,22 @@ L.tileLayer(
 
 const body = document.querySelector("body");
 for (const route in routeMaps) {
-    const button = document.createElement("button");
-    button.textContent = route;
-    button.addEventListener("click", () => {
-        for (const routeMap of Object.values(routeMaps)) {
-            routeMap.layerGroup.remove();
-        }
+    const label = document.createElement("label");
+    
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.addEventListener("change", () => {
+        const layerGroup = routeMaps[route].layerGroup;
         
-        routeMaps[route].layerGroup.addTo(map);
+        if (checkbox.checked) {
+            layerGroup.addTo(map);
+        } else {
+            layerGroup.remove();
+        }
     });
-    body.appendChild(button);
+    
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(route));
+    
+    body.appendChild(label);
 }
