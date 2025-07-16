@@ -5,7 +5,6 @@ import L from "leaflet";
 class RouteMap {
     constructor(routeId) {
         this.routeId = routeId;
-        this.layerGroup = L.layerGroup();
     }
     
     getLongRouteId() {
@@ -41,12 +40,23 @@ fetch(
     feed = response;
     console.log(feed);
     
+    const layerGroups = {};
+    for (const routeMap of Object.values(routeMaps)) {
+        layerGroups[routeMap.getLongRouteId()] = L.layerGroup();
+    }
+    
     for (const train of feed.feed.entity) {
         const { latitude, longitude } = train.vehicle.position;
-        L.circle(
-            [latitude, longitude],
-            { radius: 100 }
-        ).addTo(map);
+        layerGroups[train.vehicle.trip.routeId].addLayer(
+            L.circle(
+                [latitude, longitude],
+                { radius: 100 }
+            )
+        );
+    }
+    
+    for (const routeMap of Object.values(routeMaps)) {
+        routeMap.layerGroup = layerGroups[routeMap.getLongRouteId()];
     }
 });
 
@@ -65,7 +75,11 @@ for (const route in routeMaps) {
     const button = document.createElement("button");
     button.textContent = route;
     button.addEventListener("click", () => {
+        for (const routeMap of Object.values(routeMaps)) {
+            routeMap.layerGroup.remove();
+        }
         
+        routeMaps[route].layerGroup.addTo(map);
     });
     body.appendChild(button);
 }
