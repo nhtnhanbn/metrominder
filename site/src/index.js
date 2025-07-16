@@ -1,4 +1,5 @@
 import "./style.css";
+import geojson from "./metro_lines.geojson";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -66,6 +67,14 @@ L.tileLayer(
         attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
     }
 ).addTo(map);
+
+L.geoJSON(geojson, {
+    style: (f) => {
+        return {
+            color: "#" + Math.floor(Math.random()*16777215).toString(16)
+        };
+    }
+}).addTo(map);
 
 const body = document.querySelector("body");
 for (const route in routeMaps) {
