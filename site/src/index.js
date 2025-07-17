@@ -97,46 +97,8 @@ L.tileLayer(
     }
 ).addTo(map);
 
-function addShape(shapeId) {
-    L.geoJSON(geojson.features.filter((f)=>f.properties.SHAPE_ID===shapeId), {
-        style: (f) => {
-            return {
-                color: "#" + Math.floor(Math.random()*16777215).toString(16)
-            };
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(feature.properties.HEADSIGN + feature.properties.SHAPE_ID);
-        }
-    }).addTo(map);
+const layerGroupsNamed = {};
+for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+    layerGroupsNamed[routeName] = routeMap.layerGroup;
 }
-
-const body = document.querySelector("body");
-for (const route in routeMaps) {
-    const label = document.createElement("label");
-    
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.addEventListener("change", () => {
-        const layerGroup = routeMaps[route].layerGroup;
-        
-        if (checkbox.checked) {
-            layerGroup.addTo(map);
-        } else {
-            layerGroup.remove();
-        }
-    });
-    
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(route));
-    
-    body.appendChild(label);
-}
-
-const text = document.createElement("input");
-text.type = "text";
-body.appendChild(text);
-
-const button = document.createElement("button");
-button.textContent = "go";
-button.addEventListener("click", () => { addShape(text.value); });
-body.appendChild(button);
+L.control.layers(null, layerGroupsNamed).addTo(map);
