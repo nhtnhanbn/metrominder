@@ -4,11 +4,30 @@ import "leaflet-arrowcircle";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
 import routes from "../../data/gtfsschedule/routes.txt";
+import stationLines from "../../data/stationLines.json";
 import { routeMaps } from "./routeMaps.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
-for (const routeMap of Object.values(routeMaps)) {
+const stations = {};
+for (const stop of stops) {
+    let { stop_name, stop_lat, stop_lon, parent_station } = stop;
+    stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
+    
+    if (parent_station === "") {
+        stations[stop_name] = L.marker(
+            [stop_lat, stop_lon],
+            {
+                icon: L.icon({
+                    iconUrl: stationIcon,
+                    iconSize: [20, 20]
+                })
+            }
+        );
+    }
+}
+
+for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     const route = routes.find((route) => {
         return route.route_id === routeMap.routeId;
     });
@@ -22,6 +41,11 @@ for (const routeMap of Object.values(routeMaps)) {
         }),
         { style: { color: routeMap.colour } }
     );
+    
+    routeMap.stations = L.layerGroup();
+    for (const stop_name of stationLines[routeName]) {
+        routeMap.stations.addLayer(stations[stop_name]);
+    }
 }
 
 let feed;
@@ -31,9 +55,8 @@ setInterval(async () => {
     
     const layerGroups = {}, colours = {}, textColours = {};
     for (const routeMap of Object.values(routeMaps)) {
-        layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers().addLayer(
-            routeMap.line
-        );
+        layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers();
+        layerGroups[routeMap.routeId].addLayer(routeMap.line).addLayer(routeMap.stations);
         colours[routeMap.routeId] = routeMap.colour;
         textColours[routeMap.routeId] = routeMap.textColour;
     }
@@ -72,21 +95,6 @@ L.tileLayer(
         attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
     }
 ).addTo(map);
-
-for (const stop of stops) {
-    const { stop_lat, stop_lon, parent_station } = stop;
-    if (parent_station === "") {
-        L.marker(
-            [stop_lat, stop_lon],
-            {
-                icon: L.icon({
-                    iconUrl: stationIcon,
-                    iconSize: [20, 20]
-                })
-            }
-        ).addTo(map);
-    }
-}
 
 function addShape(shapeId) {
     L.geoJSON(geojson.features.filter((f)=>f.properties.SHAPE_ID===shapeId), {
