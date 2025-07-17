@@ -30,7 +30,7 @@ async function updateFeed() {
         new Uint8Array(buffer)
     );
     
-    return { timestamp: Date.now(), feed: feed };
+    return feed;
 }
 
 let cache = { timestamp: 0 };
@@ -41,7 +41,10 @@ app.use(
     cors(),
     async (req, res) => {
         if (Date.now() - cache.timestamp > 4000) {
-            cache = await updateFeed();
+            cache = {
+                timestamp: Date.now(),
+                feed: await updateFeed()
+            };
         }
         
         res.json(cache);
