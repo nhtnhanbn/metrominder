@@ -1,5 +1,6 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet-rotate";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
@@ -48,7 +49,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     }
 }
 
-function refreshLines(feed) {
+function drawLines(feed) {
     const layerGroups = {}, colours = {}, textColours = {};
     for (const routeMap of Object.values(routeMaps)) {
         layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers();
@@ -70,7 +71,8 @@ function refreshLines(feed) {
                         size: 40,
                         rotation: bearing
                     },
-                    pane: "trains"
+                    pane: "trainPane",
+                    rotateWithView: true
                 }
             ).bindTooltip(L.tooltip({
                 direction: "center",
@@ -84,14 +86,24 @@ function refreshLines(feed) {
 }
 
 let feed;
-setInterval(async () => {
+
+async function fetchLines() {
     const response = await fetch("https://metrominder.onrender.com");
     feed = await response.json();
-    refreshLines(feed);
-}, 1000);
+    drawLines(feed);
+    setTimeout(fetchLines, 100000);
+}
 
-const map = L.map("map").setView([-37.8, 145], 11);
-map.createPane("trains").style.zIndex = 625;
+fetchLines();
+
+const map = L.map("map", {
+    center: [-37.8, 145],
+    zoom: 11,
+    rotate: true,
+    rotateControl: { closeOnZeroBearing: false },
+    touchRotate: true
+});
+map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -109,7 +121,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     // Removing a line layer group removes its stations
     routeMap.layerGroup.addEventListener("remove", () => {
         setTimeout(() => { // wait for the layer removals to be done
-            refreshLines(feed);
+            drawLines(feed);
         }, 0);
     });
 }
