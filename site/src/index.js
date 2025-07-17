@@ -105,6 +105,11 @@ const map = L.map("map", {
 });
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
+// Reset rotation when controller clicked
+map.rotateControl.getContainer().addEventListener("mouseup", () => {
+    map.setBearing(0);
+});
+
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
