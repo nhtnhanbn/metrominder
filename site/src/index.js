@@ -48,10 +48,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     }
 }
 
-async function refreshLines() {
-    const response = await fetch("https://metrominder.onrender.com");
-    const feed = await response.json();
-    
+function refreshLines(feed) {
     const layerGroups = {}, colours = {}, textColours = {};
     for (const routeMap of Object.values(routeMaps)) {
         layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers();
@@ -86,7 +83,12 @@ async function refreshLines() {
     }
 }
 
-setInterval(refreshLines, 1000);
+let feed;
+setInterval(async () => {
+    const response = await fetch("https://metrominder.onrender.com");
+    feed = await response.json();
+    refreshLines(feed);
+}, 1000);
 
 const map = L.map("map").setView([-37.8, 145], 11);
 map.createPane("trains").style.zIndex = 625;
@@ -103,7 +105,12 @@ L.tileLayer(
 const layerGroupsNamed = {};
 for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     layerGroupsNamed[routeName] = routeMap.layerGroup;
+    
+    // Removing a line layer group removes its stations
+    routeMap.layerGroup.addEventListener("remove", () => {
+        setTimeout(() => { // wait for the layer removals to be done
+            refreshLines(feed);
+        }, 0);
+    });
 }
 L.control.layers(null, layerGroupsNamed).addTo(map);
-
-map.addEventListener("overlayremove", refreshLines);
