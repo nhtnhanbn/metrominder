@@ -3,12 +3,25 @@ import L from "leaflet";
 import "leaflet-arrowcircle";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
+import routes from "../../data/gtfsschedule/routes.txt";
 import { routeMaps } from "./routeMaps.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
 for (const routeMap of Object.values(routeMaps)) {
+    const route = routes.find((route) => {
+        return route.route_id === routeMap.routeId;
+    });
+    
+    routeMap.colour = "#" + route.route_color;
+    routeMap.textColour = "#" + route.route_text_color;
     routeMap.layerGroup = L.layerGroup();
+    routeMap.line = L.geoJSON(
+        geojson.features.filter((feature) => {
+            return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
+        }),
+        { style: { color: routeMap.colour } }
+    );
 }
 
 let feed;
@@ -16,16 +29,13 @@ setInterval(async () => {
     const response = await fetch("https://metrominder.onrender.com");
     const feed = await response.json();
     
-    const layerGroups = {};
+    const layerGroups = {}, colours = {}, textColours = {};
     for (const routeMap of Object.values(routeMaps)) {
         layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers().addLayer(
-            L.geoJSON(
-                geojson.features.filter((feature) => {
-                    return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
-                }),
-                { style: { color: routeMap.colour } }
-            )
+            routeMap.line
         );
+        colours[routeMap.routeId] = routeMap.colour;
+        textColours[routeMap.routeId] = routeMap.textColour;
     }
     
     for (const train of feed.feed.entity) {
@@ -36,21 +46,19 @@ setInterval(async () => {
                 [latitude, longitude],
                 {
                     iconOptions: {
+                        color: colours[routeId],
                         size: 40,
                         rotation: bearing
                     }
                 }
-            ).bindTooltip(routeId.slice(15, 18), {
+            ).bindTooltip(L.tooltip({
                 direction: "center",
                 permanent: true,
                 opacity: 1,
-                className: "train-tip"
-            })
+                className: "train-tip",
+                content: `<span style='color:${textColours[routeId]}'>${routeId.slice(15, 18)}</span>`
+            }))
         );
-    }
-    
-    for (const routeMap of Object.values(routeMaps)) {
-        routeMap.layerGroup = layerGroups[routeMap.routeId];
     }
 }, 1000);
 
