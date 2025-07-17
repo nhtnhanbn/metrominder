@@ -4,6 +4,7 @@ import stops from "../../data/gtfsschedule/stops.txt";
 import stationIcon from "./station.svg";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet-arrowcircle";
 import { routeMaps } from "./routeMaps.js";
 
 for (const routeMap of Object.values(routeMaps)) {
@@ -28,11 +29,16 @@ setInterval(async () => {
     }
     
     for (const train of feed.feed.entity) {
-        const { latitude, longitude } = train.vehicle.position;
+        const { latitude, longitude, bearing } = train.vehicle.position;
         layerGroups[train.vehicle.trip.routeId].addLayer(
-            L.circleMarker(
+            L.marker.arrowCircle(
                 [latitude, longitude],
-                { radius: 10 }
+                {
+                    iconOptions: {
+                        size: 30,
+                        rotation: bearing
+                    }
+                }
             )
         );
     }
