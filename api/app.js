@@ -40,7 +40,7 @@ const app = express();
 app.use(
     cors(),
     async (req, res) => {
-        if (Date.now() - cache.timestamp > 3000) {
+        if (Date.now() - cache.timestamp > 4000) {
             cache = await updateFeed();
         }
         
