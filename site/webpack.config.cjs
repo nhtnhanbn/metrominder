@@ -17,7 +17,9 @@ module.exports = {
     module: {
         rules: [
             { test: /\.css$/i, use: ["style-loader", "css-loader"] },
-            { test: /\.geojson$/, type: "json" }
+            { test: /\.geojson$/, type: "json" },
+            { test: /\.txt$/i, loader: "csv-loader", options: { header: true, skipEmptyLines: true } },
+            { test: /\.(png|svg|jpg|jpeg|gif)$/i, type: "asset/resource" }
         ]
     },
     devtool: "eval-source-map",

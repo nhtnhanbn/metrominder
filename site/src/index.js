@@ -1,5 +1,7 @@
 import "./style.css";
 import geojson from "./metro_lines.geojson";
+import stops from "../../data/gtfsschedule/stops.txt";
+import stationIcon from "./station.svg";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { routeMaps } from "./routeMaps.js";
@@ -28,9 +30,9 @@ setInterval(async () => {
     for (const train of feed.feed.entity) {
         const { latitude, longitude } = train.vehicle.position;
         layerGroups[train.vehicle.trip.routeId].addLayer(
-            L.circle(
+            L.circleMarker(
                 [latitude, longitude],
-                { radius: 100 }
+                { radius: 10 }
             )
         );
     }
@@ -38,7 +40,7 @@ setInterval(async () => {
     for (const routeMap of Object.values(routeMaps)) {
         routeMap.layerGroup = layerGroups[routeMap.routeId];
     }
-}, 3000);
+}, 1000);
 
 const map = L.map("map").setView([-37.8, 145], 11);
 
@@ -51,8 +53,23 @@ L.tileLayer(
     }
 ).addTo(map);
 
+for (const stop of stops) {
+    const { stop_lat, stop_lon, parent_station } = stop;
+    if (parent_station === "") {
+        L.marker(
+            [stop_lat, stop_lon],
+            {
+                icon: L.icon({
+                    iconUrl: stationIcon,
+                    iconSize: [20, 20]
+                })
+            }
+        ).addTo(map);
+    }
+}
+
 function addShape(shapeId) {
-    L.geoJSON(geojson.features.filter((f)=>f.properties.SHAPE_ID==shapeId), {
+    L.geoJSON(geojson.features.filter((f)=>f.properties.SHAPE_ID===shapeId), {
         style: (f) => {
             return {
                 color: "#" + Math.floor(Math.random()*16777215).toString(16)
