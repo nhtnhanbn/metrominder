@@ -1,11 +1,11 @@
-import "./style.css";
-import geojson from "./metro_lines.geojson";
-import stops from "../../data/gtfsschedule/stops.txt";
-import stationIcon from "./station.svg";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "leaflet-arrowcircle";
+import geojson from "./metro_lines.geojson";
+import stops from "../../data/gtfsschedule/stops.txt";
 import { routeMaps } from "./routeMaps.js";
+import stationIcon from "./station.svg";
+import "./style.css";
 
 for (const routeMap of Object.values(routeMaps)) {
     routeMap.layerGroup = L.layerGroup();
@@ -30,16 +30,22 @@ setInterval(async () => {
     
     for (const train of feed.feed.entity) {
         const { latitude, longitude, bearing } = train.vehicle.position;
-        layerGroups[train.vehicle.trip.routeId].addLayer(
+        const routeId = train.vehicle.trip.routeId;
+        layerGroups[routeId].addLayer(
             L.marker.arrowCircle(
                 [latitude, longitude],
                 {
                     iconOptions: {
-                        size: 30,
+                        size: 40,
                         rotation: bearing
                     }
                 }
-            )
+            ).bindTooltip(routeId.slice(15, 18), {
+                direction: "center",
+                permanent: true,
+                opacity: 1,
+                className: "train-tip"
+            })
         );
     }
     
