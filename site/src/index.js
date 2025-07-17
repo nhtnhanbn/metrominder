@@ -48,8 +48,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     }
 }
 
-let feed;
-setInterval(async () => {
+async function refreshLines() {
     const response = await fetch("https://metrominder.onrender.com");
     const feed = await response.json();
     
@@ -73,7 +72,8 @@ setInterval(async () => {
                         color: colours[routeId],
                         size: 40,
                         rotation: bearing
-                    }
+                    },
+                    pane: "trains"
                 }
             ).bindTooltip(L.tooltip({
                 direction: "center",
@@ -84,9 +84,12 @@ setInterval(async () => {
             }))
         );
     }
-}, 1000);
+}
+
+setInterval(refreshLines, 1000);
 
 const map = L.map("map").setView([-37.8, 145], 11);
+map.createPane("trains").style.zIndex = 625;
 
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -102,3 +105,5 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     layerGroupsNamed[routeName] = routeMap.layerGroup;
 }
 L.control.layers(null, layerGroupsNamed).addTo(map);
+
+map.addEventListener("overlayremove", refreshLines);
