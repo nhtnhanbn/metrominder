@@ -1,6 +1,6 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import "leaflet-arrowcircle";
+import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
 import routes from "../../data/gtfsschedule/routes.txt";
@@ -69,6 +69,7 @@ setInterval(async () => {
                 [latitude, longitude],
                 {
                     iconOptions: {
+                        stroke: textColours[routeId],
                         color: colours[routeId],
                         size: 40,
                         rotation: bearing

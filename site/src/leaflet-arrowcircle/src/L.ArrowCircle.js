@@ -46,7 +46,7 @@
         `l ${dims.width} ${dims.pointerYLength} ` +
         `h -${dims.width / 2} v ${dims.width}`;
 
-      return `<path d="${pathDescription}" style="stroke: black; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
+      return `<path d="${pathDescription}" style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
     },
     _createCircle: function () {
       const getYIntercept = (x) => {
@@ -68,7 +68,7 @@
         `M ${dims.startX} ${yIntercept}` +
         `A ${radius} ${radius} 0 1 0 ${dims.startX + dims.width} ${yIntercept}`;
 
-      return `<path d="${pathDescription}" style="stroke: black; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
+      return `<path d="${pathDescription}" style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
     },
     _calculateArrowDimensions: function () {
       let circleRadius = this.options.size / 4;
