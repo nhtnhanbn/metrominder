@@ -3,19 +3,11 @@ body {
     margin: 0;
 }
 
-#map {
-    height: 90vh;
-}
-
 .train-tip {
     background: transparent;
     border: none;
     box-shadow: none;
     font-size: 6pt;
-}
-
-.leaflet-tooltip-pane {
-    z-index: 700;
 }
 
 html, body, #map {

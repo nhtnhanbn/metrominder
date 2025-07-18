@@ -16,15 +16,18 @@ for (const stop of stops) {
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
-        stations[stop_name] = L.marker(
-            [stop_lat, stop_lon],
-            {
-                icon: L.icon({
-                    iconUrl: stationIcon,
-                    iconSize: [20, 20]
-                })
-            }
-        );
+        stations[stop_name] = {
+            marker: L.marker(
+                [stop_lat, stop_lon],
+                {
+                    icon: L.icon({
+                        iconUrl: stationIcon,
+                        iconSize: [20, 20]
+                    })
+                }
+            ),
+            visibility: 0
+        };
     }
 }
 
@@ -42,18 +45,16 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
         }),
         { style: { color: routeMap.colour } }
     );
-    
-    routeMap.stations = L.layerGroup();
-    for (const stop_name of stationLines[routeName]) {
-        routeMap.stations.addLayer(stations[stop_name]);
-    }
 }
 
-function drawLines(feed) {
+async function fetchLines() {
+    const response = await fetch("https://metrominder.onrender.com");
+    const feed = await response.json();
+    
     const layerGroups = {}, colours = {}, textColours = {};
     for (const routeMap of Object.values(routeMaps)) {
         layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers();
-        layerGroups[routeMap.routeId].addLayer(routeMap.line).addLayer(routeMap.stations);
+        layerGroups[routeMap.routeId].addLayer(routeMap.line);
         colours[routeMap.routeId] = routeMap.colour;
         textColours[routeMap.routeId] = routeMap.textColour;
     }
@@ -83,17 +84,9 @@ function drawLines(feed) {
             }))
         );
     }
+    
+    setTimeout(fetchLines, 1000);
 }
-
-let feed;
-
-async function fetchLines() {
-    const response = await fetch("https://metrominder.onrender.com");
-    feed = await response.json();
-    drawLines(feed);
-    setTimeout(fetchLines, 100000);
-}
-
 fetchLines();
 
 const map = L.map("map", {
@@ -123,11 +116,22 @@ const layerGroupsNamed = {};
 for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     layerGroupsNamed[routeName] = routeMap.layerGroup;
     
-    // Removing a line layer group removes its stations
+    routeMap.layerGroup.addEventListener("add", () => {
+        for (const stop_name of stationLines[routeName]) {
+            const station = stations[stop_name];
+            station.visibility++;
+            station.marker.addTo(map);
+        }
+    });
+    
     routeMap.layerGroup.addEventListener("remove", () => {
-        setTimeout(() => { // wait for the layer removals to be done
-            drawLines(feed);
-        }, 0);
+        for (const stop_name of stationLines[routeName]) {
+            const station = stations[stop_name];
+            station.visibility--;
+            if (station.visibility == 0) {
+                station.marker.remove();
+            }
+        }
     });
 }
 L.control.layers(null, layerGroupsNamed).addTo(map);
