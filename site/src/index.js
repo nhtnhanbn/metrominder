@@ -75,13 +75,18 @@ async function fetchLines() {
                     pane: "trainPane",
                     rotateWithView: true
                 }
-            ).bindTooltip(L.tooltip({
-                direction: "center",
-                permanent: true,
-                opacity: 1,
-                className: "train-tip",
-                content: `<span style='color:${textColours[routeId]}'>${routeId.slice(15, 18)}</span>`
-            }))
+            )
+        ).addLayer(
+            L.marker(
+                [latitude, longitude],
+                {
+                    icon: L.divIcon({
+                        html: `<div style="color: ${textColours[routeId]};">${routeId.slice(15, 18)}</div>`,
+                        className: "train-tip"
+                    }),
+                    pane: "trainPane"
+                }
+            )
         );
     }
     
