@@ -100,11 +100,12 @@ async function fetchLines() {
         const { latitude, longitude, bearing } = train.vehicle.position;
         const tripId = train.vehicle.trip.tripId;
         const routeId = train.vehicle.trip.routeId;
+        const popup = `${Math.floor(Date.now()/1000-train.vehicle.timestamp)} secs ago`;
         
         if (tripId in trains) {
             trains[tripId].marker.setLatLng([latitude, longitude]);
             trains[tripId].tip.setLatLng([latitude, longitude])
-                              .setPopupContent(Date.now().toString());
+                              .setPopupContent(popup);
             updatedTrains[tripId] = trains[tripId];
         } else {
             const marker = L.marker.arrowCircle(
@@ -129,7 +130,7 @@ async function fetchLines() {
                     }),
                     pane: "trainPane"
                 }
-            ).bindPopup(Date.now().toString());
+            ).bindPopup(L.popup({ autoPan: false }).setContent(popup));
             updatedTrains[tripId] = { marker: marker, tip: tip };
             layerGroups[routeId].addLayer(marker).addLayer(tip);
         }
@@ -142,6 +143,10 @@ async function fetchLines() {
         }
     }
     trains = updatedTrains;
+    
+    map.attributionControl.setPrefix(
+        `DTP last updated ${Math.floor((Date.now()-feed.timestamp)/1000)} secs ago | <a href="https://leafletjs.com">Leaflet</a>`
+    );
     
     setTimeout(fetchLines, 1000);
 }
@@ -183,7 +188,7 @@ L.tileLayer(
     {
         maxZoom: 19,
         opacity: 0.5,
-        attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
+        attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`
     }
 ).addTo(map);
 
