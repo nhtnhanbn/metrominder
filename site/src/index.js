@@ -15,24 +15,23 @@ import stationIcon from "./station.svg";
 import "./style.css";
 
 const stations = {};
+const searchLayer = L.layerGroup();
 for (const stop of stops) {
     let { stop_name, stop_lat, stop_lon, parent_station } = stop;
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
-        stations[stop_name] = {
-            marker: L.marker(
-                [stop_lat, stop_lon],
-                {
-                    icon: L.icon({
-                        iconUrl: stationIcon,
-                        iconSize: [20, 20]
-                    }),
-                    title: stop_name
-                }
-            ),
-            visibility: 0
-        };
+        stations[stop_name] = L.marker(
+            [stop_lat, stop_lon],
+            {
+                icon: L.icon({
+                    iconUrl: stationIcon,
+                    iconSize: [20, 20]
+                }),
+                title: stop_name,
+                visibility: 0
+            }
+        ).bindPopup(`<b>${stop_name}</b><br>`).addTo(searchLayer);
     }
 }
 
@@ -105,14 +104,7 @@ const map = L.map("map", {
     zoom: 11,
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
-    touchRotate: true,
-    searchControl: {
-        layer: stationLayer,
-        zoom: 14,
-        initial: false,
-        firstTipSubmit: true,
-        textErr: "Station not found."
-    }
+    touchRotate: true
 });
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
@@ -120,6 +112,22 @@ map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 map.rotateControl.getContainer().addEventListener("mouseup", () => {
     map.setBearing(0);
 });
+
+var foundMarker;
+(new L.Control.Search({
+    layer: searchLayer,
+    zoom: 14,
+    initial: false,
+    firstTipSubmit: true,
+    textErr: "Station not found."
+})).addEventListener("search:locationfound", (data) => {
+    if (foundMarker &&
+        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
+            foundMarker.remove();
+    }
+    foundMarker = data.layer.addTo(map);
+}).addTo(map);
+searchLayer.remove();
 
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -131,22 +139,21 @@ L.tileLayer(
 ).addTo(map);
 
 const layerGroupsNamed = {};
-stationLayer.remove();
 for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stop_name of stationLines[routeName]) {
             const station = stations[stop_name];
-            station.visibility++;
-            stationLayer.addLayer(station.marker);
+            station.options.visibility++;
+            stationLayer.addLayer(station);
         }
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
         for (const stop_name of stationLines[routeName]) {
             const station = stations[stop_name];
-            station.visibility--;
-            if (station.visibility == 0) {
-                stationLayer.removeLayer(station.marker);
+            station.options.visibility--;
+            if (station.options.visibility == 0) {
+                stationLayer.removeLayer(station);
             }
         }
     });
