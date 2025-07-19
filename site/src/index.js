@@ -85,7 +85,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
 
 let trains = {};
 async function fetchLines() {
-    const response = await fetch("https://metrominder.onrender.com");
+    const response = await fetch("https://metrominder.onrender.com/positions");
     const feed = await response.json();
     
     const layerGroups = {}, colours = {}, textColours = {};

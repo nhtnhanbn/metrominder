@@ -5,9 +5,9 @@ import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 
 const PORT = process.env.PORT || 3000;
 
-async function updateFeed() {
+async function updateFeed(resource) {
     const response = await fetch(
-        "https://data-exchange-api.vicroads.vic.gov.au/opendata/v1/gtfsr/metrotrain-vehicleposition-updates",
+        resource,
         {
             headers: {
                 "Ocp-Apim-Subscription-Key": process.env.DTP_API_KEY
@@ -33,21 +33,39 @@ async function updateFeed() {
     return feed;
 }
 
-let cache = { timestamp: 0 };
+let positionCache = { timestamp: 0 }, tripCache = { timestamp: 0};
 
 const app = express();
 
-app.use(
+app.use("/positions",
     cors(),
     async (req, res) => {
-        if (Date.now() - cache.timestamp > 4000) {
-            cache = {
+        if (Date.now() - positionCache.timestamp > 4000) {
+            positionCache = {
                 timestamp: Date.now(),
-                feed: await updateFeed()
+                feed: await updateFeed(
+                    "https://data-exchange-api.vicroads.vic.gov.au/opendata/v1/gtfsr/metrotrain-vehicleposition-updates"
+                )
             };
         }
         
-        res.json(cache);
+        res.json(positionCache);
+    }
+);
+
+app.use("/trips",
+    cors(),
+    async (req, res) => {
+        if (Date.now() - tripCache.timestamp > 4000) {
+            tripCache = {
+                timestamp: Date.now(),
+                feed: await updateFeed(
+                    "https://data-exchange-api.vicroads.vic.gov.au/opendata/v1/gtfsr/metrotrain-tripupdates"
+                )
+            };
+        }
+        
+        res.json(tripCache);
     }
 );
 
