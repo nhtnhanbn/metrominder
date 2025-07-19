@@ -18,3 +18,7 @@ html, body, #map {
 .leaflet-layerstree-header-label {
     font-size: 1.08333em;
 }
+
+span[class=leaflet-layerstree-header-label] {
+    font-style: italic;
+}
