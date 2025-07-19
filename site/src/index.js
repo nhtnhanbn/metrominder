@@ -83,23 +83,31 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     );
 }
 
+let trains = {};
 async function fetchLines() {
     const response = await fetch("https://metrominder.onrender.com");
     const feed = await response.json();
     
     const layerGroups = {}, colours = {}, textColours = {};
     for (const routeMap of Object.values(routeMaps)) {
-        layerGroups[routeMap.routeId] = routeMap.layerGroup.clearLayers();
-        layerGroups[routeMap.routeId].addLayer(routeMap.line);
+        layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
         colours[routeMap.routeId] = routeMap.colour;
         textColours[routeMap.routeId] = routeMap.textColour;
     }
     
+    const updatedTrains = {};
     for (const train of feed.feed.entity) {
         const { latitude, longitude, bearing } = train.vehicle.position;
+        const tripId = train.vehicle.trip.tripId;
         const routeId = train.vehicle.trip.routeId;
-        layerGroups[routeId].addLayer(
-            L.marker.arrowCircle(
+        
+        if (tripId in trains) {
+            trains[tripId].marker.setLatLng([latitude, longitude]);
+            trains[tripId].tip.setLatLng([latitude, longitude])
+                              .setPopupContent(Date.now().toString());
+            updatedTrains[tripId] = trains[tripId];
+        } else {
+            const marker = L.marker.arrowCircle(
                 [latitude, longitude],
                 {
                     iconOptions: {
@@ -111,9 +119,8 @@ async function fetchLines() {
                     pane: "trainPane",
                     rotateWithView: true
                 }
-            )
-        ).addLayer(
-            L.marker(
+            );
+            const tip = L.marker(
                 [latitude, longitude],
                 {
                     icon: L.divIcon({
@@ -122,9 +129,19 @@ async function fetchLines() {
                     }),
                     pane: "trainPane"
                 }
-            )
-        );
+            ).bindPopup(Date.now().toString());
+            updatedTrains[tripId] = { marker: marker, tip: tip };
+            layerGroups[routeId].addLayer(marker).addLayer(tip);
+        }
     }
+    
+    for (const tripId in trains) {
+        if (!(tripId in updatedTrains)) {
+            trains[tripId].marker.remove();
+            trains[tripId].tip.remove();
+        }
+    }
+    trains = updatedTrains;
     
     setTimeout(fetchLines, 1000);
 }
