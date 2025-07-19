@@ -14,13 +14,28 @@ import { routeMaps } from "./routeMaps.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
-const stations = {};
+const stations = {}, layerGroupStations = {};
 const searchLayer = L.layerGroup();
 for (const stop of stops) {
     let { stop_name, stop_lat, stop_lon, parent_station } = stop;
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
+        const popup = document.createElement("div");
+        
+        const header = document.createElement("b");
+        header.textContent = stop_name;
+        popup.appendChild(header);
+        
+        popup.appendChild(document.createElement("br"));
+        
+        const button = document.createElement("button");
+        button.textContent = "Filter lines";
+        button.addEventListener("click", () => {
+            filterLines(stop_name)
+        });
+        popup.appendChild(button);
+        
         stations[stop_name] = L.marker(
             [stop_lat, stop_lon],
             {
@@ -31,7 +46,24 @@ for (const stop of stops) {
                 title: stop_name,
                 visibility: 0
             }
-        ).bindPopup(`<b>${stop_name}</b><br>`).addTo(searchLayer);
+        ).bindPopup(popup).addTo(searchLayer);
+        layerGroupStations[stop_name] = [];
+    }
+}
+
+for (const [routeName, stationLine] of Object.entries(stationLines)) {
+    for (const stop_name of stationLine) {
+        layerGroupStations[stop_name].push(routeName);
+    }
+}
+
+function filterLines(stop_name) {
+    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+        if (layerGroupStations[stop_name].includes(routeName)) {
+            routeMap.layerGroup.addTo(map);
+        } else {
+            routeMap.layerGroup.remove();
+        }
     }
 }
 
