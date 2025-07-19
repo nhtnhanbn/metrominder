@@ -17,6 +17,7 @@
 })(function (L) {
   L.DivIcon.ArrowCircle = L.DivIcon.extend({
     options: {
+      stroke: "black",
       color: "#0080ff",
       size: 36,
       opacity: 1,

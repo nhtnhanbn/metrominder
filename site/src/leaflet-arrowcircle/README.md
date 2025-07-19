@@ -33,6 +33,7 @@ L.marker
 
 | Option   | Type   | Default   | Description                                                                                                                 |
 | -------- | ------ | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| stroke   | String | `black`   | Border color of the ArrowCircle                                                                                             |
 | color    | String | `#0080ff` | Color of the ArrowCircle                                                                                                    |
 | size     | Number | 36        | Total size of viewport square; the circle's center is coincident with the viewport's and the tip of the arrow abuts the end |
 | opacity  | Number | 1         | Opacity of the ArrowCircle                                                                                                  |
