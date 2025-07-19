@@ -5,7 +5,6 @@ body {
 
 .train-tip {
     min-width: 36px;
-    padding-top: 1px;
     left: -12px;
     text-align: center;
     font-size: 6pt;
@@ -14,4 +13,8 @@ body {
 html, body, #map {
     height: 100%;
     width: 100vw;
+}
+
+.leaflet-layerstree-header-label {
+    font-size: 1.08333em;
 }

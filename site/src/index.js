@@ -1,6 +1,8 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "leaflet-rotate";
+import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
+import "leaflet.control.layers.tree";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
@@ -118,14 +120,18 @@ L.tileLayer(
 ).addTo(map);
 
 const layerGroupsNamed = {};
+const stationLayer = L.layerGroup().addTo(map);
 for (const [routeName, routeMap] of Object.entries(routeMaps)) {
-    layerGroupsNamed[routeName] = routeMap.layerGroup;
+    layerGroupsNamed[routeName] = {
+        label: `<span style="background-color: ${routeMap.colour}; color: ${routeMap.textColour}">${routeName} line</span>`,
+        layer: routeMap.layerGroup
+    };
     
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stop_name of stationLines[routeName]) {
             const station = stations[stop_name];
             station.visibility++;
-            station.marker.addTo(map);
+            stationLayer.addLayer(station.marker);
         }
     });
     
@@ -139,4 +145,96 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
         }
     });
 }
-L.control.layers(null, layerGroupsNamed).addTo(map);
+
+L.control.layers.tree(null, {
+    label: "All lines",
+    selectAllCheckbox: true,
+    children: [
+        layerGroupsNamed["Sandringham"],
+        {
+            label: `<span style="background-color: #279FD5; color: black">Caulfield group</span>`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerGroupsNamed["Cranbourne"],
+                layerGroupsNamed["Pakenham"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #BE1014; color: white">Clifton Hill group</span>`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerGroupsNamed["Hurstbridge"],
+                layerGroupsNamed["Mernda"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #FFBE00; color: black">Northern group</span>`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerGroupsNamed["Craigieburn"],
+                layerGroupsNamed["Sunbury"],
+                layerGroupsNamed["Upfield"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #028430; color: white">Cross-city group</span>`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                {
+                    label: `<span style="background-color: #028430; color: white">Frankston</span>`,
+                    selectAllCheckbox: true,
+                    children: [
+                        layerGroupsNamed["Frankston"],
+                        layerGroupsNamed["Stony Point"]
+                    ]
+                },
+                {
+                    label: `<span style="background-color: #028430; color: white">West</span>`,
+                    selectAllCheckbox: true,
+                    children: [
+                        layerGroupsNamed["Werribee"],
+                        layerGroupsNamed["Williamstown"]
+                    ]
+                }
+            ]
+        },
+        {
+            label: `<span style="background-color: #152C6B; color: white">Burnley group</span>`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerGroupsNamed["Glen Waverley"],
+                {
+                    label: `<span style="background-color: #152C6B; color: white">Camberwell</span>`,
+                    selectAllCheckbox: true,
+                    children: [
+                        layerGroupsNamed["Alamein"],
+                        {
+                            label: `<span style="background-color: #152C6B; color: white">Ringwood</span>`,
+                            selectAllCheckbox: true,
+                            children: [
+                                layerGroupsNamed["Belgrave"],
+                                layerGroupsNamed["Lilydale"]
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            label: "Special services",
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerGroupsNamed["Flemington Racecourse"],
+                layerGroupsNamed["City Circle"]
+            ]
+        }
+    ]
+}, {
+    selectorBack: true
+}).addTo(map);
