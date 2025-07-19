@@ -1,6 +1,8 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "leaflet-rotate";
+import "leaflet-search";
+import "leaflet-search/src/leaflet-search.css";
 import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
 import "leaflet.control.layers.tree";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
@@ -25,7 +27,8 @@ for (const stop of stops) {
                     icon: L.icon({
                         iconUrl: stationIcon,
                         iconSize: [20, 20]
-                    })
+                    }),
+                    title: stop_name
                 }
             ),
             visibility: 0
@@ -96,12 +99,20 @@ async function fetchLines() {
 }
 fetchLines();
 
+const stationLayer = L.layerGroup();
 const map = L.map("map", {
     center: [-37.8, 145],
     zoom: 11,
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
-    touchRotate: true
+    touchRotate: true,
+    searchControl: {
+        layer: stationLayer,
+        zoom: 14,
+        initial: false,
+        firstTipSubmit: true,
+        textErr: "Station not found."
+    }
 });
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
@@ -120,7 +131,7 @@ L.tileLayer(
 ).addTo(map);
 
 const layerGroupsNamed = {};
-const stationLayer = L.layerGroup();
+stationLayer.remove();
 for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stop_name of stationLines[routeName]) {
