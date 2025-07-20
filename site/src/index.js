@@ -1,8 +1,10 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet-fullscreen/dist/leaflet.fullscreen.css";
+import "leaflet-fullscreen";
 import "leaflet-rotate";
-import "leaflet-search";
 import "leaflet-search/src/leaflet-search.css";
+import "leaflet-search";
 import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
 import "leaflet.control.layers.tree";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
@@ -337,6 +339,7 @@ const stationLayer = L.layerGroup();
 const map = L.map("map", {
     center: [-37.8, 145],
     zoom: 11,
+    fullscreenControl: true,
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
     touchRotate: true
