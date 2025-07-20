@@ -3,6 +3,20 @@ body {
     margin: 0;
 }
 
+table {
+    margin-top: 0.5em;
+    border-spacing: 1em 0;
+}
+
+h3 {
+    margin: 0.3em 0;
+    font-size: 12pt;
+}
+
+th, td {
+    text-align: center;
+}
+
 .train-tip {
     min-height: 18px;
     min-width: 18px;

@@ -14,6 +14,24 @@ import { routeMaps } from "./routeMaps.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
+function stationHeader(stopName) {
+    const popup = document.createElement("div");
+    popup.style.textAlign = "center";
+        
+    const header = document.createElement("h3");
+    header.textContent = `${stopName} Station`.toUpperCase();
+    popup.appendChild(header);
+    
+    const button = document.createElement("button");
+    button.textContent = "Filter lines";
+    button.addEventListener("click", () => {
+        filterLines(stopName)
+    });
+    popup.appendChild(button);
+    
+    return popup;
+}
+
 const stations = {}, layerGroupStations = {}, stopMaps = {};
 const searchLayer = L.layerGroup();
 for (const stop of stops) {
@@ -21,21 +39,6 @@ for (const stop of stops) {
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
-        const popup = document.createElement("div");
-        
-        const header = document.createElement("b");
-        header.textContent = stop_name;
-        popup.appendChild(header);
-        
-        popup.appendChild(document.createElement("br"));
-        
-        const button = document.createElement("button");
-        button.textContent = "Filter lines";
-        button.addEventListener("click", () => {
-            filterLines(stop_name)
-        });
-        popup.appendChild(button);
-        
         stations[stop_name] = L.marker(
             [stop_lat, stop_lon],
             {
@@ -46,7 +49,10 @@ for (const stop of stops) {
                 title: stop_name,
                 visibility: 0
             }
-        ).bindPopup(popup).addTo(searchLayer);
+        ).bindPopup(
+            stationHeader(stop_name),
+            { autoPan: false }
+        ).addTo(searchLayer);
         layerGroupStations[stop_name] = [];
     }
     
@@ -161,9 +167,29 @@ async function updatePositions() {
 }
 updatePositions();
 
+function shortName(stopName) {
+    return stopName.replace("Station", "")
+                   .replace("Railway", "")
+                   .replace("Rail Replacement Bus Stop", "")
+                   .trim();
+}
+
+function timeString(seconds) {
+    const date = new Date(1000*seconds);
+    
+    return date.getHours().toString().padStart(2, "0") +
+           ":" +
+           date.getMinutes().toString().padStart(2, "0");
+}
+
 async function updateTrips() {
     const response = await fetch("https://metrominder.onrender.com/trips");
     const feed = await response.json();
+    
+    const departures = {};
+    for (const stationName in stations) {
+        departures[stationName] = [];
+    }
     
     for (const trip of feed.feed.entity) {
         const tripUpdate = trip.tripUpdate;
@@ -172,37 +198,54 @@ async function updateTrips() {
             const routeId = tripUpdate.trip.routeId;
             const stopTimeUpdate = tripUpdate.stopTimeUpdate;
             const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-            let popup = `<div style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
-                             Service to ${stopMaps[lastStop.stopId].stop_name}
-                         </div>`;
+            const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
+            let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
+                             SERVICE TO ${lastStopName.toUpperCase()}
+                         </h3>`;
             
             let future = false;
             for (const stop of stopTimeUpdate) {
+                const stopMap = stopMaps[stop.stopId];
+                const platform = stopMap.platform_code;
+                
+                if (stop.departure &&
+                    stop.departure.time >= Math.floor(Date.now()/1000)) {
+                        let parentStation = stopMap;
+                        while (parentStation.parent_station !== "") {
+                            parentStation = stopMaps[parentStation.parent_station];
+                        }
+                        let parentName = parentStation.stop_name;
+                        parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
+                        
+                        departures[parentName].push({
+                            routeId: routeId,
+                            lastStopName: lastStopName,
+                            platform: platform,
+                            time: stop.departure.time
+                        });
+                }
+                
                 if (stop.arrival) {
-                    const stopName = stopMaps[stop.stopId].stop_name;
-                    const platform = stopMaps[stop.stopId].platform_code;
-                    const stopDate = new Date(1000*stop.arrival.time);
-                    const stopTime = stopDate.getHours().toString().padStart(2, "0") +
-                                     ":" +
-                                     stopDate.getMinutes().toString().padStart(2, "0");
+                    const stopName = shortName(stopMap.stop_name);
+                    const stopTime = timeString(stop.arrival.time);
                     
                     if (future) {
                         popup += `<tr>
-                                      <td>${stopName}</td>
-                                      <td style="text-align: center;">${platform}</td>
-                                      <td style="text-align: center;">${stopTime}</td>
+                                      <td style="text-align: left;">${stopName}</td>
+                                      <td>${platform}</td>
+                                      <td>${stopTime}</td>
                                   </tr>`;
                     } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
                         popup += `<table>
-                                      <tr style="font-weight: bold;">
-                                          <td>Arriving at</td>
-                                          <td style="text-align: center;">platform</td>
-                                          <td style="text-align: center;">at</td>
+                                      <tr>
+                                          <th style="text-align: left;">ARRIVING AT</td>
+                                          <th>PLATFORM</td>
+                                          <th>TIME</td>
                                       </tr>
-                                      <tr style="font-weight: bold;">
-                                          <td>${stopName}</td>
-                                          <td style="text-align: center;">${platform}</td>
-                                          <td style="text-align: center;">${stopTime}</td>
+                                      <tr>
+                                          <th style="text-align: left;">${stopName}</td>
+                                          <th>${platform}</td>
+                                          <th>${stopTime}</td>
                                       </tr>`;
                         future = true;
                     }
@@ -212,6 +255,55 @@ async function updateTrips() {
             
             trains[tripId].tip.setPopupContent(popup);
         }
+    }
+    
+    for (const [stationName, stationMarker] of Object.entries(stations)) {
+        let popup = stationHeader(stationName);
+        
+        const stationDepartures = departures[stationName];
+        if (stationDepartures.length > 0) {
+            stationDepartures.sort((a, b) => {
+                return parseInt(a.time) - parseInt(b.time);
+            });
+            
+            const table = document.createElement("table");
+            
+            const header = document.createElement("tr");
+            for (const column of ["DEPARTING FOR", "PLATFORM", "TIME"]) {
+                const cell = document.createElement("th");
+                cell.textContent = column;
+                header.appendChild(cell);
+            }
+            table.appendChild(header);
+            
+            for (const departure of stationDepartures) {
+                const row = document.createElement("tr");
+                
+                const serviceCell = document.createElement("td");
+                serviceCell.textContent = departure.lastStopName;
+                serviceCell.style.backgroundColor = colours[departure.routeId];
+                serviceCell.style.color = textColours[departure.routeId];
+                row.appendChild(serviceCell);
+                
+                for (const column of [
+                    departure.platform,
+                    timeString(departure.time)
+                ]) {
+                    const cell = document.createElement("td");
+                    cell.textContent = column;
+                    row.appendChild(cell);
+                }
+                
+                table.appendChild(row);
+            }
+            popup.appendChild(table);
+        } else {
+            const text = document.createElement("div");
+            text.textContent = "No departing trains.";
+            popup.appendChild(text);
+        }
+        
+        stationMarker.setPopupContent(popup);
     }
     
     setTimeout(updateTrips, 1000);
