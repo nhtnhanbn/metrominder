@@ -104,15 +104,6 @@
         "Southern Cross",
         "Flinders Street"
     ],
-    "Flemington Racecourse": [
-        "Flemington Racecourse",
-        "North Melbourne",
-        "Southern Cross",
-        "Flinders Street",
-        "Parliament",
-        "Melbourne Central",
-        "Flagstaff"
-    ],
     "Frankston": [
         "Frankston",
         "Kananook",
@@ -391,6 +382,15 @@
         "North Melbourne",
         "Southern Cross",
         "Flinders Street"
+    ],
+    "Flemington Racecourse": [
+        "Flemington Racecourse",
+        "North Melbourne",
+        "Southern Cross",
+        "Flinders Street",
+        "Parliament",
+        "Melbourne Central",
+        "Flagstaff"
     ],
     "City Circle": [
         "Flagstaff",

@@ -4,13 +4,16 @@ body {
 }
 
 table {
-    margin-top: 0.5em;
-    border-spacing: 1em 0;
+    border-spacing: 1em 0.2em;
 }
 
 h3 {
     margin: 0.3em 0;
     font-size: 12pt;
+}
+
+h4 {
+    margin: 0;
 }
 
 th, td {

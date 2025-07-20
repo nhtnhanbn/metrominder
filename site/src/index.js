@@ -22,17 +22,71 @@ function stationHeader(stopName) {
     header.textContent = `${stopName} Station`.toUpperCase();
     popup.appendChild(header);
     
+    const linesHeading = document.createElement("h4");
+    linesHeading.textContent = "LINES";
+    popup.appendChild(linesHeading);
+    
+    const lines = document.createElement("p");
+    lines.style.marginTop = 0;
+    
+    for (const routeName of layerGroupStations[stopName]) {
+        const line = document.createElement("span");
+        line.textContent = routeName;
+        line.style.backgroundColor = colours[routeMaps[routeName].routeId];
+        line.style.color = textColours[routeMaps[routeName].routeId];
+        line.style.whiteSpace = "nowrap";
+        lines.appendChild(line);
+        
+        lines.appendChild(document.createTextNode(" "));
+    }
+    lines.appendChild(document.createElement("br"));
+    
     const button = document.createElement("button");
     button.textContent = "Filter lines";
     button.addEventListener("click", () => {
         filterLines(stopName)
     });
-    popup.appendChild(button);
+    lines.appendChild(button);
+    
+    popup.appendChild(lines);
     
     return popup;
 }
 
 const stations = {}, layerGroupStations = {}, stopMaps = {};
+for (const [routeName, stationLine] of Object.entries(stationLines)) {
+    for (const stop_name of stationLine) {
+        if (!(stop_name in layerGroupStations)) {
+            layerGroupStations[stop_name] = [];
+        }
+        
+        layerGroupStations[stop_name].push(routeName);
+    }
+}
+
+for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+    const route = routes.find((route) => {
+        return route.route_id === routeMap.routeId;
+    });
+    
+    routeMap.colour = "#" + route.route_color;
+    routeMap.textColour = "#" + route.route_text_color;
+    routeMap.layerGroup = L.layerGroup();
+    routeMap.line = L.geoJSON(
+        geojson.features.filter((feature) => {
+            return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
+        }),
+        { style: { color: routeMap.colour } }
+    );
+}
+
+const colours = {}, textColours = {}, layerGroups = {};
+for (const routeMap of Object.values(routeMaps)) {
+    layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
+    colours[routeMap.routeId] = routeMap.colour;
+    textColours[routeMap.routeId] = routeMap.textColour;
+}
+
 const searchLayer = L.layerGroup();
 for (const stop of stops) {
     let { stop_name, stop_lat, stop_lon, parent_station } = stop;
@@ -53,17 +107,10 @@ for (const stop of stops) {
             stationHeader(stop_name),
             { autoPan: false }
         ).addTo(searchLayer);
-        layerGroupStations[stop_name] = [];
     }
     
     let { stop_id, ...stopMap } = stop;
     stopMaps[stop_id] = stopMap;
-}
-
-for (const [routeName, stationLine] of Object.entries(stationLines)) {
-    for (const stop_name of stationLine) {
-        layerGroupStations[stop_name].push(routeName);
-    }
 }
 
 function filterLines(stop_name) {
@@ -76,34 +123,10 @@ function filterLines(stop_name) {
     }
 }
 
-for (const [routeName, routeMap] of Object.entries(routeMaps)) {
-    const route = routes.find((route) => {
-        return route.route_id === routeMap.routeId;
-    });
-    
-    routeMap.colour = "#" + route.route_color;
-    routeMap.textColour = "#" + route.route_text_color;
-    routeMap.layerGroup = L.layerGroup();
-    routeMap.line = L.geoJSON(
-        geojson.features.filter((feature) => {
-            return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
-        }),
-        { style: { color: routeMap.colour } }
-    );
-}
-
 let trains = {};
-const colours = {}, textColours = {};
 async function updatePositions() {
     const response = await fetch("https://metrominder.onrender.com/positions");
     const feed = await response.json();
-    
-    const layerGroups = {};
-    for (const routeMap of Object.values(routeMaps)) {
-        layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
-        colours[routeMap.routeId] = routeMap.colour;
-        textColours[routeMap.routeId] = routeMap.textColour;
-    }
     
     const updatedTrains = {};
     for (const train of feed.feed.entity) {
@@ -144,7 +167,7 @@ async function updatePositions() {
                 }
             ).bindTooltip(
                 L.tooltip().setContent(popup)
-            ).bindPopup("", { autoPan: false });
+            ).bindPopup("No trip information.", { autoPan: false });
             updatedTrains[tripId] = { marker: marker, tip: tip };
             layerGroups[routeId].addLayer(marker).addLayer(tip);
         }
@@ -343,7 +366,7 @@ var foundMarker;
         (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
             foundMarker.remove();
     }
-    foundMarker = data.layer.addTo(map);
+    foundMarker = data.layer.addTo(map).openPopup();
 }).addTo(map);
 searchLayer.remove();
 
