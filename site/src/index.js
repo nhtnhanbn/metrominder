@@ -87,11 +87,12 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
 }
 
 let trains = {};
+const colours = {}, textColours = {};
 async function updatePositions() {
     const response = await fetch("https://metrominder.onrender.com/positions");
     const feed = await response.json();
     
-    const layerGroups = {}, colours = {}, textColours = {};
+    const layerGroups = {};
     for (const routeMap of Object.values(routeMaps)) {
         layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
         colours[routeMap.routeId] = routeMap.colour;
@@ -128,7 +129,9 @@ async function updatePositions() {
                 [latitude, longitude],
                 {
                     icon: L.divIcon({
-                        html: `<div style="color: ${textColours[routeId]};">${routeId.slice(15, 18)}</div>`,
+                        html: `<div style="color: ${textColours[routeId]};">
+                                   ${routeId.slice(15, 18)}
+                               </div>`,
                         className: "train-tip"
                     }),
                     pane: "trainPane"
@@ -149,8 +152,9 @@ async function updatePositions() {
     }
     trains = updatedTrains;
     
+    const sinceUpdate = Math.floor((Date.now()-feed.timestamp)/1000);
     map.attributionControl.setPrefix(
-        `DTP last updated ${Math.floor((Date.now()-feed.timestamp)/1000)} secs ago | <a href="https://leafletjs.com">Leaflet</a>`
+        `DTP last updated ${sinceUpdate} secs ago | <a href="https://leafletjs.com">Leaflet</a>`
     );
     
     setTimeout(updatePositions, 1000);
@@ -162,22 +166,28 @@ async function updateTrips() {
     const feed = await response.json();
     
     for (const trip of feed.feed.entity) {
-        if (trip.tripUpdate.trip.scheduleRelationship !== "CANCELED") {
-            for (const stop of trip.tripUpdate.stopTimeUpdate) {
-                if (trains[trip.tripUpdate.trip.tripId] &&
-                    stop.arrival &&
+        const tripUpdate = trip.tripUpdate;
+        const tripId = tripUpdate.trip.tripId;
+        if (tripId in trains) {
+            const routeId = tripUpdate.trip.routeId;
+            const stopTimeUpdate = tripUpdate.stopTimeUpdate;
+            const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
+            let popup = `<div style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
+                             Service to ${stopMaps[lastStop.stopId].stop_name}
+                         </div>`;
+            for (const stop of stopTimeUpdate) {
+                if (stop.arrival &&
                     stop.arrival.time > Math.floor(Date.now()/1000)) {
                         const stopName = stopMaps[stop.stopId].stop_name;
                         const stopDate = new Date(1000*stop.arrival.time);
                         const stopTime = stopDate.getHours().toString().padStart(2, "0") +
                                          ":" +
                                          stopDate.getMinutes().toString().padStart(2, "0");
-                        trains[trip.tripUpdate.trip.tripId].tip.setPopupContent(
-                            `Arriving at ${stopName} at ${stopTime}.`
-                        );
+                        popup += `Arriving at ${stopName} at ${stopTime}.`;
                         break;
                 }
             }
+            trains[tripId].tip.setPopupContent(popup);
         }
     }
     
@@ -246,7 +256,9 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     });
     
     layerGroupsNamed[routeName] = {
-        label: `<span style="background-color: ${routeMap.colour}; color: ${routeMap.textColour}">${routeName} line</span>`,
+        label: `<span style="background-color: ${routeMap.colour}; color: ${routeMap.textColour};">
+                    ${routeName} line
+                </span>`,
         layer: routeMap.layerGroup.addTo(map)
     };
 }
@@ -262,7 +274,9 @@ L.control.layers.tree(null, [
         children: [
             layerGroupsNamed["Sandringham"],
             {
-                label: `<span style="background-color: #279FD5; color: black">Caulfield group</span>`,
+                label: `<span style="background-color: #279FD5; color: black;">
+                            Caulfield group
+                        <span>`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -271,7 +285,9 @@ L.control.layers.tree(null, [
                 ]
             },
             {
-                label: `<span style="background-color: #BE1014; color: white">Clifton Hill group</span>`,
+                label: `<span style="background-color: #BE1014; color: white;">
+                            Clifton Hill group
+                        </span>`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -280,7 +296,9 @@ L.control.layers.tree(null, [
                 ]
             },
             {
-                label: `<span style="background-color: #FFBE00; color: black">Northern group</span>`,
+                label: `<span style="background-color: #FFBE00; color: black;">
+                            Northern group
+                        </span>`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -290,12 +308,16 @@ L.control.layers.tree(null, [
                 ]
             },
             {
-                label: `<span style="background-color: #028430; color: white">Cross-city group</span>`,
+                label: `<span style="background-color: #028430; color: white;">
+                            Cross-city group
+                        </span>`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
                     {
-                        label: `<span style="background-color: #028430; color: white">Frankston</span>`,
+                        label: `<span style="background-color: #028430; color: white;">
+                                    Frankston
+                                </span>`,
                         selectAllCheckbox: true,
                         children: [
                             layerGroupsNamed["Frankston"],
@@ -303,7 +325,9 @@ L.control.layers.tree(null, [
                         ]
                     },
                     {
-                        label: `<span style="background-color: #028430; color: white">West</span>`,
+                        label: `<span style="background-color: #028430; color: white;">
+                                    West
+                                </span>`,
                         selectAllCheckbox: true,
                         children: [
                             layerGroupsNamed["Werribee"],
@@ -313,18 +337,24 @@ L.control.layers.tree(null, [
                 ]
             },
             {
-                label: `<span style="background-color: #152C6B; color: white">Burnley group</span>`,
+                label: `<span style="background-color: #152C6B; color: white;">
+                            Burnley group
+                        </span>`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
                     layerGroupsNamed["Glen Waverley"],
                     {
-                        label: `<span style="background-color: #152C6B; color: white">Camberwell</span>`,
+                        label: `<span style="background-color: #152C6B; color: white;">
+                                    Camberwell
+                                </span>`,
                         selectAllCheckbox: true,
                         children: [
                             layerGroupsNamed["Alamein"],
                             {
-                                label: `<span style="background-color: #152C6B; color: white">Ringwood</span>`,
+                                label: `<span style="background-color: #152C6B; color: white;">
+                                            Ringwood
+                                        </span>`,
                                 selectAllCheckbox: true,
                                 children: [
                                     layerGroupsNamed["Belgrave"],
