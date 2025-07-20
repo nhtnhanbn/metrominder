@@ -362,8 +362,11 @@ var foundMarker;
     layer: searchLayer,
     zoom: 14,
     initial: false,
+    delayType: 0,
     firstTipSubmit: true,
-    textErr: "Station not found."
+    textErr: "Station not found.",
+    textPlaceholder: "Search stations...",
+    hideMarkerOnCollapse: true
 })).addEventListener("search:locationfound", (data) => {
     if (foundMarker &&
         (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
