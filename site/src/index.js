@@ -175,18 +175,28 @@ async function updateTrips() {
             let popup = `<div style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
                              Service to ${stopMaps[lastStop.stopId].stop_name}
                          </div>`;
+            
+            let future = false;
             for (const stop of stopTimeUpdate) {
-                if (stop.arrival &&
-                    stop.arrival.time > Math.floor(Date.now()/1000)) {
-                        const stopName = stopMaps[stop.stopId].stop_name;
-                        const stopDate = new Date(1000*stop.arrival.time);
-                        const stopTime = stopDate.getHours().toString().padStart(2, "0") +
-                                         ":" +
-                                         stopDate.getMinutes().toString().padStart(2, "0");
-                        popup += `Arriving at ${stopName} at ${stopTime}.`;
-                        break;
+                if (stop.arrival) {
+                    const stopName = stopMaps[stop.stopId].stop_name;
+                    const stopDate = new Date(1000*stop.arrival.time);
+                    const stopTime = stopDate.getHours().toString().padStart(2, "0") +
+                                     ":" +
+                                     stopDate.getMinutes().toString().padStart(2, "0");
+                    
+                    if (future) {
+                        popup += `<div style="display: flex; justify-content: space-between">
+                                      <div>${stopName}</div>
+                                      <div>${stopTime}</div>
+                                  </div>`;
+                    } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
+                        popup += `<b>Arriving at ${stopName} at ${stopTime}</b>`;
+                        future = true;
+                    }
                 }
             }
+            
             trains[tripId].tip.setPopupContent(popup);
         }
     }
@@ -204,6 +214,12 @@ const map = L.map("map", {
     touchRotate: true
 });
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
+
+// Open popups on the bottom
+map.addEventListener("popupopen", ({popup}) => {
+    popup._wrapper.remove();
+    popup._container.appendChild(popup._wrapper);
+});
 
 // Reset rotation when controller clicked
 map.rotateControl.getContainer().addEventListener("mouseup", () => {

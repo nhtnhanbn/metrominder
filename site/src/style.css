@@ -18,6 +18,15 @@ html, body, #map {
     width: 100vw;
 }
 
+.leaflet-popup {
+    position: relative;
+}
+
+.leaflet-popup-tip-container {
+    position: relative;
+    transform: rotate(180deg);
+}
+
 .leaflet-layerstree-header-label {
     font-size: 1.08333em;
 }
