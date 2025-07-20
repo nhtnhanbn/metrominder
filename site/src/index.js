@@ -14,7 +14,7 @@ import { routeMaps } from "./routeMaps.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
-const stations = {}, layerGroupStations = {};
+const stations = {}, layerGroupStations = {}, stopMaps = {};
 const searchLayer = L.layerGroup();
 for (const stop of stops) {
     let { stop_name, stop_lat, stop_lon, parent_station } = stop;
@@ -49,6 +49,9 @@ for (const stop of stops) {
         ).bindPopup(popup).addTo(searchLayer);
         layerGroupStations[stop_name] = [];
     }
+    
+    let { stop_id, ...stopMap } = stop;
+    stopMaps[stop_id] = stopMap;
 }
 
 for (const [routeName, stationLine] of Object.entries(stationLines)) {
@@ -84,7 +87,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
 }
 
 let trains = {};
-async function fetchLines() {
+async function updatePositions() {
     const response = await fetch("https://metrominder.onrender.com/positions");
     const feed = await response.json();
     
@@ -100,12 +103,12 @@ async function fetchLines() {
         const { latitude, longitude, bearing } = train.vehicle.position;
         const tripId = train.vehicle.trip.tripId;
         const routeId = train.vehicle.trip.routeId;
-        const popup = `${Math.floor(Date.now()/1000-train.vehicle.timestamp)} secs ago`;
+        const popup = `${Math.floor(Date.now()/1000)-train.vehicle.timestamp} secs ago`;
         
         if (tripId in trains) {
             trains[tripId].marker.setLatLng([latitude, longitude]);
             trains[tripId].tip.setLatLng([latitude, longitude])
-                              .setPopupContent(popup);
+                              .setTooltipContent(popup);
             updatedTrains[tripId] = trains[tripId];
         } else {
             const marker = L.marker.arrowCircle(
@@ -130,7 +133,9 @@ async function fetchLines() {
                     }),
                     pane: "trainPane"
                 }
-            ).bindPopup(L.popup({ autoPan: false }).setContent(popup));
+            ).bindTooltip(
+                L.tooltip().setContent(popup)
+            ).bindPopup("", { autoPan: false });
             updatedTrains[tripId] = { marker: marker, tip: tip };
             layerGroups[routeId].addLayer(marker).addLayer(tip);
         }
@@ -148,9 +153,37 @@ async function fetchLines() {
         `DTP last updated ${Math.floor((Date.now()-feed.timestamp)/1000)} secs ago | <a href="https://leafletjs.com">Leaflet</a>`
     );
     
-    setTimeout(fetchLines, 1000);
+    setTimeout(updatePositions, 1000);
 }
-fetchLines();
+updatePositions();
+
+async function updateTrips() {
+    const response = await fetch("https://metrominder.onrender.com/trips");
+    const feed = await response.json();
+    
+    for (const trip of feed.feed.entity) {
+        if (trip.tripUpdate.trip.scheduleRelationship !== "CANCELED") {
+            for (const stop of trip.tripUpdate.stopTimeUpdate) {
+                if (trains[trip.tripUpdate.trip.tripId] &&
+                    stop.arrival &&
+                    stop.arrival.time > Math.floor(Date.now()/1000)) {
+                        const stopName = stopMaps[stop.stopId].stop_name;
+                        const stopDate = new Date(1000*stop.arrival.time);
+                        const stopTime = stopDate.getHours().toString().padStart(2, "0") +
+                                         ":" +
+                                         stopDate.getMinutes().toString().padStart(2, "0");
+                        trains[trip.tripUpdate.trip.tripId].tip.setPopupContent(
+                            `Arriving at ${stopName} at ${stopTime}.`
+                        );
+                        break;
+                }
+            }
+        }
+    }
+    
+    setTimeout(updateTrips, 1000);
+};
+updateTrips();
 
 const stationLayer = L.layerGroup();
 const map = L.map("map", {
