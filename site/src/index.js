@@ -337,13 +337,11 @@ updateTrips();
 
 const stationLayer = L.layerGroup();
 const map = L.map("map", {
-    center: [-37.8, 145],
-    zoom: 11,
     fullscreenControl: true,
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
     touchRotate: true
-});
+}).fitBounds([[-38.2, 145.4], [-37.5, 144.6]]);
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
 // Open popups on the bottom
