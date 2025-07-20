@@ -7,12 +7,15 @@ import "leaflet-search/src/leaflet-search.css";
 import "leaflet-search";
 import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
 import "leaflet.control.layers.tree";
+import "leaflet.zoomhome";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
 import routes from "../../data/gtfsschedule/routes.txt";
 import stationLines from "../../data/stationLines.json";
 import { routeMaps } from "./routeMaps.js";
+import { timeString } from "./timeString.js";
+import "./L.control.clock.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
@@ -135,7 +138,7 @@ async function updatePositions() {
         const { latitude, longitude, bearing } = train.vehicle.position;
         const tripId = train.vehicle.trip.tripId;
         const routeId = train.vehicle.trip.routeId;
-        const popup = `${Math.floor(Date.now()/1000)-train.vehicle.timestamp} secs ago`;
+        const popup = `Position at ${timeString(train.vehicle.timestamp, true)}`;
         
         if (tripId in trains) {
             trains[tripId].marker.setLatLng([latitude, longitude]);
@@ -183,9 +186,9 @@ async function updatePositions() {
     }
     trains = updatedTrains;
     
-    const sinceUpdate = Math.floor((Date.now()-feed.timestamp)/1000);
+    const time = timeString(feed.timestamp/1000, true);
     map.attributionControl.setPrefix(
-        `DTP last updated ${sinceUpdate} secs ago | <a href="https://leafletjs.com">Leaflet</a>`
+        `<a href="https://opendata.transport.vic.gov.au/organization/public-transport">DTP</a> last updated ${time} | <a href="https://leafletjs.com">Leaflet</a>`
     );
     
     setTimeout(updatePositions, 1000);
@@ -197,14 +200,6 @@ function shortName(stopName) {
                    .replace("Railway", "")
                    .replace("Rail Replacement Bus Stop", "")
                    .trim();
-}
-
-function timeString(seconds) {
-    const date = new Date(1000*seconds);
-    
-    return date.getHours().toString().padStart(2, "0") +
-           ":" +
-           date.getMinutes().toString().padStart(2, "0");
 }
 
 async function updateTrips() {
@@ -340,11 +335,16 @@ updateTrips();
 
 const stationLayer = L.layerGroup();
 const map = L.map("map", {
+    zoomControl: false,
+    zoomSnap: 0,
     fullscreenControl: true,
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
     touchRotate: true
-}).fitBounds([[-38.2, 145.4], [-37.5, 144.6]]);
+}).fitBounds([[-38.4, 145.4], [-37.5, 144.6]]);
+L.Control.zoomHome().addTo(map);
+L.control.scale().addTo(map);
+L.control.clock({ position: "bottomright" }).addTo(map);
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
 // Open popups on the bottom
