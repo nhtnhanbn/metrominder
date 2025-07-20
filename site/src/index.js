@@ -180,22 +180,35 @@ async function updateTrips() {
             for (const stop of stopTimeUpdate) {
                 if (stop.arrival) {
                     const stopName = stopMaps[stop.stopId].stop_name;
+                    const platform = stopMaps[stop.stopId].platform_code;
                     const stopDate = new Date(1000*stop.arrival.time);
                     const stopTime = stopDate.getHours().toString().padStart(2, "0") +
                                      ":" +
                                      stopDate.getMinutes().toString().padStart(2, "0");
                     
                     if (future) {
-                        popup += `<div style="display: flex; justify-content: space-between">
-                                      <div>${stopName}</div>
-                                      <div>${stopTime}</div>
-                                  </div>`;
+                        popup += `<tr>
+                                      <td>${stopName}</td>
+                                      <td style="text-align: center;">${platform}</td>
+                                      <td style="text-align: center;">${stopTime}</td>
+                                  </tr>`;
                     } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
-                        popup += `<b>Arriving at ${stopName} at ${stopTime}</b>`;
+                        popup += `<table>
+                                      <tr style="font-weight: bold;">
+                                          <td>Arriving at</td>
+                                          <td style="text-align: center;">platform</td>
+                                          <td style="text-align: center;">at</td>
+                                      </tr>
+                                      <tr style="font-weight: bold;">
+                                          <td>${stopName}</td>
+                                          <td style="text-align: center;">${platform}</td>
+                                          <td style="text-align: center;">${stopTime}</td>
+                                      </tr>`;
                         future = true;
                     }
                 }
             }
+            popup += `</table>`;
             
             trains[tripId].tip.setPopupContent(popup);
         }
