@@ -219,66 +219,69 @@ async function updateTrips() {
     for (const trip of feed.feed.entity) {
         const tripUpdate = trip.tripUpdate;
         const tripId = tripUpdate.trip.tripId;
-        if (tripId in trains) {
-            const routeId = tripUpdate.trip.routeId;
-            const stopTimeUpdate = tripUpdate.stopTimeUpdate;
-            const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-            const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
-            let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
-                             SERVICE TO ${lastStopName.toUpperCase()}
-                         </h3>`;
-            
-            let future = false;
-            for (const stop of stopTimeUpdate) {
-                const stopMap = stopMaps[stop.stopId];
-                const platform = stopMap.platform_code;
+        if (tripUpdate.trip.scheduleRelationship !== "CANCELED" &&
+            "stopTimeUpdate" in tripUpdate) {
+                const routeId = tripUpdate.trip.routeId;
+                const stopTimeUpdate = tripUpdate.stopTimeUpdate;
+                const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
+                const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
+                let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
+                                 SERVICE TO ${lastStopName.toUpperCase()}
+                             </h3>`;
                 
-                if (stop.departure &&
-                    stop.departure.time >= Math.floor(Date.now()/1000)) {
-                        let parentStation = stopMap;
-                        while (parentStation.parent_station !== "") {
-                            parentStation = stopMaps[parentStation.parent_station];
-                        }
-                        let parentName = parentStation.stop_name;
-                        parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
-                        
-                        departures[parentName].push({
-                            routeId: routeId,
-                            lastStopName: lastStopName,
-                            platform: platform,
-                            time: stop.departure.time
-                        });
-                }
-                
-                if (stop.arrival) {
-                    const stopName = shortName(stopMap.stop_name);
-                    const stopTime = timeString(stop.arrival.time);
+                let future = false;
+                for (const stop of stopTimeUpdate) {
+                    const stopMap = stopMaps[stop.stopId];
+                    const platform = stopMap.platform_code;
                     
-                    if (future) {
-                        popup += `<tr>
-                                      <td style="text-align: left;">${stopName}</td>
-                                      <td>${platform}</td>
-                                      <td>${stopTime}</td>
-                                  </tr>`;
-                    } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
-                        popup += `<table>
-                                      <tr>
-                                          <th style="text-align: left;">ARRIVING AT</td>
-                                          <th>PLATFORM</td>
-                                          <th>TIME</td>
-                                      </tr>
-                                      <tr>
-                                          <th style="text-align: left;">${stopName}</td>
-                                          <th>${platform}</td>
-                                          <th>${stopTime}</td>
+                    if (stop.departure &&
+                        stop.departure.time >= Math.floor(Date.now()/1000)) {
+                            let parentStation = stopMap;
+                            while (parentStation.parent_station !== "") {
+                                parentStation = stopMaps[parentStation.parent_station];
+                            }
+                            let parentName = parentStation.stop_name;
+                            parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
+                            
+                            departures[parentName].push({
+                                routeId: routeId,
+                                lastStopName: lastStopName,
+                                platform: platform,
+                                time: stop.departure.time
+                            });
+                    }
+                    
+                    if (tripId in trains && stop.arrival) {
+                        const stopName = shortName(stopMap.stop_name);
+                        const stopTime = timeString(stop.arrival.time);
+                        
+                        if (future) {
+                            popup += `<tr>
+                                          <td style="text-align: left;">${stopName}</td>
+                                          <td>${platform}</td>
+                                          <td>${stopTime}</td>
                                       </tr>`;
-                        future = true;
+                        } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
+                            popup += `<table>
+                                          <tr>
+                                              <th style="text-align: left;">ARRIVING AT</td>
+                                              <th>PLATFORM</td>
+                                              <th>TIME</td>
+                                          </tr>
+                                          <tr>
+                                              <th style="text-align: left;">${stopName}</td>
+                                              <th>${platform}</td>
+                                              <th>${stopTime}</td>
+                                          </tr>`;
+                            future = true;
+                        }
                     }
                 }
-            }
-            popup += `</table>`;
-            
-            trains[tripId].tip.setPopupContent(popup);
+                popup += `</table>`;
+                
+                if (tripId in trains) {
+                    trains[tripId].tip.setPopupContent(popup);
+                }
         }
     }
     
