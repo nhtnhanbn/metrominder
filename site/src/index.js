@@ -508,7 +508,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
     
     layerGroupsNamed[routeName] = {
         label: `<span style="background-color: ${routeMap.colour}; color: ${routeMap.textColour};">
-                    ${routeName} line
+                    ${routeName} line&nbsp
                 </span>`,
         layer: routeMap.layerGroup.addTo(map)
     };
@@ -527,7 +527,8 @@ L.control.layers.tree(null, [
             {
                 label: `<span style="background-color: #279FD5; color: black;">
                             Caulfield group
-                        <span>`,
+                        <span>
+                        &nbsp`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -538,7 +539,8 @@ L.control.layers.tree(null, [
             {
                 label: `<span style="background-color: #BE1014; color: white;">
                             Clifton Hill group
-                        </span>`,
+                        </span>
+                        &nbsp`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -549,7 +551,8 @@ L.control.layers.tree(null, [
             {
                 label: `<span style="background-color: #FFBE00; color: black;">
                             Northern group
-                        </span>`,
+                        </span>
+                        &nbsp`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -561,14 +564,16 @@ L.control.layers.tree(null, [
             {
                 label: `<span style="background-color: #028430; color: white;">
                             Cross-city group
-                        </span>`,
+                        </span>
+                        &nbsp`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
                     {
                         label: `<span style="background-color: #028430; color: white;">
                                     Frankston
-                                </span>`,
+                                </span>
+                                &nbsp`,
                         selectAllCheckbox: true,
                         children: [
                             layerGroupsNamed["Frankston"],
@@ -578,7 +583,8 @@ L.control.layers.tree(null, [
                     {
                         label: `<span style="background-color: #028430; color: white;">
                                     West
-                                </span>`,
+                                </span>
+                                &nbsp`,
                         selectAllCheckbox: true,
                         children: [
                             layerGroupsNamed["Werribee"],
@@ -590,7 +596,8 @@ L.control.layers.tree(null, [
             {
                 label: `<span style="background-color: #152C6B; color: white;">
                             Burnley group
-                        </span>`,
+                        </span>
+                        &nbsp`,
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
@@ -598,14 +605,16 @@ L.control.layers.tree(null, [
                     {
                         label: `<span style="background-color: #152C6B; color: white;">
                                     Camberwell
-                                </span>`,
+                                </span>
+                                &nbsp`,
                         selectAllCheckbox: true,
                         children: [
                             layerGroupsNamed["Alamein"],
                             {
                                 label: `<span style="background-color: #152C6B; color: white;">
                                             Ringwood
-                                        </span>`,
+                                        </span>
+                                        &nbsp`,
                                 selectAllCheckbox: true,
                                 children: [
                                     layerGroupsNamed["Belgrave"],
