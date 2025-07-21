@@ -263,7 +263,13 @@ async function updatePositions() {
                 }
             }
             
-            let consistInfo = `<p>
+            if ((!length || !type) &&
+                routeId === "aus:vic:vic-02-STY:") {
+                    length = 1;
+                    type = "Sprinter";
+            }
+            
+            let consistInfo = `<p style="margin-bottom: 0">
                                    <b>`;
             
             if (length) {
@@ -275,7 +281,8 @@ async function updatePositions() {
             }
             
             consistInfo += `</b>
-                            <br>
+                        </p>
+                        <p style="margin-top: 0">
                             ${consist}
                         </p>`;
                              
