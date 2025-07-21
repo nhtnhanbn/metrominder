@@ -16,7 +16,7 @@ h4 {
     margin: 0;
 }
 
-th, td {
+.leaflet-popup-content {
     text-align: center;
 }
 
@@ -46,6 +46,10 @@ html, body, #map {
 
 .leaflet-layerstree-header-label {
     font-size: 1.08333em;
+}
+
+.leaflet-control-attribution {
+    text-align: right;
 }
 
 span[class=leaflet-layerstree-header-label] {

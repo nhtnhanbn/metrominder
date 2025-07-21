@@ -15,9 +15,62 @@ import routes from "../../data/gtfsschedule/routes.txt";
 import stationLines from "../../data/stationLines.json";
 import { routeMaps } from "./routeMaps.js";
 import { timeString } from "./timeString.js";
-import "./L.control.clock.js";
 import stationIcon from "./station.svg";
 import "./style.css";
+
+const searchLayer = L.layerGroup();
+const stationLayer = L.layerGroup();
+const map = L.map("map", {
+    zoomControl: false,
+    zoomSnap: 0,
+    fullscreenControl: true,
+    rotate: true,
+    rotateControl: { closeOnZeroBearing: false },
+    touchRotate: true
+}).fitBounds([[-38.4, 145.4], [-37.5, 144.6]]);
+L.Control.zoomHome().addTo(map);
+L.control.scale().addTo(map);
+
+map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
+
+// Open popups on the bottom
+map.addEventListener("popupopen", ({popup}) => {
+    popup._wrapper.remove();
+    popup._container.appendChild(popup._wrapper);
+});
+
+// Reset rotation when controller clicked
+map.rotateControl.getContainer().addEventListener("mouseup", () => {
+    map.setBearing(0);
+});
+
+var foundMarker;
+(new L.Control.Search({
+    layer: searchLayer,
+    zoom: 14,
+    initial: false,
+    delayType: 0,
+    firstTipSubmit: true,
+    textErr: "Station not found.",
+    textPlaceholder: "Search stations...",
+    hideMarkerOnCollapse: true
+})).addEventListener("search:locationfound", (data) => {
+    if (foundMarker &&
+        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
+            foundMarker.remove();
+    }
+    foundMarker = data.layer.addTo(map).openPopup();
+}).addTo(map);
+searchLayer.remove();
+
+L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        opacity: 0.5,
+        attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`
+    }
+).addTo(map);
 
 function stationHeader(stopName) {
     const popup = document.createElement("div");
@@ -92,7 +145,6 @@ for (const routeMap of Object.values(routeMaps)) {
     textColours[routeMap.routeId] = routeMap.textColour;
 }
 
-const searchLayer = L.layerGroup();
 for (const stop of stops) {
     let { stop_name, stop_lat, stop_lon, parent_station } = stop;
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
@@ -128,8 +180,41 @@ function filterLines(stop_name) {
     }
 }
 
+const attributionPrefix = document.createElement("span");
+
+const positionStatus = document.createElement("div");
+const tripStatus = document.createElement("div");
+
+const clock = document.createElement("div");
+setInterval(() => {
+    const time = timeString(Math.floor(Date.now()/1000), true);
+    clock.textContent = `Current time: ${time}`;
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+}, 1000);
+
+const dtpAttribution = document.createElement("div");
+
+const dtpLink = document.createElement("a");
+dtpLink.href = "https://opendata.transport.vic.gov.au/organization/public-transport";
+dtpLink.textContent = "DTP";
+dtpAttribution.appendChild(dtpLink);
+
+const dtpTime = document.createTextNode("");
+dtpAttribution.appendChild(dtpTime);
+
+const leafletAttribution = document.createElement("a");
+leafletAttribution.href = "https://leafletjs.com";
+leafletAttribution.textContent = "Leaflet";
+
+for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafletAttribution]) {
+    attributionPrefix.appendChild(element);
+}
+
 let trains = {};
 async function updatePositions() {
+    positionStatus.textContent = "Retrieving positions...";
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    
     const response = await fetch("https://metrominder.onrender.com/positions");
     const feed = await response.json();
     
@@ -146,6 +231,54 @@ async function updatePositions() {
                               .setTooltipContent(popup);
             updatedTrains[tripId] = trains[tripId];
         } else {
+            const consist = train.vehicle.vehicle.id;
+            const splitConsist = consist.split("-");
+            let car = splitConsist.find((car) => {
+                return car[car.length-1] === 'T';
+            });
+            
+            let length, type;
+            if (car) {
+                length = splitConsist.length;
+                
+                const number = parseInt(car.slice(0, -1));
+                if (1000 <= number && number < 1200) {
+                    type = "Comeng";
+                } else if (2500 <= number && number < 2600) {
+                    type = "Siemens";
+                } else if (1300 <= number && number < 1700) {
+                    type = "X'Trapolis 100";
+                } else if (8100 <= number && number < 8900) {
+                    type = "X'Trapolis 2.0";
+                }
+            } else if (splitConsist.length > 0) {
+                car = splitConsist[0];
+                const number = parseInt(car.slice(0, -1));
+                if (9000 <= number && number < 10000) {
+                    length = 7;
+                    type = "HCMT";
+                } else if (7000 <= number && number < 7030) {
+                    length = 1;
+                    type = "Sprinter";
+                }
+            }
+            
+            let consistInfo = `<p>
+                                   <b>`;
+            
+            if (length) {
+                consistInfo += `${length}-car`;
+            }
+            
+            if (type) {
+                consistInfo += ` ${type}`;
+            }
+            
+            consistInfo += `</b>
+                            <br>
+                            ${consist}
+                        </p>`;
+                             
             const marker = L.marker.arrowCircle(
                 [latitude, longitude],
                 {
@@ -159,6 +292,7 @@ async function updatePositions() {
                     rotateWithView: true
                 }
             );
+            
             const tip = L.marker(
                 [latitude, longitude],
                 {
@@ -172,8 +306,17 @@ async function updatePositions() {
                 }
             ).bindTooltip(
                 L.tooltip().setContent(popup)
-            ).bindPopup("No trip information.", { autoPan: false });
-            updatedTrains[tripId] = { marker: marker, tip: tip };
+            ).bindPopup(
+                consistInfo + "No trip information.",
+                { autoPan: false }
+            );
+            
+            updatedTrains[tripId] = {
+                marker: marker,
+                tip: tip,
+                consistInfo: consistInfo
+            };
+            
             layerGroups[routeId].addLayer(marker).addLayer(tip);
         }
     }
@@ -187,9 +330,9 @@ async function updatePositions() {
     trains = updatedTrains;
     
     const time = timeString(feed.timestamp/1000, true);
-    map.attributionControl.setPrefix(
-        `<a href="https://opendata.transport.vic.gov.au/organization/public-transport">DTP</a> last updated ${time} | <a href="https://leafletjs.com">Leaflet</a>`
-    );
+    dtpTime.textContent = ` last updated ${time}`;
+    positionStatus.textContent = "";
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     setTimeout(updatePositions, 1000);
 }
@@ -203,6 +346,9 @@ function shortName(stopName) {
 }
 
 async function updateTrips() {
+    tripStatus.textContent = "Retrieving trip updates...";
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    
     const response = await fetch("https://metrominder.onrender.com/trips");
     const feed = await response.json();
     
@@ -220,9 +366,13 @@ async function updateTrips() {
                 const stopTimeUpdate = tripUpdate.stopTimeUpdate;
                 const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
                 const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
-                let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]}; text-align: center;">
+                let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]};">
                                  SERVICE TO ${lastStopName.toUpperCase()}
                              </h3>`;
+                
+                if (tripId in trains) {
+                    popup += trains[tripId].consistInfo;
+                }
                 
                 let future = false;
                 for (const stop of stopTimeUpdate) {
@@ -329,62 +479,12 @@ async function updateTrips() {
         stationMarker.setPopupContent(popup);
     }
     
+    tripStatus.textContent = "";
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    
     setTimeout(updateTrips, 1000);
 };
 updateTrips();
-
-const stationLayer = L.layerGroup();
-const map = L.map("map", {
-    zoomControl: false,
-    zoomSnap: 0,
-    fullscreenControl: true,
-    rotate: true,
-    rotateControl: { closeOnZeroBearing: false },
-    touchRotate: true
-}).fitBounds([[-38.4, 145.4], [-37.5, 144.6]]);
-L.Control.zoomHome().addTo(map);
-L.control.scale().addTo(map);
-L.control.clock({ position: "bottomright" }).addTo(map);
-map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
-
-// Open popups on the bottom
-map.addEventListener("popupopen", ({popup}) => {
-    popup._wrapper.remove();
-    popup._container.appendChild(popup._wrapper);
-});
-
-// Reset rotation when controller clicked
-map.rotateControl.getContainer().addEventListener("mouseup", () => {
-    map.setBearing(0);
-});
-
-var foundMarker;
-(new L.Control.Search({
-    layer: searchLayer,
-    zoom: 14,
-    initial: false,
-    delayType: 0,
-    firstTipSubmit: true,
-    textErr: "Station not found.",
-    textPlaceholder: "Search stations...",
-    hideMarkerOnCollapse: true
-})).addEventListener("search:locationfound", (data) => {
-    if (foundMarker &&
-        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
-            foundMarker.remove();
-    }
-    foundMarker = data.layer.addTo(map).openPopup();
-}).addTo(map);
-searchLayer.remove();
-
-L.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        maxZoom: 19,
-        opacity: 0.5,
-        attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`
-    }
-).addTo(map);
 
 const layerGroupsNamed = {};
 for (const [routeName, routeMap] of Object.entries(routeMaps)) {
