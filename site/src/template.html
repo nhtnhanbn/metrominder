@@ -8,5 +8,81 @@
     </head>
     <body>
         <div id="map"></div>
+        <dialog closedby="any">
+            <h1>
+                <div style="display: flex; justify-content: space-between">
+                    <div>About MetroMinder</div>
+                    <button onclick="document.querySelector('dialog').close()">Go to map</button>
+                </div>
+            </h1>
+            
+            <h2>A live Melbourne train tracker</h2>
+            <p>This site maps realtime positions of metropolitan trains operated by Metro Trains Melbourne using public data distributed by Transport Victoria.</p>
+            <p><strong>Use information on this site as a guide only. Do not rely on its accuracy.</strong> This site is not endorsed by the DTP.</p>
+            <p>Realtime data including positions, service, arrival and departure information are sourced from <a href="https://gtfs.org/documentation/overview/#gtfs-realtime">GTFS</a> APIs made available by the Victorian Department of Transport and Planning and consumed by third party software including Google Maps. As such, the quality of the information on this site is subject to the DTP data's quality (and any upstream outages, omissions and errors). It is the same data used by the PTV app and website, but they do not use the public API layer so the PTV app may still be able to display realtime information when outages affect this and other thirdparty apps.</p>
+            <p>
+                Features include:
+                <ul>
+                    <li>Display coloured routes and train positions and directions on the map</li>
+                    <li>Optional display of station markers</li>
+                    <li>Select and filter individual lines or line groups</li>
+                    <li>
+                        Details on each train:
+                        <ul>
+                            <li>Service destination</li>
+                            <li>Model and consist</li>
+                            <li>Future arrival stations</li>
+                            <li>Future arrival platforms</li>
+                            <li>Future arrival times</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Details on each station:
+                        <ul>
+                            <li>Lines servicing the station</li>
+                            <li>Filter lines</li>
+                            <li>Future departure service destinations</li>
+                            <li>Future departure platforms</li>
+                            <li>Future departure times</li>
+                        </ul>
+                    </li>
+                </ul>
+            </p>
+            
+            <h2>Usage</h2>
+            <p>Most functionality and interaction should be fairly conventional. The map can be interacted with using the buttons in the top left or mouse/touch gestures, and supports fullscreen, rotation, zoom, panning and returning to initial view.</p>
+            <p>The compass button's functionality differs between mouse and touch. When using a mouse, click on the compass, hold and drag to the right to rotate the map. Click and release on the compass to return to initial rotation (north pointing directly up).</p>
+            <p>
+                When using a touchscreen, the compass button has three modes which are cycled through when pressed. To return to initial rotation (north pointing directly up), press on the compass until you get there.
+                <ul>
+                    <li>White: pinching the map both zooms and rotates.</li>
+                    <li>Orange: acts as a compass with the map's rotation continuously following the direction your device is facing in the real world.</li>
+                    <li>Grey: the map's rotation is locked to either the initial rotation or the final compass rotation from orange mode - pinching the map zooms but does not rotate.</li>
+                </ul>
+            </p>
+            <p>Use the search button to search for a station.</p>
+            <p>You can add and remove station markers, individual lines and line groups using the layer control in the top right. Performance degrades a bit the more station and train markers there are, so filter the lines that you need and remove station markers for the best performance.</p>
+            
+            <h2>Other sites</h2>
+            <p>In addition to PTV and operator websites and apps, there are a number of third party projects, commercial and not, that use the PTV API.</p>
+            <p>
+                Some other projects, covering more public transport modes, include:
+                <ul>
+                    <li><a href="https://transportvic.me">TransportVic</a>: Realtime service details and station PID mockups</li>
+                    <li><a href="https://anytrip.com.au/region/vic">AnyTrip</a>: Realtime vehicle position and station map with arrival details, covering multiple states</li>
+                    <li><a href="https://tripview.com.au">TripView</a>: Realtime vehicle position, station and route map with arrival details, filtered by station, covering multiple states</li>
+                </ul>
+            </p>
+            <p>This site was initially inspired by the <a href="https://venturabus.com.au/live-tracking">Ventura Tracker</a> mobile app by BusMinder. I wanted a similar app for the train network that could select a line and see its route, trains and stations on a live map with an intuitive interface. Nothing that I could find fit perfectly so I made this - maybe it will work for you too.</p>
+            
+            <h2>Attribution</h2>
+            <p>By <a href="https://nhan.au">Nhan</a>.</p>
+            <p>Data &copy; State of Victoria (<a href="https://opendata.transport.vic.gov.au/organization/public-transport">Department of Transport and Planning</a>) licensed under a <a href="https://creativecommons.org/licenses/by/4.0">Creative Commons Attribution 4.0 International licence</a>.</p>
+            <p>Rolling stock information and codes from <a href="https://cmsportal.metrotrains.com.au/docnum.aspx?id=A8520">Metro Trains Melbourne</a> and <a href="https://vicsig.net/suburban/fleet">Vicsig</a>.</p>
+            <p>Map tiles &copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>.</p>
+            <p>Built using <a href="https://leafletjs.com">Leaflet</a>.</p>
+            <p>See the <a href="https://github.com/nhtnhanbn/metrominder">README</a> for full software details and build instructions.</p>
+            <p>Use of this site is licensed under the <a href="https://github.com/nhtnhanbn/metrominder/tree/main/site/LICENSE">MIT license</a>.</p>
+        </dialog>
     </body>
 </html>

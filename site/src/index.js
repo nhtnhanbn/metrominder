@@ -68,7 +68,7 @@ L.tileLayer(
     {
         maxZoom: 19,
         opacity: 0.5,
-        attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`
+        attribution: `&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>`
     }
 ).addTo(map);
 
@@ -695,3 +695,5 @@ L.control.layers.tree(null, [
 ], {
     selectorBack: true
 }).addTo(map);
+
+document.querySelector("dialog").showModal();
