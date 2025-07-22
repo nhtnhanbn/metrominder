@@ -29,7 +29,7 @@ const map = L.map("map", {
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
     touchRotate: true
-}).fitBounds([[-38.4, 145.4], [-37.5, 144.6]]);
+}).fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);
 L.Control.zoomHome().addTo(map);
 L.control.scale().addTo(map);
 (new LocateControl({
@@ -47,6 +47,34 @@ L.control.scale().addTo(map);
 })).addTo(map);
 
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
+
+(new (L.Control.extend({
+    onAdd: (map) => {
+        const title = L.DomUtil.create("a");
+        title.style.cursor = "pointer";
+        title.style.fontFamily = `"Times New Roman", "serif"`;
+        title.style.fontStyle = "italic";
+        title.style.fontSize = "min(48pt, 8vw)";
+        title.style.letterSpacing = "min(6pt, 1vw)";
+        title.title = "About MetroMinder";
+        
+        const metro = L.DomUtil.create("b", null, title);
+        metro.textContent = "METRO";
+        const minder = L.DomUtil.create("span", null, title);
+        minder.textContent = "MINDER";
+        
+        const about = document.querySelector("dialog");
+        title.addEventListener("click", () => {
+            about.showModal();
+        });
+        
+        return title;
+    },
+    
+    onRemove: (map) => {}
+}))({
+    position: "topright"
+})).addTo(map);
 
 // Open popups on the bottom
 map.addEventListener("popupopen", ({popup}) => {
@@ -750,5 +778,3 @@ L.control.layers.tree(null, [
 ], {
     selectorBack: true
 }).addTo(map);
-
-document.querySelector("dialog").showModal();
