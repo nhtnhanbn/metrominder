@@ -24,6 +24,7 @@
     "leaflet-rotate": "^0.2.8",
     "leaflet-search": "^4.0.0",
     "leaflet.control.layers.tree": "^1.1.1",
+    "leaflet.locatecontrol": "^0.84.2",
     "leaflet.zoomhome": "^1.0.0"
   },
   "type": "module"

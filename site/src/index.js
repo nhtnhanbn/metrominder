@@ -8,6 +8,8 @@ import "leaflet-search";
 import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
 import "leaflet.control.layers.tree";
 import "leaflet.zoomhome";
+import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
@@ -30,6 +32,19 @@ const map = L.map("map", {
 }).fitBounds([[-38.4, 145.4], [-37.5, 144.6]]);
 L.Control.zoomHome().addTo(map);
 L.control.scale().addTo(map);
+(new LocateControl({
+    setView: "untilPan",
+    flyTo: true,
+    initialZoomLevel: 14,
+    clickBehavior: {
+        inView: "stop",
+        inViewNotFollowing: "setView",
+        outOfView: "setView"
+    },
+    compassStyle: {
+        rotateWithView: true
+    }
+})).addTo(map);
 
 map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
@@ -46,6 +61,7 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
 
 var foundMarker;
 (new L.Control.Search({
+    position: "bottomleft",
     layer: searchLayer,
     zoom: 14,
     initial: false,
