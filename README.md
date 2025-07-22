@@ -23,7 +23,7 @@ npm install
 npm run dev
 ```
 
-### Thanks
+## Thanks
 
 Data © State of Victoria ([Department of Transport and Planning](https://opendata.transport.vic.gov.au/organization/public-transport)) licensed under a [Creative Commons Attribution 4.0 International licence](https://creativecommons.org/licenses/by/4.0).
 
