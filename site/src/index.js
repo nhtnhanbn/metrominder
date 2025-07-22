@@ -728,7 +728,7 @@ L.control.layers.tree(null, [
         collapsed: false,
         children: [
             {
-                label: `<button class="preset-button" title="Caulfield, Clifton Hill, Northern and Burnley groups and City Circle line">
+                label: `<button class="preset-button" title="Burnley, Clifton Hill, Caulfield and Northern groups and City Circle line" style="background: linear-gradient(to right, #152C6B 25%, #BE1014 25% 50%, #279FD5 50% 75%, #FFBE00 75%);">
                             City Loop
                         </button>`,
                 eventedClasses: [{
@@ -741,7 +741,7 @@ L.control.layers.tree(null, [
                 }]
             },
             {
-                label: `<button class="preset-button" title="Caulfield, Cross-city (except Stony Point line) and Burnley groups and Sandringham line">
+                label: `<button class="preset-button" title="Burnley, Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #152C6B 25%, #028430 25% 50%, #279FD5 50% 75%, #F178AF 75%);">
                             Richmond
                         </button>`,
                 eventedClasses: [{
@@ -755,7 +755,7 @@ L.control.layers.tree(null, [
                 }]
             },
             {
-                label: `<button class="preset-button" title="Caulfield and Cross-city (except Stony Point line) groups and Sandringham line">
+                label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #028430 25%, #279FD5 25% 75%, #F178AF 75%);">
                             South Yarra
                         </button>`,
                 eventedClasses: [{
@@ -769,7 +769,7 @@ L.control.layers.tree(null, [
                 }]
             },
             {
-                label: `<button class="preset-button" title="Caulfield and Cross-city (except Stony Point line) groups">
+                label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Caulfield groups" style="background: linear-gradient(to right, #028430 50%, #279FD5 50%);">
                             Caulfield
                         </button>`,
                 eventedClasses: [{
@@ -783,7 +783,7 @@ L.control.layers.tree(null, [
                 }]
             },
             {
-                label: `<button class="preset-button" title="Northern and Cross-city (except Stony Point line) groups">
+                label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Northern groups" style="background: linear-gradient(to right, #028430 50%, #FFBE00 50%);">
                             North Melbourne
                         </button>`,
                 eventedClasses: [{
@@ -797,7 +797,7 @@ L.control.layers.tree(null, [
                 }]
             },
             {
-                label: `<button class="preset-button" title="Cross-city (except Stony Point line) group and Sunbury line">
+                label: `<button class="preset-button" title="Cross-city (except Stony Point line) group and Sunbury line" style="background: linear-gradient(to right, #028430 75%, #FFBE00 25%);">
                             Footscray
                         </button>`,
                 eventedClasses: [{

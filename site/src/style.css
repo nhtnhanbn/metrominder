@@ -47,6 +47,7 @@ button {
 
 .preset-button {
     width: 100%;
+    text-shadow: 1px 1px white, 1px -1px white, -1px 1px white, -1px -1px white;
 }
 
 .leaflet-popup {
