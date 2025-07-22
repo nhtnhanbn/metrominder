@@ -40,7 +40,7 @@
                         Details on each station:
                         <ul>
                             <li>Lines servicing the station</li>
-                            <li>Filter lines</li>
+                            <li>Set, add and filter lines displayed</li>
                             <li>Future departure service destinations</li>
                             <li>Future departure platforms</li>
                             <li>Future departure times</li>
@@ -61,8 +61,17 @@
                     <li>Grey: the map's rotation is locked to either the initial rotation or the final compass rotation from orange mode - pinching the map zooms and pans but does not rotate.</li>
                 </ul>
             </p>
-            <p>Use the search button to search for a station.</p>
-            <p>You can add and remove station markers, individual lines, line groups and presets using the layer control in the top right. Performance degrades a bit the more station and train markers there are, so filter the lines that you need and remove station markers for the best performance.</p>
+            <p>
+                Use the search button to search for a station. When you search for a station or click on the station marker, there are buttons to Set, Add and Filter. These change which lines are displayed on the map. Consider examples with an initial state of the Cranbourne and Frankston lines visible and hitting a button on Huntingdale station (on the Cranbourne and Pakenham lines).
+                <ul>
+                    <li>Set: add all corresponding lines and remove all other lines. If I hit Set lines, the Pakenham line will be shown in addition to the Cranbourne line, and the Frankston line will be hidden.</li>
+                    <li>Add: add all corresponding lines (an OR operation). If I hit Add lines, the Pakenham line will be shown in addition to the Cranbourne and Frankston lines.</li>
+                    <li>Filter: remove all other lines (an AND operation). If I hit Filter lines, the Frankston line will be hidden, and the Cranbourne line will remain shown.</li>
+                </ul>
+            </p>
+            <p>This can be useful if you want to see trains running between two stations. Suppose that I am the member of state parliament for Caulfield and need to go to work at Parliament House by taking a single train from Caulfield station to Parliament station. To view relevant trains, I can first Set lines on Caulfield station then Filter lines on Parliament station (removing the Frankston line).</p>
+            <p>Alternatively, suppose that I am the MP for Bulleen and I wish to visit my friend in Dandenong by taking the train from Box Hill station to Dandenong station, although to do so I must transfer in the city (even so, I oppose the SRL). To view relevant trains, I can first Set lines on Box Hill station then Add lines on Dandenong station.</p>
+            <p>You can show and hide station markers, individual lines, line groups and presets using the layer control in the top right. Performance degrades a bit the more station and train markers there are, so filter the lines that you need and hide station markers for the best performance.</p>
             
             <h2>Other sites</h2>
             <p>In addition to PTV and operator websites and apps, there are a number of third party projects, commercial and not, that use the PTV API.</p>

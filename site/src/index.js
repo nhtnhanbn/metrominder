@@ -116,7 +116,8 @@ L.tileLayer(
     }
 ).addTo(map);
 
-function stationHeader(stopName) {
+function stationHeader(marker) {
+    const stopName = marker.options.title;
     const popup = document.createElement("div");
     popup.style.textAlign = "center";
         
@@ -143,23 +144,56 @@ function stationHeader(stopName) {
     }
     lines.appendChild(document.createElement("br"));
     
-    const button = document.createElement("button");
-    button.textContent = "Filter lines";
-    button.addEventListener("click", () => {
-        filterLines(stopName)
+    const setButton = document.createElement("button");
+    setButton.textContent = "Set";
+    setButton.addEventListener("click", () => {
+        setLines(stopName);
+        marker.closePopup();
     });
-    lines.appendChild(button);
+    lines.appendChild(setButton);
+    
+    const addButton = document.createElement("button");
+    addButton.textContent = "Add";
+    addButton.addEventListener("click", () => {
+        addLines(stopName);
+        marker.closePopup();
+    });
+    lines.appendChild(addButton);
+    
+    const filterButton = document.createElement("button");
+    filterButton.textContent = "Filter";
+    filterButton.addEventListener("click", () => {
+        filterLines(stopName);
+        marker.closePopup();
+    });
+    lines.appendChild(filterButton);
     
     popup.appendChild(lines);
     
     return popup;
 }
 
-function filterLines(stop_name) {
+function setLines(stop_name) {
     for (const [routeName, routeMap] of Object.entries(routeMaps)) {
         if (layerGroupStations[stop_name].includes(routeName)) {
             routeMap.layerGroup.addTo(map);
         } else {
+            routeMap.layerGroup.remove();
+        }
+    }
+}
+
+function addLines(stop_name) {
+    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+        if (layerGroupStations[stop_name].includes(routeName)) {
+            routeMap.layerGroup.addTo(map);
+        }
+    }
+}
+
+function filterLines(stop_name) {
+    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+        if (!layerGroupStations[stop_name].includes(routeName)) {
             routeMap.layerGroup.remove();
         }
     }
@@ -204,7 +238,7 @@ for (const stop of stops) {
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
-        stations[stop_name] = L.marker(
+        const marker = L.marker(
             [stop_lat, stop_lon],
             {
                 icon: L.icon({
@@ -214,10 +248,12 @@ for (const stop of stops) {
                 title: stop_name,
                 visibility: 0
             }
-        ).bindPopup(
-            stationHeader(stop_name),
+        );
+        marker.bindPopup(
+            stationHeader(marker),
             { autoPan: false }
         ).addTo(searchLayer);
+        stations[stop_name] = marker;
     }
     
     let { stop_id, ...stopMap } = stop;
@@ -482,7 +518,7 @@ async function updateTrips() {
     }
     
     for (const [stationName, stationMarker] of Object.entries(stations)) {
-        let popup = stationHeader(stationName);
+        let popup = stationHeader(stationMarker);
         
         const stationDepartures = departures[stationName];
         if (stationDepartures.length > 0) {
@@ -699,7 +735,7 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                        filterLines("Melbourne Central");
+                        setLines("Melbourne Central");
                         routeMaps["Flemington Racecourse"].layerGroup.remove();
                     }
                 }]
@@ -712,7 +748,7 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                         filterLines("Richmond");
+                         setLines("Richmond");
                          routeMaps["Werribee"].layerGroup.addTo(map);
                          routeMaps["Williamstown"].layerGroup.addTo(map);
                     }
@@ -726,7 +762,7 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                         filterLines("South Yarra");
+                         setLines("South Yarra");
                          routeMaps["Werribee"].layerGroup.addTo(map);
                          routeMaps["Williamstown"].layerGroup.addTo(map);
                     }
@@ -740,7 +776,7 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                        filterLines("Caulfield");
+                        setLines("Caulfield");
                          routeMaps["Werribee"].layerGroup.addTo(map);
                          routeMaps["Williamstown"].layerGroup.addTo(map);
                     }
@@ -754,7 +790,7 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                        filterLines("North Melbourne");
+                        setLines("North Melbourne");
                         routeMaps["Frankston"].layerGroup.addTo(map);
                         routeMaps["Flemington Racecourse"].layerGroup.remove();
                     }
@@ -768,7 +804,7 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                        filterLines("Footscray");
+                        setLines("Footscray");
                         routeMaps["Frankston"].layerGroup.addTo(map);
                     }
                 }]
