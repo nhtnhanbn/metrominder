@@ -41,6 +41,11 @@ html, body, #map {
     width: 100vw;
 }
 
+.preset-button {
+    margin: 2px;
+    width: 100%;
+}
+
 .leaflet-popup {
     position: relative;
 }

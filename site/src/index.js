@@ -61,7 +61,7 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
 
 var foundMarker;
 (new L.Control.Search({
-    position: "bottomleft",
+    position: "topleft",
     layer: searchLayer,
     zoom: 14,
     initial: false,
@@ -127,6 +127,16 @@ function stationHeader(stopName) {
     return popup;
 }
 
+function filterLines(stop_name) {
+    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+        if (layerGroupStations[stop_name].includes(routeName)) {
+            routeMap.layerGroup.addTo(map);
+        } else {
+            routeMap.layerGroup.remove();
+        }
+    }
+}
+
 const stations = {}, layerGroupStations = {}, stopMaps = {};
 for (const [routeName, stationLine] of Object.entries(stationLines)) {
     for (const stop_name of stationLine) {
@@ -184,16 +194,6 @@ for (const stop of stops) {
     
     let { stop_id, ...stopMap } = stop;
     stopMaps[stop_id] = stopMap;
-}
-
-function filterLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
-        if (layerGroupStations[stop_name].includes(routeName)) {
-            routeMap.layerGroup.addTo(map);
-        } else {
-            routeMap.layerGroup.remove();
-        }
-    }
 }
 
 const attributionPrefix = document.createElement("span");
@@ -543,7 +543,7 @@ L.control.layers.tree(null, [
         layer: stationLayer
     },
     {
-        label: "All lines",
+        label: "<b>All lines<b>",
         selectAllCheckbox: true,
         children: [
             layerGroupsNamed["Sandringham"],
@@ -660,51 +660,90 @@ L.control.layers.tree(null, [
         ]
     },
     {
-        label: "Presets",
-        collapsed: true,
+        label: "<b>Presets<b>",
+        collapsed: false,
         children: [
             {
-                label: "City Loop",
-                layer: L.layerGroup(
-                    Object.values(routeMaps).filter((routeMap) => {
-                        return !["#F178AF", "#028430"].includes(routeMap.colour);
-                    }).map((routeMap) => routeMap.layerGroup)
-                )
+                label: `<button class="preset-button" title="Caulfield, Clifton Hill, Northern and Burnley groups and City Circle line">
+                            City Loop
+                        </button>`,
+                eventedClasses: [{
+                    className: "preset-button",
+                    event: "click",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                        filterLines("Melbourne Central");
+                        routeMaps["Flemington Racecourse"].layerGroup.remove();
+                    }
+                }]
             },
             {
-                label: "Richmond station",
-                layer: L.layerGroup(
-                    Object.entries(routeMaps).filter(([routeName, routeMap]) => {
-                        return routeName !== "Stony Point" &&
-                               ["#F178AF", "#028430", "#279FD5", "#152C6B"].includes(routeMap.colour);
-                    }).map(([routeName, routeMap]) => routeMap.layerGroup)
-                )
+                label: `<button class="preset-button" title="Caulfield, Cross-city (except Stony Point line) and Burnley groups and Sandringham line">
+                            Richmond
+                        </button>`,
+                eventedClasses: [{
+                    className: "preset-button",
+                    event: "click",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                         filterLines("Richmond");
+                         routeMaps["Werribee"].layerGroup.addTo(map);
+                         routeMaps["Williamstown"].layerGroup.addTo(map);
+                    }
+                }]
             },
             {
-                label: "South Yarra station",
-                layer: L.layerGroup(
-                    Object.entries(routeMaps).filter(([routeName, routeMap]) => {
-                        return routeName !== "Stony Point" &&
-                               ["#F178AF", "#028430", "#279FD5"].includes(routeMap.colour);
-                    }).map(([routeName, routeMap]) => routeMap.layerGroup)
-                )
+                label: `<button class="preset-button" title="Caulfield and Cross-city (except Stony Point line) groups and Sandringham line">
+                            South Yarra
+                        </button>`,
+                eventedClasses: [{
+                    className: "preset-button",
+                    event: "click",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                         filterLines("South Yarra");
+                         routeMaps["Werribee"].layerGroup.addTo(map);
+                         routeMaps["Williamstown"].layerGroup.addTo(map);
+                    }
+                }]
             },
             {
-                label: "Caulfield station",
-                layer: L.layerGroup(
-                    Object.entries(routeMaps).filter(([routeName, routeMap]) => {
-                        return ["Frankston", "Cranbourne", "Pakenham"].includes(routeName);
-                    }).map(([routeName, routeMap]) => routeMap.layerGroup)
-                )
+                label: `<button class="preset-button" title="Caulfield and Cross-city (except Stony Point line) groups">
+                            Caulfield
+                        </button>`,
+                eventedClasses: [{
+                    className: "preset-button",
+                    event: "click",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                        filterLines("Caulfield");
+                         routeMaps["Werribee"].layerGroup.addTo(map);
+                         routeMaps["Williamstown"].layerGroup.addTo(map);
+                    }
+                }]
             },
             {
-                label: "North Melbourne station",
-                layer: L.layerGroup(
-                    Object.entries(routeMaps).filter(([routeName, routeMap]) => {
-                        return routeName !== "Stony Point" &&
-                               ["#FFBE00", "#028430"].includes(routeMap.colour);
-                    }).map(([routeName, routeMap]) => routeMap.layerGroup)
-                )
+                label: `<button class="preset-button" title="Northern and Cross-city (except Stony Point line) groups">
+                            North Melbourne
+                        </button>`,
+                eventedClasses: [{
+                    className: "preset-button",
+                    event: "click",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                        filterLines("North Melbourne");
+                        routeMaps["Frankston"].layerGroup.addTo(map);
+                        routeMaps["Flemington Racecourse"].layerGroup.remove();
+                    }
+                }]
+            },
+            {
+                label: `<button class="preset-button" title="Cross-city (except Stony Point line) group and Sunbury line">
+                            Footscray
+                        </button>`,
+                eventedClasses: [{
+                    className: "preset-button",
+                    event: "click",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                        filterLines("Footscray");
+                        routeMaps["Frankston"].layerGroup.addTo(map);
+                    }
+                }]
             }
         ]
     }
