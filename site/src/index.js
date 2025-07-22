@@ -58,9 +58,11 @@ map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
         title.style.letterSpacing = "min(6pt, 1vw)";
         title.title = "About MetroMinder";
         
-        const metro = L.DomUtil.create("b", null, title);
+        const metro = L.DomUtil.create("span", "watermark", title);
+        metro.style.fontWeight = 1;
         metro.textContent = "METRO";
-        const minder = L.DomUtil.create("span", null, title);
+        const minder = L.DomUtil.create("span", "watermark", title);
+        minder.style.fontWeight = 1000;
         minder.textContent = "MINDER";
         
         const about = document.querySelector("dialog");

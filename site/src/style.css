@@ -50,6 +50,10 @@ button {
     text-shadow: 1px 1px white, 1px -1px white, -1px 1px white, -1px -1px white;
 }
 
+.watermark {
+    text-shadow: 1px 1px white, 1px -1px white, -1px 1px white, -1px -1px white;
+}
+
 .leaflet-popup {
     position: relative;
 }
