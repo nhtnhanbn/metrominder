@@ -442,6 +442,7 @@ async function updateTrips() {
         departures[stationName] = [];
     }
     
+    const time = timeString(feed.feed.header.timestamp, true);
     for (const trip of feed.feed.entity) {
         const tripUpdate = trip.tripUpdate;
         const tripId = tripUpdate.trip.tripId;
@@ -507,7 +508,8 @@ async function updateTrips() {
                         }
                     }
                 }
-                popup += `</table>`;
+                popup += `</table>
+                          <p>Trip update ${time}</p>`;
                 
                 if (tripId in trains) {
                     trains[tripId].tip.setPopupContent(popup);
@@ -560,6 +562,10 @@ async function updateTrips() {
             text.textContent = "No departing trains.";
             popup.appendChild(text);
         }
+        
+        const updateTime = document.createElement("p");
+        updateTime.textContent = `Trip updates ${time}`;
+        popup.appendChild(updateTime);
         
         stationMarker.setPopupContent(popup);
     }
