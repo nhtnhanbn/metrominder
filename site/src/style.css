@@ -43,6 +43,7 @@ html, body, #map {
 
 button {
     margin: 2px;
+    pointer-events: auto;
 }
 
 .preset-button {
@@ -72,6 +73,7 @@ button {
 
 .leaflet-popup {
     position: relative;
+    pointer-events: none;
 }
 
 .leaflet-popup-tip-container {
