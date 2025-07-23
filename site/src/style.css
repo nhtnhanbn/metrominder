@@ -60,6 +60,11 @@ button {
 }
 
 .watermark {
+    cursor: pointer;
+    font-family: "Times New Roman", "serif";
+    font-style: italic;
+    font-size: min(8vw, 8vh);
+    letter-spacing: min(1vw, 1vh);
     text-shadow:
         1px 1px white,
         1px -1px white,

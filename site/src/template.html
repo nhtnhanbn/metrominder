@@ -19,7 +19,7 @@
             <h2>A live Melbourne train tracker</h2>
             <p>This site maps realtime positions of metropolitan trains operated by Metro Trains Melbourne using public data distributed by Transport Victoria.</p>
             <p><strong>Use information on this site as a guide only. Do not rely on its accuracy.</strong> This site is not endorsed by the DTP or MTM.</p>
-            <p>Realtime data including positions, service, arrival and departure information are sourced from <a href="https://gtfs.org/documentation/overview/#gtfs-realtime">GTFS</a> APIs made available by the Victorian Department of Transport and Planning and consumed by other third party software such as Google Maps. As such, the quality of the information on this site is subject to the DTP data's quality (and any upstream outages, omissions and errors). It is the same data used by the PTV app and website, but they do not use the public API layer so the PTV app may still be able to display realtime information when outages affect this and other thirdparty apps. Vehicle positions appear to be updated in the API about once a minute.</p>
+            <p>Realtime data including positions, service, arrival and departure information are sourced from <a href="https://gtfs.org/documentation/overview/#gtfs-realtime">GTFS</a> APIs made available by the Victorian Department of Transport and Planning and consumed by other third party software such as Google Maps. As such, the quality of the information on this site is subject to the DTP data's quality (and any upstream outages, omissions and errors). It is the same data used by the PTV app and website, but they do not use the public API layer so the PTV app may still be able to display realtime information when outages affect this and other third party apps. Vehicle positions appear to be updated in the API about once a minute.</p>
             <p>
                 Features include:
                 <ul>
@@ -52,13 +52,13 @@
             
             <h2>Usage</h2>
             <p>Most functionality and interaction should be fairly conventional. The map can be interacted with using the buttons in the top left or mouse/touch gestures, and supports fullscreen, rotation, zoom, panning and returning to initial view.</p>
-            <p>The compass button's functionality differs between mouse and touch. When using a mouse, click on the compass, hold and drag to the right to rotate the map. Click and release on the compass to return to initial rotation (north pointing directly up).</p>
+            <p>The compass button's functionality differs between mouse and touch. When using a mouse, click on the compass, hold and drag to the right to rotate the map. Click and release on the button to return to initial rotation (north pointing directly up).</p>
             <p>
-                When using a touchscreen, the compass button has three modes which are cycled through when pressed. To return to initial rotation (north pointing directly up), press on the compass until you get there.
+                When using a touchscreen, the compass button has three modes which are cycled through when pressed. To return to the default rotation (north pointing directly up), press on the button until you get there.
                 <ul>
                     <li>White: pinching the map zooms, pans and rotates.</li>
                     <li>Orange: acts as a compass with the map's rotation continuously following the direction your device is facing in the real world.</li>
-                    <li>Grey: the map's rotation is locked to either the initial rotation or the final compass rotation from orange mode - pinching the map zooms and pans but does not rotate.</li>
+                    <li>Grey: the map's rotation is locked to either the default rotation or the final compass rotation from orange mode - pinching the map zooms and pans but does not rotate.</li>
                 </ul>
             </p>
             <p>
@@ -69,8 +69,8 @@
                     <li>Filter: remove all other lines (an AND operation). If I hit Filter lines, the Frankston line will be hidden, and the Cranbourne line will remain shown.</li>
                 </ul>
             </p>
-            <p>This can be useful if you want to see trains running between two stations. Suppose that I am the member of state parliament for Caulfield and need to go to work at Parliament House by taking a single train from Caulfield station to Parliament station. To view relevant trains, I can first Set lines on Caulfield station then Filter lines on Parliament station (removing the Frankston line).</p>
-            <p>Alternatively, suppose that I am the MP for Bulleen and I wish to visit my friend in Dandenong by taking the train from Box Hill station to Dandenong station, although to do so I must transfer in the city (even so, I oppose the SRL). To view relevant trains, I can first Set lines on Box Hill station then Add lines on Dandenong station.</p>
+            <p>This can be useful if you want to see trains running between two stations. Suppose that I need to take a single train from Caulfield station to Parliament station. To view relevant trains, I can first Set lines on Caulfield station then Filter lines on Parliament station (removing the Frankston line).</p>
+            <p>Alternatively, suppose that I wish to take the train from Box Hill station to Dandenong station, although to do so I must transfer in the city. To view relevant trains, I can first Set lines on Box Hill station then Add lines on Dandenong station.</p>
             <p>You can show and hide station markers, individual lines, line groups and presets using the layer control in the top right. Performance degrades a bit the more station and train markers there are, so filter the lines that you need and hide station markers for the best performance.</p>
             
             <h2>Other sites</h2>
@@ -92,7 +92,6 @@
             <p>Map tiles &copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>.</p>
             <p>Built using <a href="https://leafletjs.com">Leaflet</a>.</p>
             <p>See the <a href="https://github.com/nhtnhanbn/metrominder">README</a> for full software details and build instructions.</p>
-            <p>Use of this site is licensed under the <a href="https://github.com/nhtnhanbn/metrominder/tree/main/site/LICENSE">MIT license</a>.</p>
         </dialog>
     </body>
 </html>

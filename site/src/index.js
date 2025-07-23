@@ -51,11 +51,6 @@ map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 (new (L.Control.extend({
     onAdd: (map) => {
         const title = L.DomUtil.create("a");
-        title.style.cursor = "pointer";
-        title.style.fontFamily = `"Times New Roman", "serif"`;
-        title.style.fontStyle = "italic";
-        title.style.fontSize = "min(48pt, 8vw)";
-        title.style.letterSpacing = "min(6pt, 1vw)";
         title.title = "About MetroMinder";
         
         const metro = L.DomUtil.create("span", "watermark", title);
