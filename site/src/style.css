@@ -47,11 +47,23 @@ button {
 
 .preset-button {
     width: 100%;
-    text-shadow: 1px 1px white, 1px -1px white, -1px 1px white, -1px -1px white;
+    text-shadow:
+        1px 1px white,
+        1px -1px white,
+        -1px 1px white,
+        -1px -1px white,
+        1px 0px white,
+        -1px 0px white,
+        0px 1px white,
+        0px -1px white;
 }
 
 .watermark {
-    text-shadow: 1px 1px white, 1px -1px white, -1px 1px white, -1px -1px white;
+    text-shadow:
+        1px 1px white,
+        1px -1px white,
+        -1px 1px white,
+        -1px -1px white;
 }
 
 .leaflet-container .leaflet-control-search {
