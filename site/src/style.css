@@ -54,6 +54,10 @@ button {
     text-shadow: 1px 1px white, 1px -1px white, -1px 1px white, -1px -1px white;
 }
 
+.leaflet-container .leaflet-control-search {
+    float: right;
+}
+
 .leaflet-popup {
     position: relative;
 }

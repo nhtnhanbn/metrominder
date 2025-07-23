@@ -91,15 +91,16 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
 
 var foundMarker;
 (new L.Control.Search({
-    position: "topleft",
+    position: "topright",
     layer: searchLayer,
     zoom: 14,
-    initial: false,
     delayType: 0,
     firstTipSubmit: true,
+    autoResize: false,
+    autoCollapse: true,
     textErr: "Station not found.",
     textPlaceholder: "Search stations...",
-    hideMarkerOnCollapse: true
+    marker: false
 })).addEventListener("search:locationfound", (data) => {
     if (foundMarker &&
         (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
