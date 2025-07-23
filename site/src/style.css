@@ -60,6 +60,7 @@ button {
 }
 
 .watermark {
+    color: #0072CE;
     cursor: pointer;
     font-family: "Times New Roman", "serif";
     font-style: italic;
