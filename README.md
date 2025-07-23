@@ -37,6 +37,7 @@ Dependencies include [Leaflet.ArrowCircle](https://github.com/nhtnhanbn/metromin
 
 Some other projects, covering more public transport modes, include:
 - [TransportVic](https://transportvic.me): Realtime service details and station PID mockups
+- [domino6658](https://home.domino6658.xyz/trains): Realtime vehicle position map supporting search for specific carriages/trains and filtering by train types
 - [AnyTrip](https://anytrip.com.au/region/vic): Realtime vehicle position and station map with arrival details, covering multiple states
 - [TripView](https://tripview.com.au): Realtime vehicle position, station and route map with arrival details, filtered by station, covering multiple states
 
