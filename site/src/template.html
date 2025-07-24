@@ -19,7 +19,8 @@
             <h2>A live Melbourne train tracker</h2>
             <p>This site maps realtime positions of metropolitan trains operated by Metro Trains Melbourne using public data distributed by Transport Victoria.</p>
             <p><strong>Use information on this site as a guide only. Do not rely on its accuracy.</strong> This site is not endorsed by the DTP or MTM.</p>
-            <p>Realtime data including positions, service, arrival and departure information are sourced from <a href="https://gtfs.org/documentation/overview/#gtfs-realtime">GTFS</a> APIs made available by the Victorian Department of Transport and Planning and consumed by other third party software such as Google Maps. As such, the quality of the information on this site is subject to the DTP data's quality (and any upstream outages, omissions and errors). It is the same data used by the PTV app and website, but they do not use the public API layer so the PTV app may still be able to display realtime information when outages affect this and other third party apps. Vehicle positions appear to be updated in the API about once a minute.</p>
+            <p>Realtime data including positions, service, arrival and departure information are sourced from <a href="https://gtfs.org/documentation/overview/#gtfs-realtime">GTFS Realtime</a> APIs made available by the Victorian Department of Transport and Planning and consumed by other third party software such as Google Maps. As such, the quality of the information on this site is subject to the DTP data's quality (and any upstream outages, omissions and errors). It is the same data used by the PTV app and website, but they do not use the public API layer so the PTV app may still be able to display realtime information when outages affect this and other third party apps. Vehicle positions appear to be updated in the API about once a minute.</p>
+            <p>Arrival and departure information is sourced exclusively from the GTFS Realtime API and does not include static timetable data (such as from GTFS Schedule) or the PTV Timetable API.</p>
             <p>
                 Features include:
                 <ul>
@@ -52,8 +53,8 @@
             
             <h2>Usage</h2>
             <p>If the site has not been used in 15 minutes, on initial page load it might take up to a minute for the backend to spin up and start retrieving data. This is a limitation of the hosting that I am currently using but you are free to <a href="https://github.com/nhtnhanbn/metrominder">host it yourself</a>.</p>
-            <p>Most functionality and interaction should be fairly conventional. The map can be interacted with using the buttons in the top left or mouse/touch gestures, and supports fullscreen, rotation, zoom, panning and returning to initial view.</p>
-            <p>The compass button's functionality differs between mouse and touch. When using a mouse, click on the compass, hold and drag to the right to rotate the map. Click and release on the button to return to initial rotation (north pointing directly up).</p>
+            <p>Most functionality and interaction should be fairly conventional. The map can be interacted with using the buttons on the left or mouse/trackpad/touch gestures, and supports fullscreen, rotation, zoom, panning and returning to initial view.</p>
+            <p>The compass button's functionality differs between mouse and touch. When using a mouse, click on the compass, hold and drag to the right to rotate the map. Click and release on the button to return to te default rotation (north pointing directly up).</p>
             <p>
                 When using a touchscreen, the compass button has three modes which are cycled through when pressed. To return to the default rotation (north pointing directly up), press on the button until you get there.
                 <ul>

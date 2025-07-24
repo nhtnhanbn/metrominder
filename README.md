@@ -42,3 +42,5 @@ Some other projects, covering more public transport modes, include:
 - [TripView](https://tripview.com.au): Realtime vehicle position, station and route map with arrival details, filtered by station, covering multiple states
 
 Initially inspired by the [Ventura Tracker](https://venturabus.com.au/live-tracking) mobile app by BusMinder.
+
+The code is under the MIT License: [api](api/LICENSE) and [site](site/LICENSE).
