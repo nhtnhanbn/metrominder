@@ -120,6 +120,10 @@
     onAdd: function (map) {
       L.Marker.prototype.onAdd.call(this, map);
     },
+    setRotation: function (rotation) {
+      this.options.iconOptions.rotation = rotation;
+      return this.setIcon(this.options.iconFactory(this.options.iconOptions));
+    },
   });
 
   L.marker.arrowCircle = (latlng, options) => {

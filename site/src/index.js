@@ -305,7 +305,8 @@ async function updatePositions() {
         const popup = `Position at ${timeString(train.vehicle.timestamp, true)}`;
         
         if (tripId in trains) {
-            trains[tripId].marker.slideTo([latitude, longitude]);
+            trains[tripId].marker.setRotation(bearing)
+                                 .slideTo([latitude, longitude]);
             trains[tripId].tip.setTooltipContent(popup)
                               .slideTo([latitude, longitude]);
             updatedTrains[tripId] = trains[tripId];
