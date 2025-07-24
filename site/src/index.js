@@ -306,9 +306,17 @@ async function updatePositions() {
         
         if (tripId in trains) {
             trains[tripId].marker.slideTo([latitude, longitude]);
-            trains[tripId].tip.slideTo([latitude, longitude])
-                              .setTooltipContent(popup);
+            trains[tripId].tip.setTooltipContent(popup)
+                              .slideTo([latitude, longitude]);
             updatedTrains[tripId] = trains[tripId];
+            
+            const markerLabel = document.querySelector(
+                "input[name=labels]:checked"
+            ).value;
+            
+            trains[tripId].tipContent.textContent = (markerLabel === "type") ?
+                                                    trains[tripId].typeCode :
+                                                    trains[tripId].routeCode;
         } else {
             const consist = train.vehicle.vehicle.id;
             const splitConsist = consist.split("-");
@@ -316,19 +324,23 @@ async function updatePositions() {
                 return car[car.length-1] === 'T';
             });
             
-            let length, type;
+            let length, type, typeCode = "";
             if (car) {
                 length = splitConsist.length;
                 
                 const number = parseInt(car.slice(0, -1));
                 if (1000 <= number && number < 1200) {
                     type = "Comeng";
+                    typeCode = "COM";
                 } else if (2500 <= number && number < 2600) {
                     type = "Siemens";
+                    typeCode = "SIE";
                 } else if (1300 <= number && number < 1700) {
                     type = "X'Trapolis 100";
+                    typeCode = "XT1";
                 } else if (8100 <= number && number < 8900) {
                     type = "X'Trapolis 2.0";
+                    typeCode = "XT2";
                 }
             } else if (splitConsist.length > 0) {
                 car = splitConsist[0];
@@ -336,9 +348,11 @@ async function updatePositions() {
                 if (9000 <= number && number < 10000) {
                     length = 7;
                     type = "HCMT";
+                    typeCode = "HCM";
                 } else if (7000 <= number && number < 7030) {
                     length = 1;
                     type = "Sprinter";
+                    typeCode = "SPR";
                 }
             }
             
@@ -346,6 +360,7 @@ async function updatePositions() {
                 routeId === "aus:vic:vic-02-STY:") {
                     length = 1;
                     type = "Sprinter";
+                    typeCode = "SPR";
             }
             
             let consistInfo = `<p style="margin-bottom: 0">
@@ -364,6 +379,11 @@ async function updatePositions() {
                         <p style="margin-top: 0">
                             ${consist}
                         </p>`;
+            
+            const routeCode = routeId.slice(15, 18);
+            const tipContent = document.createElement("div");
+            tipContent.textContent = routeCode;
+            tipContent.style.color = textColours[routeId];
                              
             const marker = L.marker.arrowCircle(
                 [latitude, longitude],
@@ -383,9 +403,7 @@ async function updatePositions() {
                 [latitude, longitude],
                 {
                     icon: L.divIcon({
-                        html: `<div style="color: ${textColours[routeId]};">
-                                   ${routeId.slice(15, 18)}
-                               </div>`,
+                        html: tipContent,
                         className: "train-tip"
                     }),
                     pane: "trainPane"
@@ -400,7 +418,10 @@ async function updatePositions() {
             updatedTrains[tripId] = {
                 marker: marker,
                 tip: tip,
-                consistInfo: consistInfo
+                consistInfo: consistInfo,
+                routeCode: routeCode,
+                typeCode: typeCode,
+                tipContent: tipContent
             };
             
             layerGroups[routeId].addLayer(marker).addLayer(tip);
@@ -608,8 +629,28 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
 
 L.control.layers.tree(null, [
     {
+        label: "Train marker labels",
+        children: [
+            {
+                label: `<label title="Label train markers with line code from next update">
+                            <input type="radio" name="labels" value="line" checked>
+                            Line
+                        </label>`
+            },
+            {
+                label: `<label title="Label train markers with type code from next update">
+                            <input type="radio" name="labels" value="type">
+                            Type
+                        </label>`
+            }
+        ]
+    },
+    {
         label: "Show stations",
         layer: stationLayer
+    },
+    {
+        label: `<div class="leaflet-control-layers-separator"></div>`
     },
     {
         label: "<b>All lines<b>",
@@ -730,7 +771,6 @@ L.control.layers.tree(null, [
     },
     {
         label: "<b>Presets<b>",
-        collapsed: false,
         children: [
             {
                 label: `<button class="preset-button" title="Burnley, Clifton Hill, Caulfield and Northern groups and City Circle line" style="background: linear-gradient(to right, #152C6B 25%, #BE1014 25% 50%, #279FD5 50% 75%, #FFBE00 75%);">
