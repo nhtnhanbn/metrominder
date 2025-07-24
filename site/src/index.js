@@ -8,6 +8,7 @@ import "leaflet-search";
 import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
 import "leaflet.control.layers.tree";
 import "leaflet.zoomhome";
+import "leaflet.marker.slideto";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
@@ -304,8 +305,8 @@ async function updatePositions() {
         const popup = `Position at ${timeString(train.vehicle.timestamp, true)}`;
         
         if (tripId in trains) {
-            trains[tripId].marker.setLatLng([latitude, longitude]);
-            trains[tripId].tip.setLatLng([latitude, longitude])
+            trains[tripId].marker.slideTo([latitude, longitude]);
+            trains[tripId].tip.slideTo([latitude, longitude])
                               .setTooltipContent(popup);
             updatedTrains[tripId] = trains[tripId];
         } else {
