@@ -294,153 +294,160 @@ async function updatePositions() {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
-    const response = await fetch("https://metrominder.onrender.com/positions");
-    const feed = await response.json();
-    
-    const updatedTrains = {};
-    for (const train of feed.feed.entity) {
-        const { latitude, longitude, bearing } = train.vehicle.position;
-        const tripId = train.vehicle.trip.tripId;
-        const routeId = train.vehicle.trip.routeId;
-        const popup = `Position at ${timeString(train.vehicle.timestamp, true)}`;
+    try {
+        const response = await fetch("https://metrominder.onrender.com/positions");
+        const feed = await response.json();
         
-        if (tripId in trains) {
-            trains[tripId].marker.setRotation(bearing)
-                                 .slideTo([latitude, longitude]);
-            trains[tripId].tip.setTooltipContent(popup)
-                              .slideTo([latitude, longitude]);
-            updatedTrains[tripId] = trains[tripId];
+        const updatedTrains = {};
+        for (const train of feed.feed.entity) {
+            const { latitude, longitude, bearing } = train.vehicle.position;
+            const tripId = train.vehicle.trip.tripId;
+            const routeId = train.vehicle.trip.routeId;
+            const popup = `Position at ${timeString(train.vehicle.timestamp, true)}`;
             
-            const markerLabel = document.querySelector(
-                "input[name=labels]:checked"
-            ).value;
-            
-            trains[tripId].tipContent.textContent = (markerLabel === "type") ?
-                                                    trains[tripId].typeCode :
-                                                    trains[tripId].routeCode;
-        } else {
-            const consist = train.vehicle.vehicle.id;
-            const splitConsist = consist.split("-");
-            let car = splitConsist.find((car) => {
-                return car[car.length-1] === 'T';
-            });
-            
-            let length, type, typeCode = "";
-            if (car) {
-                length = splitConsist.length;
+            if (tripId in trains) {
+                trains[tripId].marker.setRotation(bearing)
+                                     .slideTo([latitude, longitude]);
+                trains[tripId].tip.setTooltipContent(popup)
+                                  .slideTo([latitude, longitude]);
+                updatedTrains[tripId] = trains[tripId];
                 
-                const number = parseInt(car.slice(0, -1));
-                if (1000 <= number && number < 1200) {
-                    type = "Comeng";
-                    typeCode = "COM";
-                } else if (2500 <= number && number < 2600) {
-                    type = "Siemens";
-                    typeCode = "SIE";
-                } else if (1300 <= number && number < 1700) {
-                    type = "X'Trapolis 100";
-                    typeCode = "XT1";
-                } else if (8100 <= number && number < 8900) {
-                    type = "X'Trapolis 2.0";
-                    typeCode = "XT2";
+                const markerLabel = document.querySelector(
+                    "input[name=labels]:checked"
+                ).value;
+                
+                trains[tripId].tipContent.textContent = (markerLabel === "type") ?
+                                                        trains[tripId].typeCode :
+                                                        trains[tripId].routeCode;
+            } else {
+                const consist = train.vehicle.vehicle.id;
+                const splitConsist = consist.split("-");
+                let car = splitConsist.find((car) => {
+                    return car[car.length-1] === 'T';
+                });
+                
+                let length, type, typeCode = "";
+                if (car) {
+                    length = splitConsist.length;
+                    
+                    const number = parseInt(car.slice(0, -1));
+                    if (1000 <= number && number < 1200) {
+                        type = "Comeng";
+                        typeCode = "COM";
+                    } else if (2500 <= number && number < 2600) {
+                        type = "Siemens";
+                        typeCode = "SIE";
+                    } else if (1300 <= number && number < 1700) {
+                        type = "X'Trapolis 100";
+                        typeCode = "XT1";
+                    } else if (8100 <= number && number < 8900) {
+                        type = "X'Trapolis 2.0";
+                        typeCode = "XT2";
+                    }
+                } else if (splitConsist.length > 0) {
+                    car = splitConsist[0];
+                    const number = parseInt(car.slice(0, -1));
+                    if (9000 <= number && number < 10000) {
+                        length = 7;
+                        type = "HCMT";
+                        typeCode = "HCM";
+                    } else if (7000 <= number && number < 7030) {
+                        length = 1;
+                        type = "Sprinter";
+                        typeCode = "SPR";
+                    }
                 }
-            } else if (splitConsist.length > 0) {
-                car = splitConsist[0];
-                const number = parseInt(car.slice(0, -1));
-                if (9000 <= number && number < 10000) {
-                    length = 7;
-                    type = "HCMT";
-                    typeCode = "HCM";
-                } else if (7000 <= number && number < 7030) {
-                    length = 1;
-                    type = "Sprinter";
-                    typeCode = "SPR";
+                
+                if ((!length || !type) &&
+                    routeId === "aus:vic:vic-02-STY:") {
+                        length = 1;
+                        type = "Sprinter";
+                        typeCode = "SPR";
                 }
-            }
-            
-            if ((!length || !type) &&
-                routeId === "aus:vic:vic-02-STY:") {
-                    length = 1;
-                    type = "Sprinter";
-                    typeCode = "SPR";
-            }
-            
-            let consistInfo = `<p style="margin-bottom: 0">
-                                   <b>`;
-            
-            if (length) {
-                consistInfo += `${length}-car`;
-            }
-            
-            if (type) {
-                consistInfo += ` ${type}`;
-            }
-            
-            consistInfo += `</b>
-                        </p>
-                        <p style="margin-top: 0">
-                            ${consist}
-                        </p>`;
-            
-            const routeCode = routeId.slice(15, 18);
-            const tipContent = document.createElement("div");
-            tipContent.textContent = routeCode;
-            tipContent.style.color = textColours[routeId];
-                             
-            const marker = L.marker.arrowCircle(
-                [latitude, longitude],
-                {
-                    iconOptions: {
-                        stroke: textColours[routeId],
-                        color: colours[routeId],
-                        size: 40,
-                        rotation: bearing
-                    },
-                    pane: "trainPane",
-                    rotateWithView: true
+                
+                let consistInfo = `<p style="margin-bottom: 0">
+                                       <b>`;
+                
+                if (length) {
+                    consistInfo += `${length}-car`;
                 }
-            );
-            
-            const tip = L.marker(
-                [latitude, longitude],
-                {
-                    icon: L.divIcon({
-                        html: tipContent,
-                        className: "train-tip"
-                    }),
-                    pane: "trainPane"
+                
+                if (type) {
+                    consistInfo += ` ${type}`;
                 }
-            ).bindTooltip(
-                L.tooltip().setContent(popup)
-            ).bindPopup(
-                consistInfo + "No trip information.",
-                { autoPan: false }
-            );
-            
-            updatedTrains[tripId] = {
-                marker: marker,
-                tip: tip,
-                consistInfo: consistInfo,
-                routeCode: routeCode,
-                typeCode: typeCode,
-                tipContent: tipContent
-            };
-            
-            layerGroups[routeId].addLayer(marker).addLayer(tip);
+                
+                consistInfo += `</b>
+                            </p>
+                            <p style="margin-top: 0">
+                                ${consist}
+                            </p>`;
+                
+                const routeCode = routeId.slice(15, 18);
+                const tipContent = document.createElement("div");
+                tipContent.textContent = routeCode;
+                tipContent.style.color = textColours[routeId];
+                                 
+                const marker = L.marker.arrowCircle(
+                    [latitude, longitude],
+                    {
+                        iconOptions: {
+                            stroke: textColours[routeId],
+                            color: colours[routeId],
+                            size: 40,
+                            rotation: bearing
+                        },
+                        pane: "trainPane",
+                        rotateWithView: true
+                    }
+                );
+                
+                const tip = L.marker(
+                    [latitude, longitude],
+                    {
+                        icon: L.divIcon({
+                            html: tipContent,
+                            className: "train-tip"
+                        }),
+                        pane: "trainPane"
+                    }
+                ).bindTooltip(
+                    L.tooltip().setContent(popup)
+                ).bindPopup(
+                    consistInfo + "No trip information.",
+                    { autoPan: false }
+                );
+                
+                updatedTrains[tripId] = {
+                    marker: marker,
+                    tip: tip,
+                    consistInfo: consistInfo,
+                    routeCode: routeCode,
+                    typeCode: typeCode,
+                    tipContent: tipContent
+                };
+                
+                layerGroups[routeId].addLayer(marker).addLayer(tip);
+            }
         }
-    }
-    
-    for (const tripId in trains) {
-        if (!(tripId in updatedTrains)) {
-            trains[tripId].marker.remove();
-            trains[tripId].tip.remove();
+        
+        for (const tripId in trains) {
+            if (!(tripId in updatedTrains)) {
+                trains[tripId].marker.remove();
+                trains[tripId].tip.remove();
+            }
         }
+        trains = updatedTrains;
+        
+        const time = timeString(feed.timestamp/1000, true);
+        dtpTime.textContent = ` last updated ${time}`;
+        positionStatus.textContent = "";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    } catch (error) {
+        console.log(error);
+        
+        positionStatus.textContent = "Failed to retrieve positions.";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     }
-    trains = updatedTrains;
-    
-    const time = timeString(feed.timestamp/1000, true);
-    dtpTime.textContent = ` last updated ${time}`;
-    positionStatus.textContent = "";
-    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     setTimeout(updatePositions, 1000);
 }
@@ -457,144 +464,151 @@ async function updateTrips() {
     tripStatus.textContent = "Retrieving trip updates...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
-    const response = await fetch("https://metrominder.onrender.com/trips");
-    const feed = await response.json();
-    
-    const departures = {};
-    for (const stationName in stations) {
-        departures[stationName] = [];
-    }
-    
-    const time = timeString(feed.feed.header.timestamp, true);
-    for (const trip of feed.feed.entity) {
-        const tripUpdate = trip.tripUpdate;
-        const tripId = tripUpdate.trip.tripId;
-        if (tripUpdate.trip.scheduleRelationship !== "CANCELED" &&
-            "stopTimeUpdate" in tripUpdate) {
-                const routeId = tripUpdate.trip.routeId;
-                const stopTimeUpdate = tripUpdate.stopTimeUpdate;
-                const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-                const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
-                let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]};">
-                                 SERVICE TO ${lastStopName.toUpperCase()}
-                             </h3>`;
-                
-                if (tripId in trains) {
-                    popup += trains[tripId].consistInfo;
-                }
-                
-                let future = false;
-                for (const stop of stopTimeUpdate) {
-                    const stopMap = stopMaps[stop.stopId];
-                    const platform = stopMap.platform_code;
+    try {
+        const response = await fetch("https://metrominder.onrender.com/trips");
+        const feed = await response.json();
+        
+        const departures = {};
+        for (const stationName in stations) {
+            departures[stationName] = [];
+        }
+        
+        const time = timeString(feed.feed.header.timestamp, true);
+        for (const trip of feed.feed.entity) {
+            const tripUpdate = trip.tripUpdate;
+            const tripId = tripUpdate.trip.tripId;
+            if (tripUpdate.trip.scheduleRelationship !== "CANCELED" &&
+                "stopTimeUpdate" in tripUpdate) {
+                    const routeId = tripUpdate.trip.routeId;
+                    const stopTimeUpdate = tripUpdate.stopTimeUpdate;
+                    const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
+                    const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
+                    let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]};">
+                                     SERVICE TO ${lastStopName.toUpperCase()}
+                                 </h3>`;
                     
-                    if (stop.departure &&
-                        stop.departure.time >= Math.floor(Date.now()/1000)) {
-                            let parentStation = stopMap;
-                            while (parentStation.parent_station !== "") {
-                                parentStation = stopMaps[parentStation.parent_station];
-                            }
-                            let parentName = parentStation.stop_name;
-                            parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
-                            
-                            departures[parentName].push({
-                                routeId: routeId,
-                                lastStopName: lastStopName,
-                                platform: platform,
-                                time: stop.departure.time
-                            });
+                    if (tripId in trains) {
+                        popup += trains[tripId].consistInfo;
                     }
                     
-                    if (tripId in trains && stop.arrival) {
-                        const stopName = shortName(stopMap.stop_name);
-                        const stopTime = timeString(stop.arrival.time);
+                    let future = false;
+                    for (const stop of stopTimeUpdate) {
+                        const stopMap = stopMaps[stop.stopId];
+                        const platform = stopMap.platform_code;
                         
-                        if (future) {
-                            popup += `<tr>
-                                          <td style="text-align: left;">${stopName}</td>
-                                          <td>${platform}</td>
-                                          <td>${stopTime}</td>
-                                      </tr>`;
-                        } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
-                            popup += `<table>
-                                          <tr>
-                                              <th style="text-align: left;">ARRIVING AT</td>
-                                              <th>PLATFORM</td>
-                                              <th>TIME</td>
-                                          </tr>
-                                          <tr>
-                                              <th style="text-align: left;">${stopName}</td>
-                                              <th>${platform}</td>
-                                              <th>${stopTime}</td>
+                        if (stop.departure &&
+                            stop.departure.time >= Math.floor(Date.now()/1000)) {
+                                let parentStation = stopMap;
+                                while (parentStation.parent_station !== "") {
+                                    parentStation = stopMaps[parentStation.parent_station];
+                                }
+                                let parentName = parentStation.stop_name;
+                                parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
+                                
+                                departures[parentName].push({
+                                    routeId: routeId,
+                                    lastStopName: lastStopName,
+                                    platform: platform,
+                                    time: stop.departure.time
+                                });
+                        }
+                        
+                        if (tripId in trains && stop.arrival) {
+                            const stopName = shortName(stopMap.stop_name);
+                            const stopTime = timeString(stop.arrival.time);
+                            
+                            if (future) {
+                                popup += `<tr>
+                                              <td style="text-align: left;">${stopName}</td>
+                                              <td>${platform}</td>
+                                              <td>${stopTime}</td>
                                           </tr>`;
-                            future = true;
+                            } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
+                                popup += `<table>
+                                              <tr>
+                                                  <th style="text-align: left;">ARRIVING AT</td>
+                                                  <th>PLATFORM</td>
+                                                  <th>TIME</td>
+                                              </tr>
+                                              <tr>
+                                                  <th style="text-align: left;">${stopName}</td>
+                                                  <th>${platform}</td>
+                                                  <th>${stopTime}</td>
+                                              </tr>`;
+                                future = true;
+                            }
                         }
                     }
-                }
-                popup += `</table>
-                          <p>Trip update ${time}</p>`;
-                
-                if (tripId in trains) {
-                    trains[tripId].tip.setPopupContent(popup);
-                }
-        }
-    }
-    
-    for (const [stationName, stationMarker] of Object.entries(stations)) {
-        let popup = stationHeader(stationMarker);
-        
-        const stationDepartures = departures[stationName];
-        if (stationDepartures.length > 0) {
-            stationDepartures.sort((a, b) => {
-                return parseInt(a.time) - parseInt(b.time);
-            });
-            
-            const table = document.createElement("table");
-            
-            const header = document.createElement("tr");
-            for (const column of ["DEPARTING FOR", "PLATFORM", "TIME"]) {
-                const cell = document.createElement("th");
-                cell.textContent = column;
-                header.appendChild(cell);
+                    popup += `</table>
+                              <p>Trip update ${time}</p>`;
+                    
+                    if (tripId in trains) {
+                        trains[tripId].tip.setPopupContent(popup);
+                    }
             }
-            table.appendChild(header);
+        }
+        
+        for (const [stationName, stationMarker] of Object.entries(stations)) {
+            let popup = stationHeader(stationMarker);
             
-            for (const departure of stationDepartures) {
-                const row = document.createElement("tr");
+            const stationDepartures = departures[stationName];
+            if (stationDepartures.length > 0) {
+                stationDepartures.sort((a, b) => {
+                    return parseInt(a.time) - parseInt(b.time);
+                });
                 
-                const serviceCell = document.createElement("td");
-                serviceCell.textContent = departure.lastStopName;
-                serviceCell.style.backgroundColor = colours[departure.routeId];
-                serviceCell.style.color = textColours[departure.routeId];
-                row.appendChild(serviceCell);
+                const table = document.createElement("table");
                 
-                for (const column of [
-                    departure.platform,
-                    timeString(departure.time)
-                ]) {
-                    const cell = document.createElement("td");
+                const header = document.createElement("tr");
+                for (const column of ["DEPARTING FOR", "PLATFORM", "TIME"]) {
+                    const cell = document.createElement("th");
                     cell.textContent = column;
-                    row.appendChild(cell);
+                    header.appendChild(cell);
                 }
+                table.appendChild(header);
                 
-                table.appendChild(row);
+                for (const departure of stationDepartures) {
+                    const row = document.createElement("tr");
+                    
+                    const serviceCell = document.createElement("td");
+                    serviceCell.textContent = departure.lastStopName;
+                    serviceCell.style.backgroundColor = colours[departure.routeId];
+                    serviceCell.style.color = textColours[departure.routeId];
+                    row.appendChild(serviceCell);
+                    
+                    for (const column of [
+                        departure.platform,
+                        timeString(departure.time)
+                    ]) {
+                        const cell = document.createElement("td");
+                        cell.textContent = column;
+                        row.appendChild(cell);
+                    }
+                    
+                    table.appendChild(row);
+                }
+                popup.appendChild(table);
+            } else {
+                const text = document.createElement("div");
+                text.textContent = "No departing trains.";
+                popup.appendChild(text);
             }
-            popup.appendChild(table);
-        } else {
-            const text = document.createElement("div");
-            text.textContent = "No departing trains.";
-            popup.appendChild(text);
+            
+            const updateTime = document.createElement("p");
+            updateTime.textContent = `Trip updates ${time}`;
+            popup.appendChild(updateTime);
+            
+            stationMarker.setPopupContent(popup);
         }
         
-        const updateTime = document.createElement("p");
-        updateTime.textContent = `Trip updates ${time}`;
-        popup.appendChild(updateTime);
+        tripStatus.textContent = "";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    } catch (error) {
+        console.log(error);
         
-        stationMarker.setPopupContent(popup);
+        tripStatus.textContent = "Failed to retrieve trip updates.";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     }
-    
-    tripStatus.textContent = "";
-    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     setTimeout(updateTrips, 1000);
 };
