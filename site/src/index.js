@@ -311,14 +311,6 @@ async function updatePositions() {
                 trains[tripId].tip.setTooltipContent(popup)
                                   .slideTo([latitude, longitude]);
                 updatedTrains[tripId] = trains[tripId];
-                
-                const markerLabel = document.querySelector(
-                    "input[name=labels]:checked"
-                ).value;
-                
-                trains[tripId].tipContent.textContent = (markerLabel === "type") ?
-                                                        trains[tripId].typeCode :
-                                                        trains[tripId].routeCode;
             } else {
                 const consist = train.vehicle.vehicle.id;
                 const splitConsist = consist.split("-");
@@ -647,13 +639,13 @@ L.control.layers.tree(null, [
         label: "Train marker labels",
         children: [
             {
-                label: `<label title="Label train markers with line code from next update">
+                label: `<label title="Label train markers with line code">
                             <input type="radio" name="labels" value="line" checked>
                             Line
                         </label>`
             },
             {
-                label: `<label title="Label train markers with type code from next update">
+                label: `<label title="Label train markers with type code">
                             <input type="radio" name="labels" value="type">
                             Type
                         </label>`
@@ -874,3 +866,19 @@ L.control.layers.tree(null, [
 ], {
     selectorBack: true
 }).addTo(map);
+
+document.querySelector(
+    "input[name=labels][value=line]"
+).addEventListener("change", () => {
+    for (const train of Object.values(trains)) {
+        train.tipContent.textContent = train.routeCode;
+    }
+});
+
+document.querySelector(
+    "input[name=labels][value=type]"
+).addEventListener("change", () => {
+    for (const train of Object.values(trains)) {
+        train.tipContent.textContent = train.typeCode;
+    }
+});
