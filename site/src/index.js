@@ -341,7 +341,7 @@ async function updatePositions() {
                     const number = parseInt(car.slice(0, -1));
                     if (9000 <= number && number < 10000) {
                         length = 7;
-                        type = "HCMT";
+                        type = "High Capacity Metro Train";
                         typeCode = "HCM";
                     } else if (7000 <= number && number < 7030) {
                         length = 1;
