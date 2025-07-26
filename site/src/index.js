@@ -51,18 +51,19 @@ map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
 
 (new (L.Control.extend({
     onAdd: (map) => {
-        const title = L.DomUtil.create("a");
+        const title = L.DomUtil.create("a", "watermark");
         title.title = "About MetroMinder";
         
-        const metro = L.DomUtil.create("span", "watermark", title);
+        const metro = L.DomUtil.create("span", null, title);
         metro.style.fontWeight = 1;
         metro.textContent = "METRO";
-        const minder = L.DomUtil.create("span", "watermark", title);
+        const minder = L.DomUtil.create("span", null, title);
         minder.style.fontWeight = 1000;
         minder.textContent = "MINDER";
         
         const about = document.querySelector("dialog");
-        title.addEventListener("click", () => {
+        title.addEventListener("click", (event) => {
+            event.preventDefault();
             about.showModal();
         });
         
@@ -389,6 +390,7 @@ async function updatePositions() {
                             rotation: bearing
                         },
                         pane: "trainPane",
+                        interactive: false,
                         rotateWithView: true
                     }
                 );
@@ -398,6 +400,7 @@ async function updatePositions() {
                     {
                         icon: L.divIcon({
                             html: tipContent,
+                            tooltipAnchor: [9, 0],
                             className: "train-tip"
                         }),
                         pane: "trainPane"

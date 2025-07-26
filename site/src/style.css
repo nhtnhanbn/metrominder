@@ -62,7 +62,7 @@ button {
         0px -1px white;
 }
 
-.watermark {
+a.watermark {
     color: #0072CE;
     cursor: pointer;
     font-family: "Times New Roman", "serif";
@@ -106,7 +106,7 @@ button {
     min-width: 17em;
 }
 
-span[class=leaflet-layerstree-header-label] {
+span.leaflet-layerstree-header-label {
     font-style: italic;
 }
 
