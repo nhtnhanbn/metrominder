@@ -375,12 +375,9 @@ async function updatePositions() {
                                 ${consist}
                             </p>`;
                 
-                const displayRouteLabel = document.querySelector(
-                    "input[name=labels][value=line]"
-                ).checked;
                 const routeCode = routeId.slice(15, 18);
                 const tipContent = document.createElement("div");
-                if (displayRouteLabel) {
+                if (displayTrainMarker === "line") {
                     tipContent.textContent = routeCode;
                 } else {
                     tipContent.textContent = typeCode;
@@ -650,15 +647,35 @@ L.control.layers.tree(null, [
         children: [
             {
                 label: `<label title="Label train markers with line code">
-                            <input type="radio" name="labels" value="line" checked>
+                            <input class="marker-radio" type="radio" name="labels" value="line">
                             Line
-                        </label>`
+                        </label>`,
+                eventedClasses: [{
+                    className: "marker-radio",
+                    event: "change",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                        displayTrainMarker = "line";
+                        for (const train of Object.values(trains)) {
+                            train.tipContent.textContent = train.routeCode;
+                        }
+                    }
+                }]
             },
             {
                 label: `<label title="Label train markers with type code">
-                            <input type="radio" name="labels" value="type">
+                            <input class="marker-radio" type="radio" name="labels" value="type">
                             Type
-                        </label>`
+                        </label>`,
+                eventedClasses: [{
+                    className: "marker-radio",
+                    event: "change",
+                    selectAll: (ev, domNode, treeNode, map) => {
+                        displayTrainMarker = "type";
+                        for (const train of Object.values(trains)) {
+                            train.tipContent.textContent = train.typeCode;
+                        }
+                    }
+                }]
             }
         ]
     },
@@ -877,18 +894,9 @@ L.control.layers.tree(null, [
     selectorBack: true
 }).addTo(map);
 
-document.querySelector(
-    "input[name=labels][value=line]"
-).addEventListener("change", () => {
-    for (const train of Object.values(trains)) {
-        train.tipContent.textContent = train.routeCode;
-    }
-});
-
-document.querySelector(
-    "input[name=labels][value=type]"
-).addEventListener("change", () => {
-    for (const train of Object.values(trains)) {
-        train.tipContent.textContent = train.typeCode;
-    }
-});
+let displayTrainMarker = "line";
+setInterval(() => {
+    document.querySelector(
+        `input[name=labels][value=${displayTrainMarker}]`
+    ).checked = true;
+}, 0);
