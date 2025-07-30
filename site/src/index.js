@@ -375,9 +375,16 @@ async function updatePositions() {
                                 ${consist}
                             </p>`;
                 
+                const displayRouteLabel = document.querySelector(
+                    "input[name=labels][value=line]"
+                ).checked;
                 const routeCode = routeId.slice(15, 18);
                 const tipContent = document.createElement("div");
-                tipContent.textContent = routeCode;
+                if (displayRouteLabel) {
+                    tipContent.textContent = routeCode;
+                } else {
+                    tipContent.textContent = typeCode;
+                }
                 tipContent.style.color = textColours[routeId];
                                  
                 const marker = L.marker.arrowCircle(
