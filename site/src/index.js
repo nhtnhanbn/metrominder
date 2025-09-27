@@ -296,7 +296,7 @@ async function updatePositions() {
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     try {
-        const response = await fetch("https://metrominder.onrender.com/positions");
+        const response = await fetch("https://api.metrominder.nhan.au/positions");
         const feed = await response.json();
         
         const updatedTrains = {};
@@ -464,7 +464,7 @@ async function updateTrips() {
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     try {
-        const response = await fetch("https://metrominder.onrender.com/trips");
+        const response = await fetch("https://api.metrominder.nhan.au/trips");
         const feed = await response.json();
         
         const departures = {};
