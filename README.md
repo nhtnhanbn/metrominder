@@ -8,7 +8,7 @@ View the website at [metrominder.nhan.au](https://metrominder.nhan.au).
 
 ## Usage
 
-To run the api backend locally, get an [API key](https://data-exchange.vicroads.vic.gov.au/) then
+To run the api backend locally, get an [API key](https://opendata.transport.vic.gov.au) then
 ```
 cd api
 echo DTP_API_KEY="YOUR API KEY HERE" > .env

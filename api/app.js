@@ -10,7 +10,7 @@ async function updateFeed(resource) {
         resource,
         {
             headers: {
-                "Ocp-Apim-Subscription-Key": process.env.DTP_API_KEY
+                "KeyId": process.env.DTP_API_KEY
             }
         }
     );
@@ -44,7 +44,7 @@ app.use("/positions",
             positionCache = {
                 timestamp: Date.now(),
                 feed: await updateFeed(
-                    "https://data-exchange-api.vicroads.vic.gov.au/opendata/v1/gtfsr/metrotrain-vehicleposition-updates"
+                    "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/metro/vehicle-positions"
                 )
             };
         }
@@ -60,7 +60,7 @@ app.use("/trips",
             tripCache = {
                 timestamp: Date.now(),
                 feed: await updateFeed(
-                    "https://data-exchange-api.vicroads.vic.gov.au/opendata/v1/gtfsr/metrotrain-tripupdates"
+                    "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/metro/trip-updates"
                 )
             };
         }
