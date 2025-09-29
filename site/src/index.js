@@ -84,6 +84,9 @@ map.addEventListener("popupopen", ({popup}) => {
 // Reset rotation when controller clicked
 map.rotateControl.getContainer().addEventListener("mouseup", () => {
     map.setBearing(0);
+    if (!map.touchRotate.enabled()) {
+        setTimeout(() => { map.setBearing(0) }, 100);
+    }
 });
 
 var foundMarker;
