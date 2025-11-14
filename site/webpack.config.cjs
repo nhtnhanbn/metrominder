@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const WorkboxPlugin = require("workbox-webpack-plugin");
 
 module.exports = {
     mode: "development",
@@ -13,6 +14,10 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "./src/template.html",
             favicon: "./src/favicon.svg"
+        }),
+        new WorkboxPlugin.GenerateSW({
+            maximumFileSizeToCacheInBytes: 10485760,
+            swDest: "./serviceWorker.js"
         })
     ],
     module: {

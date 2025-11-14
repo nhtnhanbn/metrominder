@@ -21,6 +21,15 @@ import { timeString } from "./timeString.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker
+            .register("./serviceWorker.js")
+            .then((res) => console.log("serviceWorker.js registered", res))
+            .catch((err) => console.log("serviceWorker.js not registered", err))
+    })
+};
+
 const searchLayer = L.layerGroup();
 const stationLayer = L.layerGroup();
 const map = L.map("map", {
