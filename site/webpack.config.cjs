@@ -44,7 +44,7 @@ module.exports = {
                 {
                     "src": "https://raw.githubusercontent.com/nhtnhanbn/metrominder/refs/heads/main/site/src/wide_screenshot.png",
                     "type": "image/png",
-                    "sizes": "1900x1200",
+                    "sizes": "1920x1200",
                     "form_factor": "wide"
                 },
                 {
