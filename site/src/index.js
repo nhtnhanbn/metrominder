@@ -29,6 +29,11 @@ class StopMap {
 }
 const stopMaps = [], stopByName = {};
 
+const routeByName = {};
+for (const routeMap of routeMaps) {
+    routeByName[routeMap.routeName] = routeMap
+}
+
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -162,8 +167,8 @@ function stopPopup(stopMarker) {
     for (const routeName of stopByName[stopName].routeNames) {
         const routeItem = document.createElement("span");
         routeItem.textContent = routeName;
-        routeItem.style.backgroundColor = colours[routeMaps[routeName].routeId];
-        routeItem.style.color = textColours[routeMaps[routeName].routeId];
+        routeItem.style.backgroundColor = colours[routeByName[routeName].routeId];
+        routeItem.style.color = textColours[routeByName[routeName].routeId];
         routeItem.style.whiteSpace = "nowrap";
         routesList.appendChild(routeItem);
         
@@ -201,7 +206,7 @@ function stopPopup(stopMarker) {
 }
 
 function setLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+    for (const [routeName, routeMap] of Object.entries(routeByName)) {
         if (layerGroupStations[stop_name].includes(routeName)) {
             routeMap.layerGroup.addTo(map);
         } else {
@@ -211,7 +216,7 @@ function setLines(stop_name) {
 }
 
 function addLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+    for (const [routeName, routeMap] of Object.entries(routeByName)) {
         if (layerGroupStations[stop_name].includes(routeName)) {
             routeMap.layerGroup.addTo(map);
         }
@@ -219,7 +224,7 @@ function addLines(stop_name) {
 }
 
 function filterLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+    for (const [routeName, routeMap] of Object.entries(routeByName)) {
         if (!layerGroupStations[stop_name].includes(routeName)) {
             routeMap.layerGroup.remove();
         }
@@ -239,7 +244,7 @@ for (const [routeName, stationLine] of Object.entries(stationLines)) {
     }
 }
 
-for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+for (const [routeName, routeMap] of Object.entries(routeByName)) {
     const route = routes.find((route) => {
         return route.route_id === routeMap.routeId;
     });
@@ -256,7 +261,7 @@ for (const [routeName, routeMap] of Object.entries(routeMaps)) {
 }
 
 const colours = {}, textColours = {}, layerGroups = {};
-for (const routeMap of Object.values(routeMaps)) {
+for (const routeMap of Object.values(routeByName)) {
     layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
     colours[routeMap.routeId] = routeMap.colour;
     textColours[routeMap.routeId] = routeMap.textColour;
@@ -643,7 +648,7 @@ async function updateTrips() {
 updateTrips();
 
 const layerGroupsNamed = {};
-for (const [routeName, routeMap] of Object.entries(routeMaps)) {
+for (const [routeName, routeMap] of Object.entries(routeByName)) {
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stop_name of stationLines[routeName]) {
             const station = stations[stop_name];
@@ -844,7 +849,7 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                         setLines("Melbourne Central");
-                        routeMaps["Flemington Racecourse"].layerGroup.remove();
+                        routeByName["Flemington Racecourse"].layerGroup.remove();
                     }
                 }]
             },
@@ -857,8 +862,8 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                          setLines("Richmond");
-                         routeMaps["Werribee"].layerGroup.addTo(map);
-                         routeMaps["Williamstown"].layerGroup.addTo(map);
+                         routeByName["Werribee"].layerGroup.addTo(map);
+                         routeByName["Williamstown"].layerGroup.addTo(map);
                     }
                 }]
             },
@@ -871,8 +876,8 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                          setLines("South Yarra");
-                         routeMaps["Werribee"].layerGroup.addTo(map);
-                         routeMaps["Williamstown"].layerGroup.addTo(map);
+                         routeByName["Werribee"].layerGroup.addTo(map);
+                         routeByName["Williamstown"].layerGroup.addTo(map);
                     }
                 }]
             },
@@ -885,8 +890,8 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                         setLines("Caulfield");
-                         routeMaps["Werribee"].layerGroup.addTo(map);
-                         routeMaps["Williamstown"].layerGroup.addTo(map);
+                         routeByName["Werribee"].layerGroup.addTo(map);
+                         routeByName["Williamstown"].layerGroup.addTo(map);
                     }
                 }]
             },
@@ -899,8 +904,8 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                         setLines("North Melbourne");
-                        routeMaps["Frankston"].layerGroup.addTo(map);
-                        routeMaps["Flemington Racecourse"].layerGroup.remove();
+                        routeByName["Frankston"].layerGroup.addTo(map);
+                        routeByName["Flemington Racecourse"].layerGroup.remove();
                     }
                 }]
             },
@@ -913,7 +918,7 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                         setLines("Footscray");
-                        routeMaps["Frankston"].layerGroup.addTo(map);
+                        routeByName["Frankston"].layerGroup.addTo(map);
                     }
                 }]
             }
