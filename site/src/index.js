@@ -32,6 +32,7 @@ if ("serviceWorker" in navigator) {
 
 const searchLayer = L.layerGroup();
 const stationLayer = L.layerGroup();
+
 const map = L.map("map", {
     zoomControl: false,
     zoomSnap: 0,
@@ -40,8 +41,10 @@ const map = L.map("map", {
     rotateControl: { closeOnZeroBearing: false },
     touchRotate: true
 }).fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);
+
 L.Control.zoomHome().addTo(map);
 L.control.scale().addTo(map);
+
 (new LocateControl({
     setView: "untilPan",
     flyTo: true,
@@ -66,6 +69,7 @@ map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
         const metro = L.DomUtil.create("span", null, title);
         metro.style.fontWeight = 1;
         metro.textContent = "METRO";
+
         const minder = L.DomUtil.create("span", null, title);
         minder.style.fontWeight = 1000;
         minder.textContent = "MINDER";
@@ -111,9 +115,11 @@ var foundMarker;
     textPlaceholder: "Search stations...",
     marker: false
 })).addEventListener("search:locationfound", (data) => {
-    if (foundMarker &&
-        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))) {
-            foundMarker.remove();
+    if (
+        foundMarker &&
+        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))
+    ) {
+        foundMarker.remove();
     }
     foundMarker = data.layer.addTo(map).openPopup();
 }).addTo(map);
@@ -128,18 +134,19 @@ L.tileLayer(
     }
 ).addTo(map);
 
-function stationHeader(marker) {
+function stopPopup(marker) {
     const stopName = marker.options.title;
+    
     const popup = document.createElement("div");
     popup.style.textAlign = "center";
-        
+    
     const header = document.createElement("h3");
-    header.textContent = `${stopName} Station`.toUpperCase();
+    header.textContent = stopName;
     popup.appendChild(header);
     
-    const linesHeading = document.createElement("h4");
-    linesHeading.textContent = "LINES";
-    popup.appendChild(linesHeading);
+    const routesHeading = document.createElement("h4");
+    routesHeading.textContent = "Lines";
+    popup.appendChild(routesHeading);
     
     const lines = document.createElement("p");
     lines.style.marginTop = 0;
@@ -262,7 +269,7 @@ for (const stop of stops) {
             }
         );
         marker.bindPopup(
-            stationHeader(marker),
+            stopPopup(marker),
             { autoPan: false }
         ).addTo(searchLayer);
         stations[stop_name] = marker;
@@ -560,7 +567,7 @@ async function updateTrips() {
         }
         
         for (const [stationName, stationMarker] of Object.entries(stations)) {
-            let popup = stationHeader(stationMarker);
+            let popup = stopPopup(stationMarker);
             
             const stationDepartures = departures[stationName];
             if (stationDepartures.length > 0) {
