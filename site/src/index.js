@@ -23,10 +23,10 @@ import "./style.css";
 class StopMap {
     constructor(stopName) {
         this.stopName = stopName;
-        this.routeMaps = [];
+        this.routeMaps = new Set();
     }
 }
-const stopMaps = [], stopByName = {};
+const stopMaps = new Set(), stopByName = {};
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -199,27 +199,25 @@ function stopPopup(stopMarker) {
     return popup;
 }
 
-function setLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeByName)) {
-        if (layerGroupStations[stop_name].includes(routeName)) {
-            routeMap.layerGroup.addTo(map);
-        } else {
-            routeMap.layerGroup.remove();
-        }
+function setLines(stopName) {
+    for (const routeMap of routeMaps) {
+        routeMap.layerGroup.remove();
+    }
+
+    for (const routeMap of stopByName[stopName].routeMaps){
+        routeMap.layerGroup.addTo(map);
     }
 }
 
-function addLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeByName)) {
-        if (layerGroupStations[stop_name].includes(routeName)) {
-            routeMap.layerGroup.addTo(map);
-        }
+function addLines(stopName) {
+    for (const routeMap of stopByName[stopName].routeMaps){
+        routeMap.layerGroup.addTo(map);
     }
 }
 
-function filterLines(stop_name) {
-    for (const [routeName, routeMap] of Object.entries(routeByName)) {
-        if (!layerGroupStations[stop_name].includes(routeName)) {
+function filterLines(stopName) {
+    for (const routeMap of routeMaps) {
+        if (!stopByName[stopName].routeMaps.has(routeMap)) {
             routeMap.layerGroup.remove();
         }
     }
@@ -230,11 +228,11 @@ for (const [routeName, stationLine] of Object.entries(stationLines)) {
     for (const stop_name of stationLine) {
         if (!(stop_name in stopByName)) {
             const stopMap = new StopMap(stop_name);
-            stopMaps.push(stopMap);
+            stopMaps.add(stopMap);
             stopByName[stop_name] = stopMap;
         }
         
-        stopByName[stop_name].routeMaps.push(routeByName[routeName]);
+        stopByName[stop_name].routeMaps.add(routeByName[routeName]);
     }
 }
 

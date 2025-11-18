@@ -9,7 +9,7 @@ class RouteMap {
     }
 }
 
-const routeMaps = [
+const routeMaps = new Set([
     new RouteMap("ALM", ["1.12.H", "1.22.H"]),
     new RouteMap("BEG", ["1.17.H", "1.28.H"]),
     new RouteMap("CBE", ["1.11.H", "1.1.R"]),
@@ -28,7 +28,7 @@ const routeMaps = [
     new RouteMap("WIL", ["1.1.R"]),
     new RouteMap("RCE", ["1.1.R", "7.2.R"]),
     new RouteMap("CCL", ["41.1.H"])
-];
+]);
 
 const routeById = {}, routeByName = {};
 
