@@ -134,9 +134,9 @@ L.tileLayer(
     }
 ).addTo(map);
 
-function stopPopup(marker) {
-    const stopName = marker.options.title;
-    
+function stopPopup(stopMarker) {
+    const stopName = stopMarker.options.title;
+
     const popup = document.createElement("div");
     popup.style.textAlign = "center";
     
@@ -148,46 +148,46 @@ function stopPopup(marker) {
     routesHeading.textContent = "Lines";
     popup.appendChild(routesHeading);
     
-    const lines = document.createElement("p");
-    lines.style.marginTop = 0;
+    const routesList = document.createElement("p");
+    routesList.style.marginTop = 0;
     
     for (const routeName of layerGroupStations[stopName]) {
-        const line = document.createElement("span");
-        line.textContent = routeName;
-        line.style.backgroundColor = colours[routeMaps[routeName].routeId];
-        line.style.color = textColours[routeMaps[routeName].routeId];
-        line.style.whiteSpace = "nowrap";
-        lines.appendChild(line);
+        const routeItem = document.createElement("span");
+        routeItem.textContent = routeName;
+        routeItem.style.backgroundColor = colours[routeMaps[routeName].routeId];
+        routeItem.style.color = textColours[routeMaps[routeName].routeId];
+        routeItem.style.whiteSpace = "nowrap";
+        routesList.appendChild(routeItem);
         
-        lines.appendChild(document.createTextNode(" "));
+        routesList.appendChild(document.createTextNode(" "));
     }
-    lines.appendChild(document.createElement("br"));
+    routesList.appendChild(document.createElement("br"));
     
     const setButton = document.createElement("button");
     setButton.textContent = "Set";
     setButton.addEventListener("click", () => {
         setLines(stopName);
-        marker.closePopup();
+        stopMarker.closePopup();
     });
-    lines.appendChild(setButton);
+    routesList.appendChild(setButton);
     
     const addButton = document.createElement("button");
     addButton.textContent = "Add";
     addButton.addEventListener("click", () => {
         addLines(stopName);
-        marker.closePopup();
+        stopMarker.closePopup();
     });
-    lines.appendChild(addButton);
+    routesList.appendChild(addButton);
     
     const filterButton = document.createElement("button");
     filterButton.textContent = "Filter";
     filterButton.addEventListener("click", () => {
         filterLines(stopName);
-        marker.closePopup();
+        stopMarker.closePopup();
     });
-    lines.appendChild(filterButton);
+    routesList.appendChild(filterButton);
     
-    popup.appendChild(lines);
+    popup.appendChild(routesList);
     
     return popup;
 }
