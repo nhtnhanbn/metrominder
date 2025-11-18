@@ -36,10 +36,11 @@ Built using [Express](http://expressjs.com) and [Leaflet](https://leafletjs.com)
 Dependencies include [Leaflet.ArrowCircle](https://github.com/nhtnhanbn/metrominder/tree/main/site/src/leaflet-arrowcircle).
 
 Some other projects, covering more public transport modes, include:
-- [TransportVic](https://transportvic.me): Realtime service details and station PID mockups
-- [domino6658](https://home.domino6658.xyz/trains): Realtime vehicle position map supporting search for specific carriages/trains and filtering by train types
-- [AnyTrip](https://anytrip.com.au/region/vic): Realtime vehicle position and station map with arrival details, covering multiple states
-- [TripView](https://tripview.com.au): Realtime vehicle position, station and route map with arrival details, filtered by station, covering multiple states
+<li><a href="https://transportvic.me">TransportVic</a>: Realtime service details and station PID mockups</li>
+<li><a href="https://transit.saikumarmk.com">Mini Melbourne 3D</a>: Realtime statewide vehicle position and station map</li>
+<li><a href="https://anytrip.com.au/region/vic">AnyTrip</a>: Realtime vehicle position and station map with arrival details, covering multiple states</li>
+<li><a href="https://tripview.com.au">TripView</a>: Realtime vehicle position, station and route map with arrival details, filtered by station, covering multiple states</li>
+<li><a href="https://transport.domino6658.com">Live Trains Map</a>: Realtime train position map supporting search for specific carriages/trains and filtering by train types</li>
 
 Initially inspired by the [Ventura Tracker](https://venturabus.com.au/live-tracking) mobile app by BusMinder.
 
