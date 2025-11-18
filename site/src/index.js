@@ -23,7 +23,7 @@ import "./style.css";
 class StopMap {
     constructor(stopName) {
         this.stopName = stopName;
-        this.routeNames = [];
+        this.routeMaps = [];
     }
 }
 const stopMaps = [], stopByName = {};
@@ -158,11 +158,11 @@ function stopPopup(stopMarker) {
     const routesList = document.createElement("p");
     routesList.style.marginTop = 0;
     
-    for (const routeName of stopByName[stopName].routeNames) {
+    for (const routeMap of stopByName[stopName].routeMaps) {
         const routeItem = document.createElement("span");
-        routeItem.textContent = routeName;
-        routeItem.style.backgroundColor = routeByName[routeName].routeColour;
-        routeItem.style.color = routeByName[routeName].routeTextColour;
+        routeItem.textContent = routeMap.routeName;
+        routeItem.style.backgroundColor = routeMap.routeColour;
+        routeItem.style.color = routeMap.routeTextColour;
         routeItem.style.whiteSpace = "nowrap";
         routesList.appendChild(routeItem);
         
@@ -234,7 +234,7 @@ for (const [routeName, stationLine] of Object.entries(stationLines)) {
             stopByName[stop_name] = stopMap;
         }
         
-        stopByName[stop_name].routeNames.push(routeName);
+        stopByName[stop_name].routeMaps.push(routeByName[routeName]);
     }
 }
 

@@ -49,8 +49,4 @@ for (const routeMap of routeMaps) {
     routeByName[routeMap.routeName] = routeMap;
 }
 
-console.log(routeMaps);
-console.log(routeById);
-console.log(routeByName);
-
 export { routeMaps, routeById, routeByName };
