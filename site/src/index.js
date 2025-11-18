@@ -14,9 +14,8 @@ import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stops from "../../data/gtfsschedule/stops.txt";
-import routes from "../../data/gtfsschedule/routes.txt";
 import stationLines from "../../data/stationLines.json";
-import { routeMaps } from "./routeMaps.js";
+import { routeMaps, routeById, routeByName } from "./routeMaps.js";
 import { timeString } from "./timeString.js";
 import stationIcon from "./station.svg";
 import "./style.css";
@@ -28,11 +27,6 @@ class StopMap {
     }
 }
 const stopMaps = [], stopByName = {};
-
-const routeByName = {};
-for (const routeMap of routeMaps) {
-    routeByName[routeMap.routeName] = routeMap
-}
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -167,8 +161,8 @@ function stopPopup(stopMarker) {
     for (const routeName of stopByName[stopName].routeNames) {
         const routeItem = document.createElement("span");
         routeItem.textContent = routeName;
-        routeItem.style.backgroundColor = colours[routeByName[routeName].routeId];
-        routeItem.style.color = textColours[routeByName[routeName].routeId];
+        routeItem.style.backgroundColor = routeByName[routeName].routeColour;
+        routeItem.style.color = routeByName[routeName].routeTextColour;
         routeItem.style.whiteSpace = "nowrap";
         routesList.appendChild(routeItem);
         
@@ -245,26 +239,18 @@ for (const [routeName, stationLine] of Object.entries(stationLines)) {
 }
 
 for (const [routeName, routeMap] of Object.entries(routeByName)) {
-    const route = routes.find((route) => {
-        return route.route_id === routeMap.routeId;
-    });
-    
-    routeMap.colour = "#" + route.route_color;
-    routeMap.textColour = "#" + route.route_text_color;
     routeMap.layerGroup = L.layerGroup();
     routeMap.line = L.geoJSON(
         geojson.features.filter((feature) => {
             return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
         }),
-        { style: { color: routeMap.colour } }
+        { style: { color: routeMap.routeColour } }
     );
 }
 
-const colours = {}, textColours = {}, layerGroups = {};
+const layerGroups = {};
 for (const routeMap of Object.values(routeByName)) {
     layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
-    colours[routeMap.routeId] = routeMap.colour;
-    textColours[routeMap.routeId] = routeMap.textColour;
 }
 
 for (const stop of stops) {
@@ -416,14 +402,14 @@ async function updatePositions() {
                 } else {
                     tipContent.textContent = typeCode;
                 }
-                tipContent.style.color = textColours[routeId];
+                tipContent.style.color = routeById[routeId].routeTextColour;
                                  
                 const marker = L.marker.arrowCircle(
                     [latitude, longitude],
                     {
                         iconOptions: {
-                            stroke: textColours[routeId],
-                            color: colours[routeId],
+                            stroke: routeById[routeId].routeTextColour,
+                            color: routeById[routeId].routeColour,
                             size: 40,
                             rotation: bearing
                         },
@@ -516,7 +502,7 @@ async function updateTrips() {
                     const stopTimeUpdate = tripUpdate.stopTimeUpdate;
                     const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
                     const lastStopName = shortName(stopById[lastStop.stopId].stop_name);
-                    let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]};">
+                    let popup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
                                      SERVICE TO ${lastStopName.toUpperCase()}
                                  </h3>`;
                     
@@ -605,8 +591,8 @@ async function updateTrips() {
                     
                     const serviceCell = document.createElement("td");
                     serviceCell.textContent = departure.lastStopName;
-                    serviceCell.style.backgroundColor = colours[departure.routeId];
-                    serviceCell.style.color = textColours[departure.routeId];
+                    serviceCell.style.backgroundColor = routeById[departure.routeId].routeColour;
+                    serviceCell.style.color = routeById[departure.routeId].routeTextColour;
                     row.appendChild(serviceCell);
                     
                     for (const column of [
@@ -668,7 +654,7 @@ for (const [routeName, routeMap] of Object.entries(routeByName)) {
     });
     
     layerGroupsNamed[routeName] = {
-        label: `<span style="background-color: ${routeMap.colour}; color: ${routeMap.textColour};">
+        label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
                     ${routeName} line&nbsp
                 </span>`,
         layer: routeMap.layerGroup.addTo(map)
