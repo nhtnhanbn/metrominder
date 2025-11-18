@@ -21,6 +21,14 @@ import { timeString } from "./timeString.js";
 import stationIcon from "./station.svg";
 import "./style.css";
 
+class StopMap {
+    constructor(stopName) {
+        this.stopName = stopName;
+        this.routeNames = [];
+    }
+}
+const stopMaps = [], stopByName = {};
+
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -151,7 +159,7 @@ function stopPopup(stopMarker) {
     const routesList = document.createElement("p");
     routesList.style.marginTop = 0;
     
-    for (const routeName of layerGroupStations[stopName]) {
+    for (const routeName of stopByName[stopName].routeNames) {
         const routeItem = document.createElement("span");
         routeItem.textContent = routeName;
         routeItem.style.backgroundColor = colours[routeMaps[routeName].routeId];
@@ -218,14 +226,16 @@ function filterLines(stop_name) {
     }
 }
 
-const stations = {}, layerGroupStations = {}, stopMaps = {};
+const stations = {}, layerGroupStations = {}, stopById = {};
 for (const [routeName, stationLine] of Object.entries(stationLines)) {
     for (const stop_name of stationLine) {
-        if (!(stop_name in layerGroupStations)) {
-            layerGroupStations[stop_name] = [];
+        if (!(stop_name in stopByName)) {
+            const stopMap = new StopMap(stop_name);
+            stopMaps.push(stopMap);
+            stopByName[stop_name] = stopMap;
         }
         
-        layerGroupStations[stop_name].push(routeName);
+        stopByName[stop_name].routeNames.push(routeName);
     }
 }
 
@@ -276,7 +286,7 @@ for (const stop of stops) {
     }
     
     let { stop_id, ...stopMap } = stop;
-    stopMaps[stop_id] = stopMap;
+    stopById[stop_id] = stopMap;
 }
 
 const attributionPrefix = document.createElement("span");
@@ -500,7 +510,7 @@ async function updateTrips() {
                     const routeId = tripUpdate.trip.routeId;
                     const stopTimeUpdate = tripUpdate.stopTimeUpdate;
                     const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-                    const lastStopName = shortName(stopMaps[lastStop.stopId].stop_name);
+                    const lastStopName = shortName(stopById[lastStop.stopId].stop_name);
                     let popup = `<h3 style="background-color: ${colours[routeId]}; color: ${textColours[routeId]};">
                                      SERVICE TO ${lastStopName.toUpperCase()}
                                  </h3>`;
@@ -511,14 +521,14 @@ async function updateTrips() {
                     
                     let future = false;
                     for (const stop of stopTimeUpdate) {
-                        const stopMap = stopMaps[stop.stopId];
+                        const stopMap = stopById[stop.stopId];
                         const platform = stopMap.platform_code;
                         
                         if (stop.departure &&
                             stop.departure.time >= Math.floor(Date.now()/1000)) {
                                 let parentStation = stopMap;
                                 while (parentStation.parent_station !== "") {
-                                    parentStation = stopMaps[parentStation.parent_station];
+                                    parentStation = stopById[parentStation.parent_station];
                                 }
                                 let parentName = parentStation.stop_name;
                                 parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
