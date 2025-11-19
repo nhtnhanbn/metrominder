@@ -21,8 +21,9 @@ import stationIcon from "./station.svg";
 import "./style.css";
 
 class StopMap {
-    constructor(stopName) {
+    constructor(stopName, stopMarker) {
         this.stopName = stopName;
+        this.stopMarker = stopMarker;
         this.routeMaps = new Set();
         this.stopDepartures = [];
     }
@@ -224,18 +225,6 @@ function filterLines(stopName) {
     }
 }
 
-for (const [routeName, stationLine] of Object.entries(stationLines)) {
-    for (const stop_name of stationLine) {
-        if (!(stop_name in stopByName)) {
-            const stopMap = new StopMap(stop_name);
-            stopMaps.add(stopMap);
-            stopByName[stop_name] = stopMap;
-        }
-        
-        stopByName[stop_name].routeMaps.add(routeByName[routeName]);
-    }
-}
-
 for (const [routeName, routeMap] of Object.entries(routeByName)) {
     routeMap.layerGroup = L.layerGroup();
     routeMap.line = L.geoJSON(
@@ -251,8 +240,9 @@ for (const routeMap of Object.values(routeByName)) {
     layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
 }
 
+const parentById = {};
 for (const stopDatum of stopData) {
-    let { stop_name, stop_lat, stop_lon, parent_station } = stopDatum;
+    let { stop_id, stop_name, stop_lat, stop_lon, parent_station } = stopDatum;
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
@@ -268,16 +258,25 @@ for (const stopDatum of stopData) {
             }
         );
 
+        const stopMap = new StopMap(stop_name, stopMarker);
+        stopMaps.add(stopMap);
+        stopByName[stop_name] = stopMap;
+
         stopMarker.bindPopup(
             stopPopup(stopMarker),
             { autoPan: false }
         ).addTo(searchLayer);
-
-        stopByName[stop_name].stopMarker = stopMarker;
+    } else {
+        parentById[stop_id] = parent_station;
     }
     
-    let { stop_id, ...stopMap } = stopDatum;
-    stopById[stop_id] = stopMap;
+    stopById[stop_id] = stopDatum;
+}
+
+for (const [routeName, stationLine] of Object.entries(stationLines)) {
+    for (const stopName of stationLine) {
+        stopByName[stopName].routeMaps.add(routeByName[routeName]);
+    }
 }
 
 const attributionPrefix = document.createElement("span");
