@@ -13,7 +13,7 @@ import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
-import stops from "../../data/gtfsschedule/stops.txt";
+import stopData from "../../data/gtfsschedule/stops.txt";
 import stationLines from "../../data/stationLines.json";
 import { routeMaps, routeById, routeByName } from "./routeMaps.js";
 import { timeString } from "./timeString.js";
@@ -24,9 +24,10 @@ class StopMap {
     constructor(stopName) {
         this.stopName = stopName;
         this.routeMaps = new Set();
+        this.stopDepartures = [];
     }
 }
-const stopMaps = new Set(), stopByName = {};
+const stopMaps = new Set(), stopById = {}, stopByName = {};
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -223,7 +224,6 @@ function filterLines(stopName) {
     }
 }
 
-const stations = {}, layerGroupStations = {}, stopById = {};
 for (const [routeName, stationLine] of Object.entries(stationLines)) {
     for (const stop_name of stationLine) {
         if (!(stop_name in stopByName)) {
@@ -251,12 +251,12 @@ for (const routeMap of Object.values(routeByName)) {
     layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
 }
 
-for (const stop of stops) {
-    let { stop_name, stop_lat, stop_lon, parent_station } = stop;
+for (const stopDatum of stopData) {
+    let { stop_name, stop_lat, stop_lon, parent_station } = stopDatum;
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
-        const marker = L.marker(
+        const stopMarker = L.marker(
             [stop_lat, stop_lon],
             {
                 icon: L.icon({
@@ -267,14 +267,16 @@ for (const stop of stops) {
                 visibility: 0
             }
         );
-        marker.bindPopup(
-            stopPopup(marker),
+
+        stopMarker.bindPopup(
+            stopPopup(stopMarker),
             { autoPan: false }
         ).addTo(searchLayer);
-        stations[stop_name] = marker;
+
+        stopByName[stop_name].stopMarker = stopMarker;
     }
     
-    let { stop_id, ...stopMap } = stop;
+    let { stop_id, ...stopMap } = stopDatum;
     stopById[stop_id] = stopMap;
 }
 
@@ -485,9 +487,8 @@ async function updateTrips() {
         const response = await fetch("https://api.metrominder.nhan.au/trips");
         const feed = await response.json();
         
-        const departures = {};
-        for (const stationName in stations) {
-            departures[stationName] = [];
+        for (const stopMap of stopMaps) {
+            stopMap.stopDepartures = [];
         }
         
         const time = timeString(feed.feed.header.timestamp, true);
@@ -513,21 +514,20 @@ async function updateTrips() {
                         const stopMap = stopById[stop.stopId];
                         const platform = stopMap.platform_code;
                         
-                        if (stop.departure &&
-                            stop.departure.time >= Math.floor(Date.now()/1000)) {
-                                let parentStation = stopMap;
-                                while (parentStation.parent_station !== "") {
-                                    parentStation = stopById[parentStation.parent_station];
-                                }
-                                let parentName = parentStation.stop_name;
-                                parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
-                                
-                                departures[parentName].push({
-                                    routeId: routeId,
-                                    lastStopName: lastStopName,
-                                    platform: platform,
-                                    time: stop.departure.time
-                                });
+                        if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
+                            let parentStation = stopMap;
+                            while (parentStation.parent_station !== "") {
+                                parentStation = stopById[parentStation.parent_station];
+                            }
+                            let parentName = parentStation.stop_name;
+                            parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
+
+                            stopByName[parentName].stopDepartures.push({
+                                routeId: routeId,
+                                lastStopName: lastStopName,
+                                platform: platform,
+                                time: stop.departure.time
+                            });
                         }
                         
                         if (tripId in trains && stop.arrival) {
@@ -565,10 +565,11 @@ async function updateTrips() {
             }
         }
         
-        for (const [stationName, stationMarker] of Object.entries(stations)) {
+        for (const stopMap of stopMaps) {
+            const stationName = stopMap.stopName, stationMarker = stopMap.stopMarker;
             let popup = stopPopup(stationMarker);
             
-            const stationDepartures = departures[stationName];
+            const stationDepartures = stopMap.stopDepartures;
             if (stationDepartures.length > 0) {
                 stationDepartures.sort((a, b) => {
                     return parseInt(a.time) - parseInt(b.time);
@@ -634,16 +635,16 @@ updateTrips();
 const layerGroupsNamed = {};
 for (const [routeName, routeMap] of Object.entries(routeByName)) {
     routeMap.layerGroup.addEventListener("add", () => {
-        for (const stop_name of stationLines[routeName]) {
-            const station = stations[stop_name];
+        for (const stopName of stationLines[routeName]) {
+            const station = stopByName[stopName].stopMarker;
             station.options.visibility++;
             stationLayer.addLayer(station);
         }
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
-        for (const stop_name of stationLines[routeName]) {
-            const station = stations[stop_name];
+        for (const stopName of stationLines[routeName]) {
+            const station = stopByName[stopName].stopMarker;
             station.options.visibility--;
             if (station.options.visibility == 0) {
                 stationLayer.removeLayer(station);
@@ -845,9 +846,9 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                         setLines("Richmond");
-                         routeByName["Werribee"].layerGroup.addTo(map);
-                         routeByName["Williamstown"].layerGroup.addTo(map);
+                        setLines("Richmond");
+                        routeByName["Werribee"].layerGroup.addTo(map);
+                        routeByName["Williamstown"].layerGroup.addTo(map);
                     }
                 }]
             },
@@ -859,9 +860,9 @@ L.control.layers.tree(null, [
                     className: "preset-button",
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
-                         setLines("South Yarra");
-                         routeByName["Werribee"].layerGroup.addTo(map);
-                         routeByName["Williamstown"].layerGroup.addTo(map);
+                        setLines("South Yarra");
+                        routeByName["Werribee"].layerGroup.addTo(map);
+                        routeByName["Williamstown"].layerGroup.addTo(map);
                     }
                 }]
             },
@@ -874,8 +875,8 @@ L.control.layers.tree(null, [
                     event: "click",
                     selectAll: (ev, domNode, treeNode, map) => {
                         setLines("Caulfield");
-                         routeByName["Werribee"].layerGroup.addTo(map);
-                         routeByName["Williamstown"].layerGroup.addTo(map);
+                        routeByName["Werribee"].layerGroup.addTo(map);
+                        routeByName["Williamstown"].layerGroup.addTo(map);
                     }
                 }]
             },
