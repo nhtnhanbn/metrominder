@@ -21,7 +21,8 @@ import stationIcon from "./station.svg";
 import "./style.css";
 
 class StopMap {
-    constructor(stopName, stopMarker) {
+    constructor(stopId, stopName, stopMarker) {
+        this.stopId = stopId;
         this.stopName = stopName;
         this.stopMarker = stopMarker;
         this.routeMaps = new Set();
@@ -240,9 +241,9 @@ for (const routeMap of Object.values(routeByName)) {
     layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
 }
 
-const parentById = {};
+const parentById = {}, platformById = {};
 for (const stopDatum of stopData) {
-    let { stop_id, stop_name, stop_lat, stop_lon, parent_station } = stopDatum;
+    let { stop_id, stop_name, stop_lat, stop_lon, parent_station, platform_code } = stopDatum;
     stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
@@ -258,8 +259,9 @@ for (const stopDatum of stopData) {
             }
         );
 
-        const stopMap = new StopMap(stop_name, stopMarker);
+        const stopMap = new StopMap(stop_id, stop_name, stopMarker);
         stopMaps.add(stopMap);
+        stopById[stop_id] = stopMap;
         stopByName[stop_name] = stopMap;
 
         stopMarker.bindPopup(
@@ -268,9 +270,15 @@ for (const stopDatum of stopData) {
         ).addTo(searchLayer);
     } else {
         parentById[stop_id] = parent_station;
+        platformById[stop_id] = platform_code
     }
-    
-    stopById[stop_id] = stopDatum;
+}
+
+for (let [stopId, parentId] of Object.entries(parentById)) {
+    while (parentId in parentById) {
+        parentId = parentById[parentId];
+    }
+    stopById[stopId] = stopById[parentId];
 }
 
 for (const [routeName, stationLine] of Object.entries(stationLines)) {
@@ -499,7 +507,7 @@ async function updateTrips() {
                     const routeId = tripUpdate.trip.routeId;
                     const stopTimeUpdate = tripUpdate.stopTimeUpdate;
                     const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-                    const lastStopName = shortName(stopById[lastStop.stopId].stop_name);
+                    const lastStopName = shortName(stopById[lastStop.stopId].stopName);
                     let popup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
                                      SERVICE TO ${lastStopName.toUpperCase()}
                                  </h3>`;
@@ -511,17 +519,10 @@ async function updateTrips() {
                     let future = false;
                     for (const stop of stopTimeUpdate) {
                         const stopMap = stopById[stop.stopId];
-                        const platform = stopMap.platform_code;
+                        const platform = platformById[stop.stopId];
                         
                         if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
-                            let parentStation = stopMap;
-                            while (parentStation.parent_station !== "") {
-                                parentStation = stopById[parentStation.parent_station];
-                            }
-                            let parentName = parentStation.stop_name;
-                            parentName = parentName.slice(0, parentName.indexOf(" Railway Station"));
-
-                            stopByName[parentName].stopDepartures.push({
+                            stopMap.stopDepartures.push({
                                 routeId: routeId,
                                 lastStopName: lastStopName,
                                 platform: platform,
@@ -530,7 +531,7 @@ async function updateTrips() {
                         }
                         
                         if (tripId in trains && stop.arrival) {
-                            const stopName = shortName(stopMap.stop_name);
+                            const stopName = shortName(stopMap.stopName);
                             const stopTime = timeString(stop.arrival.time);
                             
                             if (future) {
