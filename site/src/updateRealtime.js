@@ -1,5 +1,6 @@
 import { VehicleMap } from "./vehicleMaps.js";
-import { timeString } from "./timeString.js";
+import { timeString, shortName } from "./stringConverters.js";
+import { createStopPopup } from "./stopPopup.js";
 
 async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map) {
     positionStatus.textContent = "Retrieving positions...";
@@ -163,4 +164,149 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
     }, 1000);
 }
 
-export { updatePositions };
+async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map) {
+    tripStatus.textContent = "Retrieving trip updates...";
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    
+    try {
+        const response = await fetch("https://api.metrominder.nhan.au/trips");
+        const feed = await response.json();
+        
+        for (const stopMap of stopMaps) {
+            stopMap.stopDepartures = [];
+        }
+        
+        const tripUpdateTime = timeString(feed.feed.header.timestamp, true);
+        for (const trip of feed.feed.entity) {
+            const tripUpdate = trip.tripUpdate;
+            const tripId = tripUpdate.trip.tripId;
+            if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate) {
+                const routeId = tripUpdate.trip.routeId;
+                const stopTimeUpdate = tripUpdate.stopTimeUpdate;
+                const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
+                const lastStopName = shortName(stopById[lastStop.stopId].stopName);
+                let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
+                                        Service to ${lastStopName}
+                                    </h3>`;
+                
+                if (tripId in vehicleByTripId) {
+                    vehiclePopup += vehicleByTripId[tripId].vehicleConsistInfo;
+                }
+                
+                let future = false;
+                for (const stop of stopTimeUpdate) {
+                    const stopMap = stopById[stop.stopId];
+                    const platform = platformById[stop.stopId];
+                    
+                    if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
+                        stopMap.stopDepartures.push({
+                            routeMap: routeById[routeId],
+                            lastStopName: lastStopName,
+                            platform: platform,
+                            time: stop.departure.time
+                        });
+                    }
+                    
+                    if (tripId in vehicleByTripId && stop.arrival) {
+                        const stopName = shortName(stopMap.stopName);
+                        const stopTime = timeString(stop.arrival.time);
+                        
+                        if (future) {
+                            vehiclePopup += `<tr>
+                                                 <td style="text-align: left;">${stopName}</td>
+                                                 <td>${platform}</td>
+                                                 <td>${stopTime}</td>
+                                             </tr>`;
+                        } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
+                            vehiclePopup += `<table>
+                                                 <tr>
+                                                     <th style="text-align: left;">ARRIVING AT</td>
+                                                     <th>PLATFORM</td>
+                                                     <th>TIME</td>
+                                                 </tr>
+                                                 <tr>
+                                                     <th style="text-align: left;">${stopName}</td>
+                                                     <th>${platform}</td>
+                                                     <th>${stopTime}</td>
+                                                 </tr>`;
+                            future = true;
+                        }
+                    }
+                }
+                vehiclePopup += `</table> <p>Trip update ${tripUpdateTime}</p>`;
+                
+                if (tripId in vehicleByTripId) {
+                    vehicleByTripId[tripId].vehicleLabel.setPopupContent(vehiclePopup);
+                }
+            }
+        }
+        
+        for (const stopMap of stopMaps) {
+            const stopMarker = stopMap.stopMarker;
+            const stopPopup = createStopPopup(stopMap, routeMaps, stopByName, map);
+            
+            const stopDepartures = stopMap.stopDepartures;
+            if (stopDepartures.length > 0) {
+                stopDepartures.sort((a, b) => {
+                    return parseInt(a.time) - parseInt(b.time);
+                });
+                
+                const table = document.createElement("table");
+                
+                const header = document.createElement("tr");
+                for (const column of ["DEPARTING FOR", "PLATFORM", "TIME"]) {
+                    const cell = document.createElement("th");
+                    cell.textContent = column;
+                    header.appendChild(cell);
+                }
+                table.appendChild(header);
+                
+                for (const stopDeparture of stopDepartures) {
+                    const row = document.createElement("tr");
+                    
+                    const serviceCell = document.createElement("td");
+                    serviceCell.textContent = stopDeparture.lastStopName;
+                    serviceCell.style.backgroundColor = stopDeparture.routeMap.routeColour;
+                    serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
+                    row.appendChild(serviceCell);
+                    
+                    for (const column of [
+                        stopDeparture.platform,
+                        timeString(stopDeparture.time)
+                    ]) {
+                        const cell = document.createElement("td");
+                        cell.textContent = column;
+                        row.appendChild(cell);
+                    }
+                    
+                    table.appendChild(row);
+                }
+                stopPopup.appendChild(table);
+            } else {
+                const text = document.createElement("div");
+                text.textContent = "No departing trains.";
+                stopPopup.appendChild(text);
+            }
+            
+            const updateTime = document.createElement("p");
+            updateTime.textContent = `Trip updates ${tripUpdateTime}`;
+            stopPopup.appendChild(updateTime);
+            
+            stopMarker.setPopupContent(stopPopup);
+        }
+        
+        tripStatus.textContent = "";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    } catch (error) {
+        console.log(error);
+        
+        tripStatus.textContent = "Failed to retrieve trip updates.";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    }
+    
+    setTimeout(() => {
+        updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
+    }, 1000);
+};
+
+export { updatePositions, updateTrips };
