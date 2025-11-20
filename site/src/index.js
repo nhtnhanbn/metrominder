@@ -226,19 +226,15 @@ function filterLines(stopName) {
     }
 }
 
-for (const [routeName, routeMap] of Object.entries(routeByName)) {
-    routeMap.layerGroup = L.layerGroup();
+for (const routeMap of routeMaps) {
     routeMap.line = L.geoJSON(
         geojson.features.filter((feature) => {
             return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
         }),
         { style: { color: routeMap.routeColour } }
     );
-}
-
-const layerGroups = {};
-for (const routeMap of Object.values(routeByName)) {
-    layerGroups[routeMap.routeId] = routeMap.layerGroup.addLayer(routeMap.line);
+    routeMap.layerGroup = L.layerGroup();
+    routeMap.layerGroup.addLayer(routeMap.line);
 }
 
 const parentById = {}, platformById = {};
@@ -270,7 +266,7 @@ for (const stopDatum of stopData) {
         ).addTo(searchLayer);
     } else {
         parentById[stop_id] = parent_station;
-        platformById[stop_id] = platform_code
+        platformById[stop_id] = platform_code;
     }
 }
 
@@ -452,7 +448,7 @@ async function updatePositions() {
                     tipContent: tipContent
                 };
                 
-                layerGroups[routeId].addLayer(marker).addLayer(tip);
+                routeById[routeId].layerGroup.addLayer(marker).addLayer(tip);
             }
         }
         
@@ -632,7 +628,7 @@ async function updateTrips() {
 };
 updateTrips();
 
-const layerGroupsNamed = {};
+const layerTrees = {};
 for (const [routeName, routeMap] of Object.entries(routeByName)) {
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stopName of stationLines[routeName]) {
@@ -651,12 +647,14 @@ for (const [routeName, routeMap] of Object.entries(routeByName)) {
             }
         }
     });
+
+    routeMap.layerGroup.addTo(map)
     
-    layerGroupsNamed[routeName] = {
+    layerTrees[routeName] = {
         label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
                     ${routeName} line&nbsp
                 </span>`,
-        layer: routeMap.layerGroup.addTo(map)
+        layer: routeMap.layerGroup
     };
 }
 
@@ -709,7 +707,7 @@ L.control.layers.tree(null, [
         label: "<b>All lines<b>",
         selectAllCheckbox: true,
         children: [
-            layerGroupsNamed["Sandringham"],
+            layerTrees["Sandringham"],
             {
                 label: `<span style="background-color: #279FD5; color: black;">
                             Caulfield group
@@ -718,8 +716,8 @@ L.control.layers.tree(null, [
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
-                    layerGroupsNamed["Cranbourne"],
-                    layerGroupsNamed["Pakenham"]
+                    layerTrees["Cranbourne"],
+                    layerTrees["Pakenham"]
                 ]
             },
             {
@@ -730,8 +728,8 @@ L.control.layers.tree(null, [
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
-                    layerGroupsNamed["Hurstbridge"],
-                    layerGroupsNamed["Mernda"]
+                    layerTrees["Hurstbridge"],
+                    layerTrees["Mernda"]
                 ]
             },
             {
@@ -742,9 +740,9 @@ L.control.layers.tree(null, [
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
-                    layerGroupsNamed["Craigieburn"],
-                    layerGroupsNamed["Sunbury"],
-                    layerGroupsNamed["Upfield"]
+                    layerTrees["Craigieburn"],
+                    layerTrees["Sunbury"],
+                    layerTrees["Upfield"]
                 ]
             },
             {
@@ -762,8 +760,8 @@ L.control.layers.tree(null, [
                                 &nbsp`,
                         selectAllCheckbox: true,
                         children: [
-                            layerGroupsNamed["Frankston"],
-                            layerGroupsNamed["Stony Point"]
+                            layerTrees["Frankston"],
+                            layerTrees["Stony Point"]
                         ]
                     },
                     {
@@ -773,8 +771,8 @@ L.control.layers.tree(null, [
                                 &nbsp`,
                         selectAllCheckbox: true,
                         children: [
-                            layerGroupsNamed["Werribee"],
-                            layerGroupsNamed["Williamstown"]
+                            layerTrees["Werribee"],
+                            layerTrees["Williamstown"]
                         ]
                     }
                 ]
@@ -787,7 +785,7 @@ L.control.layers.tree(null, [
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
-                    layerGroupsNamed["Glen Waverley"],
+                    layerTrees["Glen Waverley"],
                     {
                         label: `<span style="background-color: #152C6B; color: white;">
                                     Camberwell
@@ -795,7 +793,7 @@ L.control.layers.tree(null, [
                                 &nbsp`,
                         selectAllCheckbox: true,
                         children: [
-                            layerGroupsNamed["Alamein"],
+                            layerTrees["Alamein"],
                             {
                                 label: `<span style="background-color: #152C6B; color: white;">
                                             Ringwood
@@ -803,8 +801,8 @@ L.control.layers.tree(null, [
                                         &nbsp`,
                                 selectAllCheckbox: true,
                                 children: [
-                                    layerGroupsNamed["Belgrave"],
-                                    layerGroupsNamed["Lilydale"]
+                                    layerTrees["Belgrave"],
+                                    layerTrees["Lilydale"]
                                 ]
                             }
                         ]
@@ -816,8 +814,8 @@ L.control.layers.tree(null, [
                 collapsed: true,
                 selectAllCheckbox: true,
                 children: [
-                    layerGroupsNamed["Flemington Racecourse"],
-                    layerGroupsNamed["City Circle"]
+                    layerTrees["Flemington Racecourse"],
+                    layerTrees["City Circle"]
                 ]
             }
         ]
