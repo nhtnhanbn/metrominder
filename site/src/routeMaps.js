@@ -1,4 +1,5 @@
 import routeData from "../../data/gtfsschedule/routes.txt";
+import stationLines from "../../data/stationLines.json";
 
 class RouteMap {
     constructor(routeId, shapeIds) {
@@ -42,6 +43,7 @@ for (const routeDatum of routeData) {
         routeMap.routeName = routeDatum.route_short_name;
         routeMap.routeColour = "#" + routeDatum.route_color;
         routeMap.routeTextColour = "#" + routeDatum.route_text_color;
+        routeMap.stopNames = stationLines[routeMap.routeName];
     }
 }
 

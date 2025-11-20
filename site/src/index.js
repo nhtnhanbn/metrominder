@@ -14,7 +14,6 @@ import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
 import stopData from "../../data/gtfsschedule/stops.txt";
-import stationLines from "../../data/stationLines.json";
 import { routeMaps, routeById, routeByName } from "./routeMaps.js";
 import { timeString } from "./timeString.js";
 import stationIcon from "./station.svg";
@@ -42,7 +41,7 @@ class VehicleMap {
         this.vehicleConsistInfo = vehicleConsistInfo;
     }
 }
-let vehicleByTripId = {};
+let vehicleMaps = new Set(), vehicleByTripId = {};
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -291,9 +290,9 @@ for (let [stopId, parentId] of Object.entries(parentById)) {
     stopById[stopId] = stopById[parentId];
 }
 
-for (const [routeName, stationLine] of Object.entries(stationLines)) {
-    for (const stopName of stationLine) {
-        stopByName[stopName].routeMaps.add(routeByName[routeName]);
+for (const routeMap of routeMaps) {
+    for (const stopName of routeMap.stopNames) {
+        stopByName[stopName].routeMaps.add(routeMap);
     }
 }
 
@@ -335,20 +334,21 @@ async function updatePositions() {
         const response = await fetch("https://api.metrominder.nhan.au/positions");
         const feed = await response.json();
         
-        const updatedVehicleByTripId = {};
+        const updatedVehicleMaps = new Set();
         for (const vehicle of feed.feed.entity) {
             const { latitude, longitude, bearing } = vehicle.vehicle.position;
             const tripId = vehicle.vehicle.trip.tripId;
             const routeId = vehicle.vehicle.trip.routeId;
             const routeCode = routeId.slice(15, 18);
             const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
+            const vehicleMap = vehicleByTripId[tripId];
             
-            if (tripId in vehicleByTripId) {
-                vehicleByTripId[tripId].vehicleMarker.setRotation(bearing)
+            if (vehicleMaps.has(vehicleMap)) {
+                vehicleMap.vehicleMarker.setRotation(bearing)
                                                      .slideTo([latitude, longitude]);
-                vehicleByTripId[tripId].vehicleLabel.setTooltipContent(vehicleTooltip)
+                vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
                                                     .slideTo([latitude, longitude]);
-                updatedVehicleByTripId[tripId] = vehicleByTripId[tripId];
+                updatedVehicleMaps.add(vehicleMap);
             } else {
                 const consist = vehicle.vehicle.vehicle.id;
                 const splitConsist = consist.split("-");
@@ -452,18 +452,25 @@ async function updatePositions() {
                     { autoPan: false }
                 );
                 
-                updatedVehicleByTripId[tripId] = new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo);
+                updatedVehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo));
                 
                 routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }
         }
         
-        for (const tripId in vehicleByTripId) {
-            if (!(tripId in updatedVehicleByTripId)) {
-                vehicleByTripId[tripId].vehicleMarker.remove();
-                vehicleByTripId[tripId].vehicleLabel.remove();
+        for (const vehicleMap in vehicleMaps) {
+            if (!(updatedVehicleMaps.has(vehicleMap))) {
+                vehicleMap.vehicleMarker.remove();
+                vehicleMap.vehicleLabel.remove();
             }
         }
+
+        const updatedVehicleByTripId = {};
+        for (const vehicleMap of updatedVehicleMaps) {
+            updatedVehicleByTripId[vehicleMap.tripId] = vehicleMap;
+        }
+
+        vehicleMaps = updatedVehicleMaps;
         vehicleByTripId = updatedVehicleByTripId;
         
         const time = timeString(feed.timestamp/1000, true);
@@ -639,30 +646,30 @@ async function updateTrips() {
 updateTrips();
 
 const layerTrees = {};
-for (const [routeName, routeMap] of Object.entries(routeByName)) {
+for (const routeMap of routeMaps) {
     routeMap.layerGroup.addEventListener("add", () => {
-        for (const stopName of stationLines[routeName]) {
-            const station = stopByName[stopName].stopMarker;
-            station.options.visibility++;
-            stationLayer.addLayer(station);
+        for (const stopName of routeMap.stopNames) {
+            const stopMarker = stopByName[stopName].stopMarker;
+            stopMarker.options.visibility++;
+            stationLayer.addLayer(stopMarker);
         }
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
-        for (const stopName of stationLines[routeName]) {
-            const station = stopByName[stopName].stopMarker;
-            station.options.visibility--;
-            if (station.options.visibility == 0) {
-                stationLayer.removeLayer(station);
+        for (const stopName of routeMap.stopNames) {
+            const stopMarker = stopByName[stopName].stopMarker;
+            stopMarker.options.visibility--;
+            if (stopMarker.options.visibility == 0) {
+                stationLayer.removeLayer(stopMarker);
             }
         }
     });
 
     routeMap.layerGroup.addTo(map)
     
-    layerTrees[routeName] = {
+    layerTrees[routeMap.routeName] = {
         label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
-                    ${routeName} line&nbsp
+                    ${routeMap.routeName} line&nbsp
                 </span>`,
         layer: routeMap.layerGroup
     };
