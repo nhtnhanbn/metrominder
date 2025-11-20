@@ -253,9 +253,10 @@ for (const routeMap of routeMaps) {
 const parentById = {}, platformById = {};
 for (const stopDatum of stopData) {
     let { stop_id, stop_name, stop_lat, stop_lon, parent_station, platform_code } = stopDatum;
-    stop_name = stop_name.slice(0, stop_name.indexOf(" Railway Station"));
     
     if (parent_station === "") {
+        stop_name = shortName(stop_name);
+        
         const stopMarker = L.marker(
             [stop_lat, stop_lon],
             {
@@ -481,7 +482,13 @@ async function updatePositions() {
 updatePositions();
 
 function shortName(stopName) {
-    return stopName.replace("Station", "")
+    let sliceEnd = stopName.indexOf(" Railway Station");
+    if (sliceEnd < 0) {
+        sliceEnd = stopName.length;
+    }
+
+    return stopName.slice(0, sliceEnd)
+                   .replace("Station", "")
                    .replace("Railway", "")
                    .replace("Rail Replacement Bus Stop", "")
                    .trim();
