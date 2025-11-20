@@ -689,8 +689,8 @@ L.control.layers.tree(null, [
                     event: "change",
                     selectAll: (ev, domNode, treeNode, map) => {
                         vehicleMarkerLabelSelection = "route";
-                        for (const train of Object.values(vehicleByTripId)) {
-                            train.vehicleLabelContent.textContent = train.routeCode;
+                        for (const vehicleMap of vehicleMaps) {
+                            vehicleMap.vehicleLabelContent.textContent = vehicleMap.routeCode;
                         }
                     }
                 }]
@@ -705,8 +705,8 @@ L.control.layers.tree(null, [
                     event: "change",
                     selectAll: (ev, domNode, treeNode, map) => {
                         vehicleMarkerLabelSelection = "type";
-                        for (const train of Object.values(vehicleByTripId)) {
-                            train.vehicleLabelContent.textContent = train.vehicleModelCode;
+                        for (const vehicleMap of vehicleMaps) {
+                            vehicleMap.vehicleLabelContent.textContent = vehicleMap.vehicleModelCode;
                         }
                     }
                 }]
