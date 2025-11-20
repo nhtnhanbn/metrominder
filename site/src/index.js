@@ -31,6 +31,19 @@ class StopMap {
 }
 const stopMaps = new Set(), stopById = {}, stopByName = {};
 
+class VehicleMap {
+    constructor(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo) {
+        this.tripId = tripId;
+        this.routeCode = routeCode;
+        this.vehicleModelCode = vehicleModelCode;
+        this.vehicleMarker = vehicleMarker;
+        this.vehicleLabel = vehicleLabel;
+        this.vehicleLabelContent = vehicleLabelContent;
+        this.vehicleConsistInfo = vehicleConsistInfo;
+    }
+}
+let vehicleByTripId = {};
+
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -69,7 +82,7 @@ L.control.scale().addTo(map);
     }
 })).addTo(map);
 
-map.createPane("trainPane", map.getPane("norotatePane")).style.zIndex = 625;
+map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
 
 (new (L.Control.extend({
     onAdd: (map) => {
@@ -144,19 +157,19 @@ L.tileLayer(
     }
 ).addTo(map);
 
-function stopPopup(stopMarker) {
+function createStopPopup(stopMarker) {
     const stopName = stopMarker.options.title;
 
-    const popup = document.createElement("div");
-    popup.style.textAlign = "center";
+    const stopPopup = document.createElement("div");
+    stopPopup.style.textAlign = "center";
     
     const header = document.createElement("h3");
     header.textContent = stopName;
-    popup.appendChild(header);
+    stopPopup.appendChild(header);
     
     const routesHeading = document.createElement("h4");
     routesHeading.textContent = "Lines";
-    popup.appendChild(routesHeading);
+    stopPopup.appendChild(routesHeading);
     
     const routesList = document.createElement("p");
     routesList.style.marginTop = 0;
@@ -197,9 +210,9 @@ function stopPopup(stopMarker) {
     });
     routesList.appendChild(filterButton);
     
-    popup.appendChild(routesList);
+    stopPopup.appendChild(routesList);
     
-    return popup;
+    return stopPopup;
 }
 
 function setLines(stopName) {
@@ -261,7 +274,7 @@ for (const stopDatum of stopData) {
         stopByName[stop_name] = stopMap;
 
         stopMarker.bindPopup(
-            stopPopup(stopMarker),
+            createStopPopup(stopMarker),
             { autoPan: false }
         ).addTo(searchLayer);
     } else {
@@ -313,7 +326,6 @@ for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafle
     attributionPrefix.appendChild(element);
 }
 
-let trains = {};
 async function updatePositions() {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
@@ -322,92 +334,92 @@ async function updatePositions() {
         const response = await fetch("https://api.metrominder.nhan.au/positions");
         const feed = await response.json();
         
-        const updatedTrains = {};
-        for (const train of feed.feed.entity) {
-            const { latitude, longitude, bearing } = train.vehicle.position;
-            const tripId = train.vehicle.trip.tripId;
-            const routeId = train.vehicle.trip.routeId;
-            const popup = `Position at ${timeString(train.vehicle.timestamp, true)}`;
+        const updatedVehicleByTripId = {};
+        for (const vehicle of feed.feed.entity) {
+            const { latitude, longitude, bearing } = vehicle.vehicle.position;
+            const tripId = vehicle.vehicle.trip.tripId;
+            const routeId = vehicle.vehicle.trip.routeId;
+            const routeCode = routeId.slice(15, 18);
+            const vehiclePopup = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
             
-            if (tripId in trains) {
-                trains[tripId].marker.setRotation(bearing)
-                                     .slideTo([latitude, longitude]);
-                trains[tripId].tip.setTooltipContent(popup)
-                                  .slideTo([latitude, longitude]);
-                updatedTrains[tripId] = trains[tripId];
+            if (tripId in vehicleByTripId) {
+                vehicleByTripId[tripId].vehicleMarker.setRotation(bearing)
+                                                     .slideTo([latitude, longitude]);
+                vehicleByTripId[tripId].vehicleLabel.setTooltipContent(vehiclePopup)
+                                                    .slideTo([latitude, longitude]);
+                updatedVehicleByTripId[tripId] = vehicleByTripId[tripId];
             } else {
-                const consist = train.vehicle.vehicle.id;
+                const consist = vehicle.vehicle.vehicle.id;
                 const splitConsist = consist.split("-");
-                let car = splitConsist.find((car) => {
+                let carCode = splitConsist.find((car) => {
                     return car[car.length-1] === 'T';
                 });
                 
-                let length, type, typeCode = "";
-                if (car) {
-                    length = splitConsist.length;
+                let carCount, vehicleModelName, vehicleModelCode = "";
+                if (carCode) {
+                    carCount = splitConsist.length;
                     
-                    const number = parseInt(car.slice(0, -1));
-                    if (1000 <= number && number < 1200) {
-                        type = "Comeng";
-                        typeCode = "COM";
-                    } else if (2500 <= number && number < 2600) {
-                        type = "Siemens";
-                        typeCode = "SIE";
-                    } else if (1300 <= number && number < 1700) {
-                        type = "X'Trapolis 100";
-                        typeCode = "XT1";
-                    } else if (8100 <= number && number < 8900) {
-                        type = "X'Trapolis 2.0";
-                        typeCode = "XT2";
+                    const carNumber = parseInt(carCode.slice(0, -1));
+                    if (1000 <= carNumber && carNumber < 1200) {
+                        vehicleModelName = "Comeng";
+                        vehicleModelCode = "COM";
+                    } else if (2500 <= carNumber && carNumber < 2600) {
+                        vehicleModelName = "Siemens";
+                        vehicleModelCode = "SIE";
+                    } else if (1300 <= carNumber && carNumber < 1700) {
+                        vehicleModelName = "X'Trapolis 100";
+                        vehicleModelCode = "XT1";
+                    } else if (8100 <= carNumber && carNumber < 8900) {
+                        vehicleModelName = "X'Trapolis 2.0";
+                        vehicleModelCode = "XT2";
                     }
                 } else if (splitConsist.length > 0) {
-                    car = splitConsist[0];
-                    const number = parseInt(car.slice(0, -1));
-                    if (9000 <= number && number < 10000) {
-                        length = 7;
-                        type = "High Capacity Metro Train";
-                        typeCode = "HCM";
-                    } else if (7000 <= number && number < 7030) {
-                        length = 1;
-                        type = "Sprinter";
-                        typeCode = "SPR";
+                    carCode = splitConsist[0];
+
+                    const carNumber = parseInt(carCode.slice(0, -1));
+                    if (9000 <= carNumber && carNumber < 10000) {
+                        carCount = 7;
+                        vehicleModelName = "High Capacity Metro Train";
+                        vehicleModelCode = "HCM";
+                    } else if (7000 <= carNumber && carNumber < 7030) {
+                        carCount = 1;
+                        vehicleModelName = "Sprinter";
+                        vehicleModelCode = "SPR";
                     }
                 }
                 
-                if ((!length || !type) &&
-                    routeId === "aus:vic:vic-02-STY:") {
-                        length = 1;
-                        type = "Sprinter";
-                        typeCode = "SPR";
+                if ((!carCount || !vehicleModelName) && routeId === "aus:vic:vic-02-STY:") {
+                    carCount = 1;
+                    vehicleModelName = "Sprinter";
+                    vehicleModelCode = "SPR";
                 }
                 
-                let consistInfo = `<p style="margin-bottom: 0">
+                let vehicleConsistInfo = `<p style="margin-bottom: 0">
                                        <b>`;
                 
-                if (length) {
-                    consistInfo += `${length}-car`;
+                if (carCount) {
+                    vehicleConsistInfo += `${carCount}-car`;
                 }
                 
-                if (type) {
-                    consistInfo += ` ${type}`;
+                if (vehicleModelName) {
+                    vehicleConsistInfo += ` ${vehicleModelName}`;
                 }
                 
-                consistInfo += `</b>
+                vehicleConsistInfo += `</b>
                             </p>
                             <p style="margin-top: 0">
                                 ${consist}
                             </p>`;
                 
-                const routeCode = routeId.slice(15, 18);
-                const tipContent = document.createElement("div");
-                if (displayTrainMarker === "line") {
-                    tipContent.textContent = routeCode;
+                const vehicleLabelContent = document.createElement("div");
+                if (vehicleMarkerLabelSelection === "route") {
+                    vehicleLabelContent.textContent = routeCode;
                 } else {
-                    tipContent.textContent = typeCode;
+                    vehicleLabelContent.textContent = vehicleModelCode;
                 }
-                tipContent.style.color = routeById[routeId].routeTextColour;
+                vehicleLabelContent.style.color = routeById[routeId].routeTextColour;
                                  
-                const marker = L.marker.arrowCircle(
+                const vehicleMarker = L.marker.arrowCircle(
                     [latitude, longitude],
                     {
                         iconOptions: {
@@ -416,49 +428,42 @@ async function updatePositions() {
                             size: 40,
                             rotation: bearing
                         },
-                        pane: "trainPane",
+                        pane: "vehiclePane",
                         interactive: false,
                         rotateWithView: true
                     }
                 );
                 
-                const tip = L.marker(
+                const vehicleLabel = L.marker(
                     [latitude, longitude],
                     {
                         icon: L.divIcon({
-                            html: tipContent,
+                            html: vehicleLabelContent,
                             tooltipAnchor: [9, 0],
-                            className: "train-tip"
+                            className: "vehicle-label"
                         }),
-                        pane: "trainPane"
+                        pane: "vehiclePane"
                     }
                 ).bindTooltip(
-                    L.tooltip().setContent(popup)
+                    L.tooltip().setContent(vehiclePopup)
                 ).bindPopup(
-                    consistInfo + "No trip information.",
+                    vehicleConsistInfo + "No trip information.",
                     { autoPan: false }
                 );
                 
-                updatedTrains[tripId] = {
-                    marker: marker,
-                    tip: tip,
-                    consistInfo: consistInfo,
-                    routeCode: routeCode,
-                    typeCode: typeCode,
-                    tipContent: tipContent
-                };
+                updatedVehicleByTripId[tripId] = new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo);
                 
-                routeById[routeId].layerGroup.addLayer(marker).addLayer(tip);
+                routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }
         }
         
-        for (const tripId in trains) {
-            if (!(tripId in updatedTrains)) {
-                trains[tripId].marker.remove();
-                trains[tripId].tip.remove();
+        for (const tripId in vehicleByTripId) {
+            if (!(tripId in updatedVehicleByTripId)) {
+                vehicleByTripId[tripId].vehicleMarker.remove();
+                vehicleByTripId[tripId].vehicleLabel.remove();
             }
         }
-        trains = updatedTrains;
+        vehicleByTripId = updatedVehicleByTripId;
         
         const time = timeString(feed.timestamp/1000, true);
         dtpTime.textContent = ` last updated ${time}`;
@@ -508,8 +513,8 @@ async function updateTrips() {
                                      SERVICE TO ${lastStopName.toUpperCase()}
                                  </h3>`;
                     
-                    if (tripId in trains) {
-                        popup += trains[tripId].consistInfo;
+                    if (tripId in vehicleByTripId) {
+                        popup += vehicleByTripId[tripId].vehicleConsistInfo;
                     }
                     
                     let future = false;
@@ -526,7 +531,7 @@ async function updateTrips() {
                             });
                         }
                         
-                        if (tripId in trains && stop.arrival) {
+                        if (tripId in vehicleByTripId && stop.arrival) {
                             const stopName = shortName(stopMap.stopName);
                             const stopTime = timeString(stop.arrival.time);
                             
@@ -555,15 +560,15 @@ async function updateTrips() {
                     popup += `</table>
                               <p>Trip update ${time}</p>`;
                     
-                    if (tripId in trains) {
-                        trains[tripId].tip.setPopupContent(popup);
+                    if (tripId in vehicleByTripId) {
+                        vehicleByTripId[tripId].vehicleLabel.setPopupContent(popup);
                     }
             }
         }
         
         for (const stopMap of stopMaps) {
             const stationName = stopMap.stopName, stationMarker = stopMap.stopMarker;
-            let popup = stopPopup(stationMarker);
+            let popup = createStopPopup(stationMarker);
             
             const stationDepartures = stopMap.stopDepartures;
             if (stationDepartures.length > 0) {
@@ -664,16 +669,16 @@ L.control.layers.tree(null, [
         children: [
             {
                 label: `<label title="Label train markers with line code">
-                            <input class="marker-radio" type="radio" name="labels" value="line">
+                            <input class="marker-radio" type="radio" name="labels" value="route">
                             Line
                         </label>`,
                 eventedClasses: [{
                     className: "marker-radio",
                     event: "change",
                     selectAll: (ev, domNode, treeNode, map) => {
-                        displayTrainMarker = "line";
-                        for (const train of Object.values(trains)) {
-                            train.tipContent.textContent = train.routeCode;
+                        vehicleMarkerLabelSelection = "route";
+                        for (const train of Object.values(vehicleByTripId)) {
+                            train.vehicleLabelContent.textContent = train.routeCode;
                         }
                     }
                 }]
@@ -687,9 +692,9 @@ L.control.layers.tree(null, [
                     className: "marker-radio",
                     event: "change",
                     selectAll: (ev, domNode, treeNode, map) => {
-                        displayTrainMarker = "type";
-                        for (const train of Object.values(trains)) {
-                            train.tipContent.textContent = train.typeCode;
+                        vehicleMarkerLabelSelection = "type";
+                        for (const train of Object.values(vehicleByTripId)) {
+                            train.vehicleLabelContent.textContent = train.vehicleModelCode;
                         }
                     }
                 }]
@@ -911,9 +916,9 @@ L.control.layers.tree(null, [
     selectorBack: true
 }).addTo(map);
 
-let displayTrainMarker = "line";
+let vehicleMarkerLabelSelection = "route";
 setInterval(() => {
     document.querySelector(
-        `input[name=labels][value=${displayTrainMarker}]`
+        `input[name=labels][value=${vehicleMarkerLabelSelection}]`
     ).checked = true;
 }, 0);
