@@ -21,8 +21,6 @@ async function updateFeed(resource) {
         );
         error.response = response;
         throw error;
-        
-        return;
     }
     
     const buffer = await response.arrayBuffer();
@@ -56,7 +54,7 @@ app.use("/positions",
 app.use("/trips",
     cors(),
     async (req, res) => {
-        if (Date.now() - tripCache.timestamp > 4000) {
+        if (Date.now() - tripCache.timestamp > 8000) {
             tripCache = {
                 timestamp: Date.now(),
                 feed: await updateFeed(
@@ -68,6 +66,24 @@ app.use("/trips",
         res.json(tripCache);
     }
 );
+
+app.use("/positions", (err, req, res, next) => {
+    if ("feed" in positionCache) {
+        res.json(positionCache);
+        console.log(err);
+    } else {
+        next(err);
+    }
+});
+
+app.use("/trips", (err, req, res, next) => {
+    if ("feed" in tripCache) {
+        res.json(tripCache);
+        console.log(err);
+    } else {
+        next(err);
+    }
+});
 
 app.use((err, req, res, next) => {
     res.status(500).send("Internal server error :(");
