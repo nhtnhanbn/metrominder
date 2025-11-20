@@ -17,7 +17,13 @@ import stopData from "../../data/gtfsschedule/stops.txt";
 import { routeMaps, routeById, routeByName } from "./routeMaps.js";
 import { timeString } from "./timeString.js";
 import stationIcon from "./station.svg";
+import { createLayerTree } from "./layerTree.js";
+import { setLines, addLines, filterLines } from "./lineFilters.js";
 import "./style.css";
+
+const state = {
+    vehicleMarkerLabelSelection: "route"
+}
 
 class StopMap {
     constructor(stopId, stopName, stopMarker) {
@@ -41,7 +47,7 @@ class VehicleMap {
         this.vehicleConsistInfo = vehicleConsistInfo;
     }
 }
-let vehicleMaps = new Set(), vehicleByTripId = {};
+const vehicleMaps = new Set(), vehicleByTripId = {};
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -188,7 +194,7 @@ function createStopPopup(stopMarker) {
     const setButton = document.createElement("button");
     setButton.textContent = "Set";
     setButton.addEventListener("click", () => {
-        setLines(stopName);
+        setLines(stopName, stopByName, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(setButton);
@@ -196,7 +202,7 @@ function createStopPopup(stopMarker) {
     const addButton = document.createElement("button");
     addButton.textContent = "Add";
     addButton.addEventListener("click", () => {
-        addLines(stopName);
+        addLines(stopName, stopByName, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(addButton);
@@ -204,7 +210,7 @@ function createStopPopup(stopMarker) {
     const filterButton = document.createElement("button");
     filterButton.textContent = "Filter";
     filterButton.addEventListener("click", () => {
-        filterLines(stopName);
+        filterLines(stopName, stopByName, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(filterButton);
@@ -212,41 +218,6 @@ function createStopPopup(stopMarker) {
     stopPopup.appendChild(routesList);
     
     return stopPopup;
-}
-
-function setLines(stopName) {
-    for (const routeMap of routeMaps) {
-        routeMap.layerGroup.remove();
-    }
-
-    for (const routeMap of stopByName[stopName].routeMaps){
-        routeMap.layerGroup.addTo(map);
-    }
-}
-
-function addLines(stopName) {
-    for (const routeMap of stopByName[stopName].routeMaps){
-        routeMap.layerGroup.addTo(map);
-    }
-}
-
-function filterLines(stopName) {
-    for (const routeMap of routeMaps) {
-        if (!stopByName[stopName].routeMaps.has(routeMap)) {
-            routeMap.layerGroup.remove();
-        }
-    }
-}
-
-for (const routeMap of routeMaps) {
-    routeMap.line = L.geoJSON(
-        geojson.features.filter((feature) => {
-            return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
-        }),
-        { style: { color: routeMap.routeColour } }
-    );
-    routeMap.layerGroup = L.layerGroup();
-    routeMap.layerGroup.addLayer(routeMap.line);
 }
 
 const parentById = {}, platformById = {};
@@ -281,6 +252,38 @@ for (const stopDatum of stopData) {
         parentById[stop_id] = parent_station;
         platformById[stop_id] = platform_code;
     }
+}
+
+for (const routeMap of routeMaps) {
+    routeMap.layerGroup = L.layerGroup();
+    routeMap.layerGroup.addLayer(
+        L.geoJSON(
+            geojson.features.filter((feature) => {
+                return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
+            }),
+            { style: { color: routeMap.routeColour } }
+        )
+    );
+    
+    routeMap.layerGroup.addEventListener("add", () => {
+        for (const stopName of routeMap.stopNames) {
+            const stopMarker = stopByName[stopName].stopMarker;
+            stopMarker.options.visibility++;
+            stationLayer.addLayer(stopMarker);
+        }
+    });
+    
+    routeMap.layerGroup.addEventListener("remove", () => {
+        for (const stopName of routeMap.stopNames) {
+            const stopMarker = stopByName[stopName].stopMarker;
+            stopMarker.options.visibility--;
+            if (stopMarker.options.visibility == 0) {
+                stationLayer.removeLayer(stopMarker);
+            }
+        }
+    });
+
+    routeMap.layerGroup.addTo(map)
 }
 
 for (let [stopId, parentId] of Object.entries(parentById)) {
@@ -334,7 +337,9 @@ async function updatePositions() {
         const response = await fetch("https://api.metrominder.nhan.au/positions");
         const feed = await response.json();
         
-        const updatedVehicleMaps = new Set();
+        const oldVehicleMaps = new Set(vehicleMaps);
+        vehicleMaps.clear();
+
         for (const vehicle of feed.feed.entity) {
             const { latitude, longitude, bearing } = vehicle.vehicle.position;
             const tripId = vehicle.vehicle.trip.tripId;
@@ -343,12 +348,12 @@ async function updatePositions() {
             const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
             const vehicleMap = vehicleByTripId[tripId];
             
-            if (vehicleMaps.has(vehicleMap)) {
+            if (oldVehicleMaps.has(vehicleMap)) {
                 vehicleMap.vehicleMarker.setRotation(bearing)
                                                      .slideTo([latitude, longitude]);
                 vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
                                                     .slideTo([latitude, longitude]);
-                updatedVehicleMaps.add(vehicleMap);
+                vehicleMaps.add(vehicleMap);
             } else {
                 const consist = vehicle.vehicle.vehicle.id;
                 const splitConsist = consist.split("-");
@@ -413,7 +418,7 @@ async function updatePositions() {
                             </p>`;
                 
                 const vehicleLabelContent = document.createElement("div");
-                if (vehicleMarkerLabelSelection === "route") {
+                if (state.vehicleMarkerLabelSelection === "route") {
                     vehicleLabelContent.textContent = routeCode;
                 } else {
                     vehicleLabelContent.textContent = vehicleModelCode;
@@ -452,26 +457,23 @@ async function updatePositions() {
                     { autoPan: false }
                 );
                 
-                updatedVehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo));
+                vehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo));
                 
                 routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }
         }
         
-        for (const vehicleMap in vehicleMaps) {
-            if (!(updatedVehicleMaps.has(vehicleMap))) {
+        for (const vehicleMap of oldVehicleMaps) {
+            if (!(vehicleMaps.has(vehicleMap))) {
                 vehicleMap.vehicleMarker.remove();
                 vehicleMap.vehicleLabel.remove();
+                delete vehicleByTripId[vehicleMap.tripId];
             }
         }
 
-        const updatedVehicleByTripId = {};
-        for (const vehicleMap of updatedVehicleMaps) {
-            updatedVehicleByTripId[vehicleMap.tripId] = vehicleMap;
+        for (const vehicleMap of vehicleMaps) {
+            vehicleByTripId[vehicleMap.tripId] = vehicleMap;
         }
-
-        vehicleMaps = updatedVehicleMaps;
-        vehicleByTripId = updatedVehicleByTripId;
         
         const time = timeString(feed.timestamp/1000, true);
         dtpTime.textContent = ` last updated ${time}`;
@@ -645,292 +647,6 @@ async function updateTrips() {
 };
 updateTrips();
 
-const layerTrees = {};
-for (const routeMap of routeMaps) {
-    routeMap.layerGroup.addEventListener("add", () => {
-        for (const stopName of routeMap.stopNames) {
-            const stopMarker = stopByName[stopName].stopMarker;
-            stopMarker.options.visibility++;
-            stationLayer.addLayer(stopMarker);
-        }
-    });
-    
-    routeMap.layerGroup.addEventListener("remove", () => {
-        for (const stopName of routeMap.stopNames) {
-            const stopMarker = stopByName[stopName].stopMarker;
-            stopMarker.options.visibility--;
-            if (stopMarker.options.visibility == 0) {
-                stationLayer.removeLayer(stopMarker);
-            }
-        }
-    });
-
-    routeMap.layerGroup.addTo(map)
-    
-    layerTrees[routeMap.routeName] = {
-        label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
-                    ${routeMap.routeName} line&nbsp
-                </span>`,
-        layer: routeMap.layerGroup
-    };
-}
-
-L.control.layers.tree(null, [
-    {
-        label: "Train marker labels",
-        children: [
-            {
-                label: `<label title="Label train markers with line code">
-                            <input class="marker-radio" type="radio" name="labels" value="route">
-                            Line
-                        </label>`,
-                eventedClasses: [{
-                    className: "marker-radio",
-                    event: "change",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        vehicleMarkerLabelSelection = "route";
-                        for (const vehicleMap of vehicleMaps) {
-                            vehicleMap.vehicleLabelContent.textContent = vehicleMap.routeCode;
-                        }
-                    }
-                }]
-            },
-            {
-                label: `<label title="Label train markers with type code">
-                            <input class="marker-radio" type="radio" name="labels" value="type">
-                            Type
-                        </label>`,
-                eventedClasses: [{
-                    className: "marker-radio",
-                    event: "change",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        vehicleMarkerLabelSelection = "type";
-                        for (const vehicleMap of vehicleMaps) {
-                            vehicleMap.vehicleLabelContent.textContent = vehicleMap.vehicleModelCode;
-                        }
-                    }
-                }]
-            }
-        ]
-    },
-    {
-        label: "Show stations",
-        layer: stationLayer
-    },
-    {
-        label: `<div class="leaflet-control-layers-separator"></div>`
-    },
-    {
-        label: "<b>All lines<b>",
-        selectAllCheckbox: true,
-        children: [
-            layerTrees["Sandringham"],
-            {
-                label: `<span style="background-color: #279FD5; color: black;">
-                            Caulfield group
-                        <span>
-                        &nbsp`,
-                collapsed: true,
-                selectAllCheckbox: true,
-                children: [
-                    layerTrees["Cranbourne"],
-                    layerTrees["Pakenham"]
-                ]
-            },
-            {
-                label: `<span style="background-color: #BE1014; color: white;">
-                            Clifton Hill group
-                        </span>
-                        &nbsp`,
-                collapsed: true,
-                selectAllCheckbox: true,
-                children: [
-                    layerTrees["Hurstbridge"],
-                    layerTrees["Mernda"]
-                ]
-            },
-            {
-                label: `<span style="background-color: #FFBE00; color: black;">
-                            Northern group
-                        </span>
-                        &nbsp`,
-                collapsed: true,
-                selectAllCheckbox: true,
-                children: [
-                    layerTrees["Craigieburn"],
-                    layerTrees["Sunbury"],
-                    layerTrees["Upfield"]
-                ]
-            },
-            {
-                label: `<span style="background-color: #028430; color: white;">
-                            Cross-city group
-                        </span>
-                        &nbsp`,
-                collapsed: true,
-                selectAllCheckbox: true,
-                children: [
-                    {
-                        label: `<span style="background-color: #028430; color: white;">
-                                    Frankston
-                                </span>
-                                &nbsp`,
-                        selectAllCheckbox: true,
-                        children: [
-                            layerTrees["Frankston"],
-                            layerTrees["Stony Point"]
-                        ]
-                    },
-                    {
-                        label: `<span style="background-color: #028430; color: white;">
-                                    West
-                                </span>
-                                &nbsp`,
-                        selectAllCheckbox: true,
-                        children: [
-                            layerTrees["Werribee"],
-                            layerTrees["Williamstown"]
-                        ]
-                    }
-                ]
-            },
-            {
-                label: `<span style="background-color: #152C6B; color: white;">
-                            Burnley group
-                        </span>
-                        &nbsp`,
-                collapsed: true,
-                selectAllCheckbox: true,
-                children: [
-                    layerTrees["Glen Waverley"],
-                    {
-                        label: `<span style="background-color: #152C6B; color: white;">
-                                    Camberwell
-                                </span>
-                                &nbsp`,
-                        selectAllCheckbox: true,
-                        children: [
-                            layerTrees["Alamein"],
-                            {
-                                label: `<span style="background-color: #152C6B; color: white;">
-                                            Ringwood
-                                        </span>
-                                        &nbsp`,
-                                selectAllCheckbox: true,
-                                children: [
-                                    layerTrees["Belgrave"],
-                                    layerTrees["Lilydale"]
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                label: "Special services",
-                collapsed: true,
-                selectAllCheckbox: true,
-                children: [
-                    layerTrees["Flemington Racecourse"],
-                    layerTrees["City Circle"]
-                ]
-            }
-        ]
-    },
-    {
-        label: "<b>Presets<b>",
-        children: [
-            {
-                label: `<button class="preset-button" title="Burnley, Clifton Hill, Caulfield and Northern groups and City Circle line" style="background: linear-gradient(to right, #152C6B 25%, #BE1014 25% 50%, #279FD5 50% 75%, #FFBE00 75%);">
-                            City Loop
-                        </button>`,
-                eventedClasses: [{
-                    className: "preset-button",
-                    event: "click",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        setLines("Melbourne Central");
-                        routeByName["Flemington Racecourse"].layerGroup.remove();
-                    }
-                }]
-            },
-            {
-                label: `<button class="preset-button" title="Burnley, Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #152C6B 25%, #028430 25% 50%, #279FD5 50% 75%, #F178AF 75%);">
-                            Richmond
-                        </button>`,
-                eventedClasses: [{
-                    className: "preset-button",
-                    event: "click",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        setLines("Richmond");
-                        routeByName["Werribee"].layerGroup.addTo(map);
-                        routeByName["Williamstown"].layerGroup.addTo(map);
-                    }
-                }]
-            },
-            {
-                label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #028430 25%, #279FD5 25% 75%, #F178AF 75%);">
-                            South Yarra
-                        </button>`,
-                eventedClasses: [{
-                    className: "preset-button",
-                    event: "click",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        setLines("South Yarra");
-                        routeByName["Werribee"].layerGroup.addTo(map);
-                        routeByName["Williamstown"].layerGroup.addTo(map);
-                    }
-                }]
-            },
-            {
-                label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Caulfield groups" style="background: linear-gradient(to right, #028430 50%, #279FD5 50%);">
-                            Caulfield
-                        </button>`,
-                eventedClasses: [{
-                    className: "preset-button",
-                    event: "click",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        setLines("Caulfield");
-                        routeByName["Werribee"].layerGroup.addTo(map);
-                        routeByName["Williamstown"].layerGroup.addTo(map);
-                    }
-                }]
-            },
-            {
-                label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Northern groups" style="background: linear-gradient(to right, #028430 50%, #FFBE00 50%);">
-                            North Melbourne
-                        </button>`,
-                eventedClasses: [{
-                    className: "preset-button",
-                    event: "click",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        setLines("North Melbourne");
-                        routeByName["Frankston"].layerGroup.addTo(map);
-                        routeByName["Flemington Racecourse"].layerGroup.remove();
-                    }
-                }]
-            },
-            {
-                label: `<button class="preset-button" title="Cross-city (except Stony Point line) group and Sunbury line" style="background: linear-gradient(to right, #028430 75%, #FFBE00 25%);">
-                            Footscray
-                        </button>`,
-                eventedClasses: [{
-                    className: "preset-button",
-                    event: "click",
-                    selectAll: (ev, domNode, treeNode, map) => {
-                        setLines("Footscray");
-                        routeByName["Frankston"].layerGroup.addTo(map);
-                    }
-                }]
-            }
-        ]
-    }
-], {
+L.control.layers.tree(null, createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, stationLayer, state), {
     selectorBack: true
 }).addTo(map);
-
-let vehicleMarkerLabelSelection = "route";
-setInterval(() => {
-    document.querySelector(
-        `input[name=labels][value=${vehicleMarkerLabelSelection}]`
-    ).checked = true;
-}, 0);
