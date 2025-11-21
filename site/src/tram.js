@@ -124,7 +124,28 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
 // TODO: SEARCH?
 
 // TODO: STOPMAPS SETUP LOOP
+for (const stopMap of stopMaps) {
+    const stopMarker = L.marker(
+        [stopMap.stopLat, stopMap.stopLon],
+        {
+            icon: L.icon({
+                iconUrl: stationIcon,
+                iconSize: [20, 20]
+            }),
+            title: stopMap.stopName,
+            visibility: 0
+        }
+    );
 
+    stopMarker.bindPopup(
+        createStopPopup(stopMap, routeMaps, stopByName, map),
+        { autoPan: false }
+    );
+    
+    stopMarker.addTo(searchLayer);
+
+    stopMap.stopMarker = stopMarker;
+}
 
 
 for (const routeMap of routeMaps) {
@@ -134,27 +155,31 @@ for (const routeMap of routeMaps) {
         { style: { color: routeMap.routeColour } }
     ).addTo(routeMap.layerGroup);
     
-    // routeMap.layerGroup.addEventListener("add", () => {
-    //     for (const stopName of routeMap.stopNames) {
-    //         if (stopName in stopByName) {
-    //             const stopMarker = stopByName[stopName].stopMarker;
-    //             stopMarker.options.visibility++;
-    //             stopMarker.addTo(stationLayer);
-    //         }
-    //     }
-    // });
+    routeMap.layerGroup.addEventListener("add", () => {
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                const stopMarker = stopById[stopId].stopMarker;
+                stopMarker.options.visibility++;
+                stopMarker.addTo(stationLayer);
+            }
+        }
+    });
     
-    // routeMap.layerGroup.addEventListener("remove", () => {
-    //     for (const stopName of routeMap.stopNames) {
-    //         if (stopName in stopByName) {
-    //             const stopMarker = stopByName[stopName].stopMarker;
-    //             stopMarker.options.visibility--;
-    //             if (stopMarker.options.visibility == 0) {
-    //                 stopMarker.removeFrom(stationLayer);
-    //             }
-    //         }
-    //     }
-    // });
+    routeMap.layerGroup.addEventListener("remove", () => {
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                const stopMarker = stopById[stopId].stopMarker;
+                stopMarker.options.visibility--;
+                if (stopMarker.options.visibility == 0) {
+                    stopMarker.removeFrom(stationLayer);
+                }
+            }
+        }
+    });
 
     routeMap.layerGroup.addTo(map)
 }
+
+L.control.layers.tree(null, createLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stationLayer, state), {
+    selectorBack: true
+}).addTo(map);
