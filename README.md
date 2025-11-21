@@ -16,6 +16,8 @@ npm install
 npm run start
 ```
 
+If you want the PTV Timetable API (only used for static data retrieval scripts), you will need to separately [request](https://vic.gov.au/public-transport-timetable-api) to be registered.
+
 To run the frontend site locally,
 ```
 cd site

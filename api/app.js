@@ -2,6 +2,7 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
+import { createHmac } from "node:crypto";
 
 const PORT = process.env.PORT || 3000;
 
@@ -34,6 +35,20 @@ async function updateFeed(resource) {
 let positionCache = { timestamp: 0 }, tripCache = { timestamp: 0};
 
 const app = express();
+
+app.use("/stops/:route_id/:route_type",
+    cors(),
+    async(req, res) => {
+        const { route_id, route_type } = req.params;
+        const url = `/v3/stops/route/${route_id}/route_type/${route_type}?stop_disruptions=false&include_geopath=false&include_advertised_interchange=false&devid=${process.env.PTV_API_DEVID}`;
+        const hmac = createHmac("sha1", process.env.PTV_API_KEY);
+        hmac.update(url);
+        const signature = hmac.digest("hex").toUpperCase();
+        const response = await fetch(`https://timetableapi.ptv.vic.gov.au${url}&signature=${signature}`);
+        const feed = await response.json();
+        res.send(feed);
+    }
+);
 
 app.use("/positions",
     cors(),
