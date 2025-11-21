@@ -6,11 +6,12 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 module.exports = {
     mode: "development",
     entry: {
-        train: "./src/train.js"
+        train: "./src/train.js",
+        tram: "./src/tram.js"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js',
+        filename: '[name].js',
         clean: true
     },
     plugins: [
@@ -18,6 +19,12 @@ module.exports = {
             template: "./src/template.html",
             filename: "train/index.html",
             chunks: ["train"],
+            favicon: "./src/favicon.svg"
+        }),
+        new HtmlWebpackPlugin({
+            template: "./src/template.html",
+            filename: "tram/index.html",
+            chunks: ["tram"],
             favicon: "./src/favicon.svg"
         }),
         new WorkboxPlugin.GenerateSW({

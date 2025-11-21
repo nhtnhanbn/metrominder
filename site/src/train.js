@@ -12,7 +12,6 @@ import "leaflet.marker.slideto";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
-import geojson from "./metroTrainRoutes.geojson";
 import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
@@ -173,9 +172,7 @@ for (const stopMap of stopMaps) {
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
     L.geoJSON(
-        geojson.features.filter((feature) => {
-            return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
-        }),
+        routeMap.geojson,
         { style: { color: routeMap.routeColour } }
     ).addTo(routeMap.layerGroup);
     

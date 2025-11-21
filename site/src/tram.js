@@ -32,8 +32,8 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const mode = "tram";
-// const { routeMaps, routeById, routeByName } = createRouteStructures(mode);
+const mode = "metroTram";
+const { routeMaps, routeById, routeByShortName } = createRouteStructures(mode);
 // const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps);
 
 const state = {
@@ -121,6 +121,40 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
     position: "topright"
 })).addTo(map);
 
-L.geoJSON(
-    geojson
-).addTo(map);
+// TODO: SEARCH?
+
+// TODO: STOPMAPS SETUP LOOP
+
+
+
+for (const routeMap of routeMaps) {
+    routeMap.layerGroup = L.layerGroup();
+    L.geoJSON(
+        routeMap.geojson,
+        { style: { color: routeMap.routeColour } }
+    ).addTo(routeMap.layerGroup);
+    
+    // routeMap.layerGroup.addEventListener("add", () => {
+    //     for (const stopName of routeMap.stopNames) {
+    //         if (stopName in stopByName) {
+    //             const stopMarker = stopByName[stopName].stopMarker;
+    //             stopMarker.options.visibility++;
+    //             stopMarker.addTo(stationLayer);
+    //         }
+    //     }
+    // });
+    
+    // routeMap.layerGroup.addEventListener("remove", () => {
+    //     for (const stopName of routeMap.stopNames) {
+    //         if (stopName in stopByName) {
+    //             const stopMarker = stopByName[stopName].stopMarker;
+    //             stopMarker.options.visibility--;
+    //             if (stopMarker.options.visibility == 0) {
+    //                 stopMarker.removeFrom(stationLayer);
+    //             }
+    //         }
+    //     }
+    // });
+
+    routeMap.layerGroup.addTo(map)
+}
