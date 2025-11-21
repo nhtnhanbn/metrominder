@@ -177,9 +177,9 @@ for (const routeMap of routeMaps) {
     ).addTo(routeMap.layerGroup);
     
     routeMap.layerGroup.addEventListener("add", () => {
-        for (const stopName of routeMap.stopNames) {
-            if (stopName in stopByName) {
-                const stopMarker = stopByName[stopName].stopMarker;
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                const stopMarker = stopById[stopId].stopMarker;
                 stopMarker.options.visibility++;
                 stopMarker.addTo(stationLayer);
             }
@@ -187,9 +187,9 @@ for (const routeMap of routeMaps) {
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
-        for (const stopName of routeMap.stopNames) {
-            if (stopName in stopByName) {
-                const stopMarker = stopByName[stopName].stopMarker;
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                const stopMarker = stopById[stopId].stopMarker;
                 stopMarker.options.visibility--;
                 if (stopMarker.options.visibility == 0) {
                     stopMarker.removeFrom(stationLayer);

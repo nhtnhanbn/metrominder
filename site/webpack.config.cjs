@@ -28,7 +28,7 @@ module.exports = {
             favicon: "./src/favicon.svg"
         }),
         new WorkboxPlugin.GenerateSW({
-            maximumFileSizeToCacheInBytes: 10485760,
+            maximumFileSizeToCacheInBytes: 20971520,
             swDest: "./serviceWorker.js"
         }),
         new WebpackPwaManifest({

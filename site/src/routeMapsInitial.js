@@ -26,8 +26,8 @@ const metroTrainRouteMaps = new Set([
     new MetroTrainRouteMap("UFD", ["1.10.H", "1.2.H"]),
     new MetroTrainRouteMap("WER", ["1.1.R", "1.15.R"]),
     new MetroTrainRouteMap("WIL", ["1.1.R"]),
-    new MetroTrainRouteMap("RCE", ["1.1.R", "7.2.R"]),
-    new MetroTrainRouteMap("CCL", ["41.1.H"])
+    new MetroTrainRouteMap("RCE", ["1.1.R", "9.1.H"]),
+    new MetroTrainRouteMap("CCL", ["42.1.H"])
 ]);
 
 export { metroTrainRouteMaps };

@@ -34,7 +34,7 @@ if ("serviceWorker" in navigator) {
 
 const mode = "metroTram";
 const { routeMaps, routeById, routeByShortName } = createRouteStructures(mode);
-// const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps);
+const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps);
 
 const state = {
     vehicleMarkerLabelSelection: "route"

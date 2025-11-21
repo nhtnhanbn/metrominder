@@ -1,7 +1,8 @@
 import { metroTrainRouteMaps } from "./routeMapsInitial.js";
 import metroTrainRouteData from "../../data/gtfsschedule/2/routes.txt";
 import metroTramRouteData from "../../data/gtfsschedule/3/routes.txt";
-import stationLines from "../../data/stationLines.json";
+import metroTrainStopRoutes from "../../data/metroTrainStopRoutes.json";
+import metroTramStopRoutes from "../../data/metroTramStopRoutes.json";
 import metroTrainGeojson from "./metroTrainRoutes.geojson";
 import metroTramGeojson from "./metroTramRoutes.geojson";
 
@@ -53,7 +54,7 @@ function createRouteStructures(mode) {
         for (const routeDatum of routeData) {
             if (routeDatum.route_id in routeById) {
                 const routeMap = routeById[routeDatum.route_id];
-                routeMap.stopNames = stationLines[routeMap.routeShortName];
+                routeMap.stopIds = metroTrainStopRoutes[routeMap.routeId];
             }
         }
         for (const feature of metroTrainGeojson.features) {
@@ -63,6 +64,12 @@ function createRouteStructures(mode) {
             }
         }
     } else if (mode === "metroTram") {
+        for (const routeDatum of routeData) {
+            if (routeDatum.route_id in routeById) {
+                const routeMap = routeById[routeDatum.route_id];
+                routeMap.stopIds = metroTramStopRoutes[routeMap.routeId];
+            }
+        }
         for (const feature of metroTramGeojson.features) {
             routeByShortName[feature.properties.SHORT_NAME].geojson.push(feature);
         }

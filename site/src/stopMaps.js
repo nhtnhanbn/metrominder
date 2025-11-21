@@ -1,4 +1,5 @@
 import metroTrainStopData from "../../data/gtfsschedule/2/stops.txt";
+import metroTramStopData from "../../data/gtfsschedule/3/stops.txt";
 import { shortName } from "./stringConverters.js";
 
 class StopMap {
@@ -16,6 +17,8 @@ function createStopStructures(mode, routeMaps) {
     let stopData;
     if (mode === "metroTrain") {
         stopData = metroTrainStopData;
+    } else if (mode === "metroTram") {
+        stopData = metroTramStopData;
     }
 
     const stopMaps = new Set(), stopById = {}, stopByName = {};
@@ -45,9 +48,9 @@ function createStopStructures(mode, routeMaps) {
     }
     
     for (const routeMap of routeMaps) {
-        for (const stopName of routeMap.stopNames) {
-            if (stopName in stopByName) {
-                stopByName[stopName].routeMaps.add(routeMap);
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                stopById[stopId].routeMaps.add(routeMap);
             }
         }
     }
