@@ -48,6 +48,8 @@ const map = L.map("map", {
     touchRotate: true
 }).fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);
 
+map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
+
 L.Control.zoomHome().addTo(map);
 L.control.scale().addTo(map);
 
@@ -64,8 +66,6 @@ L.control.scale().addTo(map);
         rotateWithView: true
     }
 })).addTo(map);
-
-map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
 
 (new (L.Control.extend({
     onAdd: (map) => {
@@ -94,21 +94,7 @@ map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
     position: "topright"
 })).addTo(map);
 
-// Open popups on the bottom
-map.addEventListener("popupopen", ({popup}) => {
-    popup._wrapper.remove();
-    popup._container.appendChild(popup._wrapper);
-});
-
-// Reset rotation when controller clicked
-map.rotateControl.getContainer().addEventListener("mouseup", () => {
-    map.setBearing(0);
-    if (!map.touchRotate.enabled()) {
-        setTimeout(() => { map.setBearing(0) }, 100);
-    }
-});
-
-var foundMarker;
+let foundMarker;
 (new L.Control.Search({
     position: "topright",
     layer: searchLayer,
@@ -127,9 +113,30 @@ var foundMarker;
     ) {
         foundMarker.remove();
     }
-    foundMarker = data.layer.addTo(map).openPopup();
+    
+    foundMarker = data.layer;
+    foundMarker.addTo(map);
+    foundMarker.openPopup();
 }).addTo(map);
 searchLayer.remove();
+
+L.control.layers.tree(null, createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, stationLayer, state), {
+    selectorBack: true
+}).addTo(map);
+
+// Reset rotation when controller clicked
+map.rotateControl.getContainer().addEventListener("mouseup", () => {
+    map.setBearing(0);
+    if (!map.touchRotate.enabled()) {
+        setTimeout(() => { map.setBearing(0) }, 100);
+    }
+});
+
+// Open popups on the bottom
+map.addEventListener("popupopen", ({popup}) => {
+    popup._wrapper.remove();
+    popup._container.appendChild(popup._wrapper);
+});
 
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -178,7 +185,7 @@ for (const routeMap of routeMaps) {
         for (const stopName of routeMap.stopNames) {
             const stopMarker = stopByName[stopName].stopMarker;
             stopMarker.options.visibility++;
-            stationLayer.addLayer(stopMarker);
+            stopMarker.addTo(stationLayer);
         }
     });
     
@@ -187,7 +194,7 @@ for (const routeMap of routeMaps) {
             const stopMarker = stopByName[stopName].stopMarker;
             stopMarker.options.visibility--;
             if (stopMarker.options.visibility == 0) {
-                stationLayer.removeLayer(stopMarker);
+                stopMarker.removeFrom(stationLayer);
             }
         }
     });
@@ -226,12 +233,4 @@ for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafle
 }
 
 updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map);
-
-
-
-
 updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
-
-L.control.layers.tree(null, createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, stationLayer, state), {
-    selectorBack: true
-}).addTo(map);
