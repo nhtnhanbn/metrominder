@@ -121,9 +121,33 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
     position: "topright"
 })).addTo(map);
 
-// TODO: SEARCH?
+let foundMarker;
+(new L.Control.Search({
+    position: "topright",
+    layer: searchLayer,
+    zoom: 14,
+    initial: false,
+    delayType: 0,
+    firstTipSubmit: true,
+    autoResize: false,
+    autoCollapse: true,
+    textErr: "Stop not found.",
+    textPlaceholder: "Search stops...                         ",
+    marker: false
+})).addEventListener("search:locationfound", (data) => {
+    if (
+        foundMarker &&
+        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))
+    ) {
+        foundMarker.remove();
+    }
+    
+    foundMarker = data.layer;
+    foundMarker.addTo(map);
+    foundMarker.openPopup();
+}).addTo(map);
+searchLayer.remove();
 
-// TODO: STOPMAPS SETUP LOOP
 for (const stopMap of stopMaps) {
     const stopMarker = L.marker(
         [stopMap.stopLat, stopMap.stopLon],
