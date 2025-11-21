@@ -20,7 +20,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     
     for (const routeMap of stopMap.routeMaps) {
         const routeItem = document.createElement("span");
-        routeItem.textContent = routeMap.routeName;
+        routeItem.textContent = routeMap.routeShortName;
         routeItem.style.backgroundColor = routeMap.routeColour;
         routeItem.style.color = routeMap.routeTextColour;
         routeItem.style.whiteSpace = "nowrap";

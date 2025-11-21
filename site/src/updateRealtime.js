@@ -196,7 +196,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                 let future = false;
                 for (const stop of stopTimeUpdate) {
                     const stopMap = stopById[stop.stopId];
-                    const platform = platformById[stop.stopId];
+                    const platform = platformById[stop.stopId] || "";
                     
                     if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
                         stopMap.stopDepartures.push({
