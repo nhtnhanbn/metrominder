@@ -9,9 +9,9 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
 
     const layerLeaves = {};
     for (const routeMap of routeMaps) {
-        layerLeaves[routeMap.routeName] = {
+        layerLeaves[routeMap.routeShortName] = {
             label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
-                        ${routeMap.routeName} line&nbsp
+                        ${routeMap.routeShortName} line&nbsp
                     </span>`,
             layer: routeMap.layerGroup
         };

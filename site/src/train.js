@@ -12,7 +12,7 @@ import "leaflet.marker.slideto";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
-import geojson from "./metro_lines.geojson";
+import geojson from "./metroTrainRoutes.geojson";
 import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
@@ -33,8 +33,8 @@ if ("serviceWorker" in navigator) {
 };
 
 const mode = "metroTrain";
-const { routeMaps, routeById, routeByName } = createRouteStructures(mode);
-const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps)
+const { routeMaps, routeById, routeByShortName } = createRouteStructures(mode);
+const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps);
 
 const state = {
     vehicleMarkerLabelSelection: "route"
@@ -56,6 +56,29 @@ map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
 
 L.Control.zoomHome().addTo(map);
 L.control.scale().addTo(map);
+
+// Open popups on the bottom
+map.addEventListener("popupopen", ({popup}) => {
+    popup._wrapper.remove();
+    popup._container.appendChild(popup._wrapper);
+});
+
+L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        opacity: 0.5,
+        attribution: `&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>`
+    }
+).addTo(map);
+
+// Reset rotation when controller clicked
+map.rotateControl.getContainer().addEventListener("mouseup", () => {
+    map.setBearing(0);
+    if (!map.touchRotate.enabled()) {
+        setTimeout(() => { map.setBearing(0) }, 100);
+    }
+});
 
 (new LocateControl({
     setView: "untilPan",
@@ -124,33 +147,6 @@ let foundMarker;
 }).addTo(map);
 searchLayer.remove();
 
-L.control.layers.tree(null, createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, stationLayer, state), {
-    selectorBack: true
-}).addTo(map);
-
-// Reset rotation when controller clicked
-map.rotateControl.getContainer().addEventListener("mouseup", () => {
-    map.setBearing(0);
-    if (!map.touchRotate.enabled()) {
-        setTimeout(() => { map.setBearing(0) }, 100);
-    }
-});
-
-// Open popups on the bottom
-map.addEventListener("popupopen", ({popup}) => {
-    popup._wrapper.remove();
-    popup._container.appendChild(popup._wrapper);
-});
-
-L.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        maxZoom: 19,
-        opacity: 0.5,
-        attribution: `&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>`
-    }
-).addTo(map);
-
 for (const stopMap of stopMaps) {
     const stopMarker = L.marker(
         [stopMap.stopLat, stopMap.stopLon],
@@ -176,14 +172,12 @@ for (const stopMap of stopMaps) {
 
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
-    routeMap.layerGroup.addLayer(
-        L.geoJSON(
-            geojson.features.filter((feature) => {
-                return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
-            }),
-            { style: { color: routeMap.routeColour } }
-        )
-    );
+    L.geoJSON(
+        geojson.features.filter((feature) => {
+            return routeMap.shapeIds.includes(feature.properties.SHAPE_ID);
+        }),
+        { style: { color: routeMap.routeColour } }
+    ).addTo(routeMap.layerGroup);
     
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stopName of routeMap.stopNames) {
@@ -197,16 +191,22 @@ for (const routeMap of routeMaps) {
     
     routeMap.layerGroup.addEventListener("remove", () => {
         for (const stopName of routeMap.stopNames) {
-            const stopMarker = stopByName[stopName].stopMarker;
-            stopMarker.options.visibility--;
-            if (stopMarker.options.visibility == 0) {
-                stopMarker.removeFrom(stationLayer);
+            if (stopName in stopByName) {
+                const stopMarker = stopByName[stopName].stopMarker;
+                stopMarker.options.visibility--;
+                if (stopMarker.options.visibility == 0) {
+                    stopMarker.removeFrom(stationLayer);
+                }
             }
         }
     });
 
     routeMap.layerGroup.addTo(map)
 }
+
+L.control.layers.tree(null, createLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stationLayer, state), {
+    selectorBack: true
+}).addTo(map);
 
 const attributionPrefix = document.createElement("span");
 

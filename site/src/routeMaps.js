@@ -2,8 +2,6 @@ import { metroTrainRouteMaps } from "./routeMapsInitial.js";
 import metroTrainRouteData from "../../data/gtfsschedule/2/routes.txt";
 import stationLines from "../../data/stationLines.json";
 
-
-
 function createRouteStructures(mode) {
     let routeMaps, routeData;
     if (mode === "metroTrain") {
@@ -11,7 +9,7 @@ function createRouteStructures(mode) {
         routeData = metroTrainRouteData;
     }
 
-    const routeById = {}, routeByName = {};
+    const routeById = {}, routeByShortName = {};
 
     for (const routeMap of routeMaps) {
         routeById[routeMap.routeId] = routeMap;
@@ -20,18 +18,18 @@ function createRouteStructures(mode) {
     for (const routeDatum of routeData) {
         if (routeDatum.route_id in routeById) {
             const routeMap = routeById[routeDatum.route_id];
-            routeMap.routeName = routeDatum.route_short_name;
+            routeMap.routeShortName = routeDatum.route_short_name;
             routeMap.routeColour = "#" + routeDatum.route_color;
             routeMap.routeTextColour = "#" + routeDatum.route_text_color;
-            routeMap.stopNames = stationLines[routeMap.routeName];
+            routeMap.stopNames = stationLines[routeMap.routeShortName];
         }
     }
 
     for (const routeMap of routeMaps) {
-        routeByName[routeMap.routeName] = routeMap;
+        routeByShortName[routeMap.routeShortName] = routeMap;
     }
 
-    return { routeMaps, routeById, routeByName };
+    return { routeMaps, routeById, routeByShortName };
 }
 
 export { createRouteStructures };
