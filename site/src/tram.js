@@ -20,7 +20,7 @@ import { timeString } from "./stringConverters.js";
 import { createLayerTree } from "./layerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
-import stationIcon from "./station.svg";
+import stopIcon from "./PICTO_MODE_Tram.svg";
 import "./style.css";
 
 if ("serviceWorker" in navigator) {
@@ -129,7 +129,7 @@ for (const stopMap of stopMaps) {
         [stopMap.stopLat, stopMap.stopLon],
         {
             icon: L.icon({
-                iconUrl: stationIcon,
+                iconUrl: stopIcon,
                 iconSize: [20, 20]
             }),
             title: stopMap.stopName,
