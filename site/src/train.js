@@ -13,8 +13,8 @@ import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
-import { routeMaps, routeById, routeByName } from "./routeMaps.js";
-import { stopMaps, stopById, stopByName, platformById } from "./stopMaps.js";
+import { createRouteStructures } from "./routeMaps.js";
+import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
 import { timeString } from "./stringConverters.js";
 import { createLayerTree } from "./layerTree.js";
@@ -22,10 +22,6 @@ import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
 import stationIcon from "./station.svg";
 import "./style.css";
-
-const state = {
-    vehicleMarkerLabelSelection: "route"
-}
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -35,6 +31,14 @@ if ("serviceWorker" in navigator) {
             .catch((err) => console.log("serviceWorker.js not registered", err))
     })
 };
+
+const mode = "metroTrain";
+const { routeMaps, routeById, routeByName } = createRouteStructures(mode);
+const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps)
+
+const state = {
+    vehicleMarkerLabelSelection: "route"
+}
 
 const searchLayer = L.layerGroup();
 const stationLayer = L.layerGroup();
@@ -183,9 +187,11 @@ for (const routeMap of routeMaps) {
     
     routeMap.layerGroup.addEventListener("add", () => {
         for (const stopName of routeMap.stopNames) {
-            const stopMarker = stopByName[stopName].stopMarker;
-            stopMarker.options.visibility++;
-            stopMarker.addTo(stationLayer);
+            if (stopName in stopByName) {
+                const stopMarker = stopByName[stopName].stopMarker;
+                stopMarker.options.visibility++;
+                stopMarker.addTo(stationLayer);
+            }
         }
     });
     
