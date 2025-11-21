@@ -43,8 +43,7 @@ function createStopStructures(mode, routeMaps) {
         }
         stopById[stopId] = stopById[parentId];
     }
-
-            console.log(stopByName);
+    
     for (const routeMap of routeMaps) {
         for (const stopName of routeMap.stopNames) {
             if (stopName in stopByName) {

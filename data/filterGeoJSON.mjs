@@ -1,10 +1,10 @@
 import fs from "fs/promises";
-import { routeMaps } from "../site/src/routeMaps.js";
+import { metroTrainRouteMaps } from "../site/src/routeMapsInitial.js";
 
 const GEOJSON_URL = "https://opendata.transport.vic.gov.au/dataset/6d36dfd9-8693-4552-8a03-05eb29a391fd/resource/52e5173e-b5d5-4b65-9b98-89f225fc529c/download/public_transport_lines.geojson";
-const shapeIds = Object.values(routeMaps).flatMap((routeMap) => {
+const shapeIds = metroTrainRouteMaps.values().flatMap((routeMap) => {
     return routeMap.shapeIds;
-});
+}).toArray();
 
 (async () => {
     console.log("Fetching...");
@@ -16,21 +16,35 @@ const shapeIds = Object.values(routeMaps).flatMap((routeMap) => {
     console.log("Read.");
     
     console.log("Filtering...");
-    const features = data.features.filter((feature) => {
-        return (feature.properties.MODE == "METRO TRAIN") &&
-               shapeIds.includes(feature.properties.SHAPE_ID);
+
+    const metroTrainFeatures = data.features.filter((feature) => {
+        return (feature.properties.MODE == "METRO TRAIN") && shapeIds.includes(feature.properties.SHAPE_ID);
     });
+
+    const metroTramFeatures = data.features.filter((feature) => {
+        return feature.properties.MODE == "METRO TRAM";
+    });
+
     console.log("Filtered.");
     
     console.log("Stringifying...");
-    const geojson = JSON.stringify({
+
+    const metroTrainRoutes = JSON.stringify({
         type: "FeatureCollection",
-        name: "metro_lines",
-        features: features
+        name: "metroTrainRoutes",
+        features: metroTrainFeatures
     });
+
+    const metroTramRoutes = JSON.stringify({
+        type: "FeatureCollection",
+        name: "metroTramRoutes",
+        features: metroTramFeatures
+    });
+
     console.log("Stringified.");
     
     console.log("Writing...");
-    await fs.writeFile("../site/src/metro_lines.geojson", geojson);
+    await fs.writeFile("../site/src/metroTrainRoutes.geojson", metroTrainRoutes);
+    await fs.writeFile("../site/src/metroTramRoutes.geojson", metroTramRoutes);
     console.log("Written.");
 })();
