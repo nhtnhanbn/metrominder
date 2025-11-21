@@ -13,30 +13,19 @@ import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import geojson from "./metro_lines.geojson";
-import stopData from "../../data/gtfsschedule/stops.txt";
 import { routeMaps, routeById, routeByName } from "./routeMaps.js";
+import { stopMaps, stopById, stopByName, platformById } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
-import { timeString, shortName } from "./stringConverters.js";
-import stationIcon from "./station.svg";
+import { timeString } from "./stringConverters.js";
 import { createLayerTree } from "./layerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
+import stationIcon from "./station.svg";
 import "./style.css";
 
 const state = {
     vehicleMarkerLabelSelection: "route"
 }
-
-class StopMap {
-    constructor(stopId, stopName, stopMarker) {
-        this.stopId = stopId;
-        this.stopName = stopName;
-        this.stopMarker = stopMarker;
-        this.routeMaps = new Set();
-        this.stopDepartures = [];
-    }
-}
-const stopMaps = new Set(), stopById = {}, stopByName = {};
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -151,40 +140,27 @@ L.tileLayer(
     }
 ).addTo(map);
 
+for (const stopMap of stopMaps) {
+    const stopMarker = L.marker(
+        [stopMap.stopLat, stopMap.stopLon],
+        {
+            icon: L.icon({
+                iconUrl: stationIcon,
+                iconSize: [20, 20]
+            }),
+            title: stopMap.stopName,
+            visibility: 0
+        }
+    );
 
-
-const parentById = {}, platformById = {};
-for (const stopDatum of stopData) {
-    let { stop_id, stop_name, stop_lat, stop_lon, parent_station, platform_code } = stopDatum;
+    stopMarker.bindPopup(
+        createStopPopup(stopMap, routeMaps, stopByName, map),
+        { autoPan: false }
+    );
     
-    if (parent_station === "") {
-        stop_name = shortName(stop_name);
-        
-        const stopMarker = L.marker(
-            [stop_lat, stop_lon],
-            {
-                icon: L.icon({
-                    iconUrl: stationIcon,
-                    iconSize: [20, 20]
-                }),
-                title: stop_name,
-                visibility: 0
-            }
-        );
+    stopMarker.addTo(searchLayer);
 
-        const stopMap = new StopMap(stop_id, stop_name, stopMarker);
-        stopMaps.add(stopMap);
-        stopById[stop_id] = stopMap;
-        stopByName[stop_name] = stopMap;
-
-        stopMarker.bindPopup(
-            createStopPopup(stopMap, routeMaps, stopByName, map),
-            { autoPan: false }
-        ).addTo(searchLayer);
-    } else {
-        parentById[stop_id] = parent_station;
-        platformById[stop_id] = platform_code;
-    }
+    stopMap.stopMarker = stopMarker;
 }
 
 for (const routeMap of routeMaps) {
@@ -217,19 +193,6 @@ for (const routeMap of routeMaps) {
     });
 
     routeMap.layerGroup.addTo(map)
-}
-
-for (let [stopId, parentId] of Object.entries(parentById)) {
-    while (parentId in parentById) {
-        parentId = parentById[parentId];
-    }
-    stopById[stopId] = stopById[parentId];
-}
-
-for (const routeMap of routeMaps) {
-    for (const stopName of routeMap.stopNames) {
-        stopByName[stopName].routeMaps.add(routeMap);
-    }
 }
 
 const attributionPrefix = document.createElement("span");
