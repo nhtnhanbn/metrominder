@@ -19,6 +19,7 @@ function createRouteStructures(mode) {
         if (routeDatum.route_id in routeById) {
             const routeMap = routeById[routeDatum.route_id];
             routeMap.routeShortName = routeDatum.route_short_name;
+            routeMap.routeLongName = routeDatum.route_long_name;
             routeMap.routeColour = "#" + routeDatum.route_color;
             routeMap.routeTextColour = "#" + routeDatum.route_text_color;
             routeMap.stopNames = stationLines[routeMap.routeShortName];

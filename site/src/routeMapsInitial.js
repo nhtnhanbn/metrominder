@@ -1,8 +1,9 @@
 class RouteMap {
-    constructor(routeId, shapeIds) {
-        this.routeId = `aus:vic:vic-02-${routeId}:`;
+    constructor(routeCode, shapeIds) {
+        this.routeCode = routeCode;
+        this.routeId = `aus:vic:vic-02-${routeCode}:`;
         this.shapeIds = shapeIds.map((shapeId) => {
-            return `2-${routeId}-vpt-${shapeId}`;
+            return `2-${this.routeCode}-vpt-${shapeId}`;
         });
     }
 }

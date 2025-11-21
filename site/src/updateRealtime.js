@@ -17,7 +17,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
             const { latitude, longitude, bearing } = vehicle.vehicle.position;
             const tripId = vehicle.vehicle.trip.tripId;
             const routeId = vehicle.vehicle.trip.routeId;
-            const routeCode = routeId.slice(15, 18);
+            const routeCode = routeById[routeId].routeCode;
             const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
             const vehicleMap = vehicleByTripId[tripId];
             

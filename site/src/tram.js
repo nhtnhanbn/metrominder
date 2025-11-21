@@ -1,0 +1,126 @@
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import "leaflet-fullscreen/dist/leaflet.fullscreen.css";
+import "leaflet-fullscreen";
+import "leaflet-rotate";
+import "leaflet-search/src/leaflet-search.css";
+import "leaflet-search";
+import "leaflet.control.layers.tree/L.Control.Layers.Tree.css";
+import "leaflet.control.layers.tree";
+import "leaflet.zoomhome";
+import "leaflet.marker.slideto";
+import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+import { LocateControl } from "leaflet.locatecontrol";
+import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
+import geojson from "./metroTramRoutes.geojson";
+import { createRouteStructures } from "./routeMaps.js";
+import { createStopStructures } from "./stopMaps.js";
+import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
+import { timeString } from "./stringConverters.js";
+import { createLayerTree } from "./layerTree.js";
+import { updatePositions, updateTrips } from "./updateRealtime.js";
+import { createStopPopup } from "./stopPopup.js";
+import stationIcon from "./station.svg";
+import "./style.css";
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker
+            .register("./serviceWorker.js")
+            .then((res) => console.log("serviceWorker.js registered", res))
+            .catch((err) => console.log("serviceWorker.js not registered", err))
+    })
+};
+
+const mode = "tram";
+// const { routeMaps, routeById, routeByName } = createRouteStructures(mode);
+// const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps);
+
+const state = {
+    vehicleMarkerLabelSelection: "route"
+}
+
+const searchLayer = L.layerGroup();
+const stationLayer = L.layerGroup();
+
+const map = L.map("map", {
+    zoomControl: false,
+    zoomSnap: 0,
+    fullscreenControl: true,
+    rotate: true,
+    rotateControl: { closeOnZeroBearing: false },
+    touchRotate: true
+}).fitBounds([[-38.0, 145.2], [-37.6, 144.8]]);
+
+map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
+
+L.Control.zoomHome().addTo(map);
+L.control.scale().addTo(map);
+
+// Open popups on the bottom
+map.addEventListener("popupopen", ({popup}) => {
+    popup._wrapper.remove();
+    popup._container.appendChild(popup._wrapper);
+});
+
+L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        opacity: 0.5,
+        attribution: `&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>`
+    }
+).addTo(map);
+
+// Reset rotation when controller clicked
+map.rotateControl.getContainer().addEventListener("mouseup", () => {
+    map.setBearing(0);
+    if (!map.touchRotate.enabled()) {
+        setTimeout(() => { map.setBearing(0) }, 100);
+    }
+});
+
+(new LocateControl({
+    setView: "untilPan",
+    flyTo: true,
+    initialZoomLevel: 14,
+    clickBehavior: {
+        inView: "stop",
+        inViewNotFollowing: "setView",
+        outOfView: "setView"
+    },
+    compassStyle: {
+        rotateWithView: true
+    }
+})).addTo(map);
+
+(new (L.Control.extend({
+    onAdd: (map) => {
+        const title = L.DomUtil.create("a", "watermark");
+        title.title = "About MetroMinder";
+        
+        const metro = L.DomUtil.create("span", null, title);
+        metro.style.fontWeight = 1;
+        metro.textContent = "METRO";
+
+        const minder = L.DomUtil.create("span", null, title);
+        minder.style.fontWeight = 1000;
+        minder.textContent = "MINDER";
+        
+        const about = document.querySelector("dialog");
+        title.addEventListener("click", (event) => {
+            event.preventDefault();
+            about.showModal();
+        });
+        
+        return title;
+    },
+    
+    onRemove: (map) => {}
+}))({
+    position: "topright"
+})).addTo(map);
+
+L.geoJSON(
+    geojson
+).addTo(map);
