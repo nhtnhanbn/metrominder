@@ -158,6 +158,7 @@ for (const stopMap of stopMaps) {
             visibility: 0
         }
     );
+    stopMap.stopMarker = stopMarker;
 
     stopMarker.bindPopup(
         createStopPopup(stopMap, routeMaps, stopByName, map),
@@ -165,8 +166,6 @@ for (const stopMap of stopMaps) {
     );
     
     stopMarker.addTo(searchLayer);
-
-    stopMap.stopMarker = stopMarker;
 }
 
 for (const routeMap of routeMaps) {
