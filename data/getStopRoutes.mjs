@@ -1,51 +1,42 @@
 import fs from "fs/promises";
-import { shortName } from "../site/src/stringConverters.js";
+import { parse } from "csv-parse/sync";
 
-(async () => {
-    const route_type = parseInt(process.argv[2]);
-
-    const routesResponse = await fetch(`http://localhost:3000/routes/${route_type}`);
-    const routesData = await routesResponse.json();
-
+async function getStopRoutes(number, filename) {
     const stopRoutes = {};
-    for (const { route_id, route_number, route_gtfs_id } of routesData.routes) {
-        let routeCode;
-        switch (route_type) {
-            case 0:
-            case 3:
-                routeCode = route_gtfs_id.slice(-3);
-                break;
-            case 1:
-            case 2:
-                routeCode = route_number;
-                break;
-        }
-
-        const stopsResponse = await fetch(`http://localhost:3000/stops/${route_id}/${route_type}`);
-        const stopsData = await stopsResponse.json();
-
-        stopRoutes[routeCode] = [];
-        try {
-        for (const { stop_name } of stopsData.stops) {
-            stopRoutes[routeCode].push(shortName(stop_name));
-        }
-        } catch {
-            console.log(stopsData);
-        }
+    
+    const rawTrips = await fs.readFile(`./gtfsschedule/${number}/trips.txt`);
+    const trips = parse(rawTrips, { bom: true, columns: true });
+    const tripRoute = {};
+    for (const trip of trips) {
+        tripRoute[trip.trip_id] = trip.route_id;
     }
+    console.log(`Processed trips for ${filename}.`)
 
-    switch (route_type) {
-        case 0:
-            await fs.writeFile("./metroTrainStopRoutes.json", JSON.stringify(stopRoutes));
-            break;
-        case 1:
-            await fs.writeFile("./metroTramStopRoutes.json", JSON.stringify(stopRoutes));
-            break;
-        case 2:
-            await fs.writeFile("./busStopRoutes.json", JSON.stringify(stopRoutes));
-            break;
-        case 3:
-            await fs.writeFile("./regionTrainStopRoutes.json", JSON.stringify(stopRoutes));
-            break;
+    const rawRoutes = await fs.readFile(`./gtfsschedule/${number}/routes.txt`);
+    const routes = parse(rawRoutes, { bom: true, columns: true });
+    for (const route of routes) {
+        stopRoutes[route.route_id] = new Set();
     }
-})();
+    console.log(`Processed routes for ${filename}.`)
+    
+    const rawStopTimes = await fs.readFile(`./gtfsschedule/${number}/stop_times.txt`);
+    const stopTimes = parse(rawStopTimes, { bom: true, columns: true });
+    for (const stopTime of stopTimes) {
+        stopRoutes[tripRoute[stopTime.trip_id]].add(stopTime.stop_id)
+    }
+    console.log(`Processed stop times for ${filename}.`)
+
+    for (const route of routes) {
+        stopRoutes[route.route_id] = Array.from(stopRoutes[route.route_id]);
+    }
+    console.log(`Arrayified for ${filename}.`)
+
+    await fs.writeFile(filename, JSON.stringify(stopRoutes));
+
+    console.log(`Written ${filename}.`)
+}
+
+getStopRoutes(1, "./regionTrainStopRoutes.json");
+getStopRoutes(2, "./metroTrainStopRoutes.json");
+getStopRoutes(3, "./metroTramStopRoutes.json");
+getStopRoutes(4, "./busStopRoutes.json");
