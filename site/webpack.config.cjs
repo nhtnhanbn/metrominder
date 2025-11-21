@@ -5,7 +5,9 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 
 module.exports = {
     mode: "development",
-    entry: './src/index.js',
+    entry: {
+        train: "./src/train.js"
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
@@ -14,6 +16,8 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: "./src/template.html",
+            filename: "train/index.html",
+            chunks: ["train"],
             favicon: "./src/favicon.svg"
         }),
         new WorkboxPlugin.GenerateSW({
