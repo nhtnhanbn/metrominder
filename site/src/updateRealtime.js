@@ -1,8 +1,17 @@
 import { VehicleMap } from "./vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
+import metroTrainTripData from "../../data/gtfsschedule/2/trips.txt";
+import metroTramTripData from "../../data/gtfsschedule/3/trips.txt";
 
-const URL = "http://localhost:3000";//"https://api.metrominder.nhan.au";
+const URL = "https://api.metrominder.nhan.au";
+
+const headsignByTripId = {};
+for (const tripData of [metroTrainTripData, metroTramTripData]) {
+    for (const tripDatum of tripData) {
+        headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
+    }
+}
 
 function calculateBearing(fromLat, fromLon, toLat, toLon) {
     function toRad(deg) {
@@ -218,10 +227,9 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
             if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate) {
                 const routeId = tripUpdate.trip.routeId;
                 const stopTimeUpdate = tripUpdate.stopTimeUpdate;
-                const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-                const lastStopName = shortName(stopById[lastStop.stopId].stopName);
+                const headsign = headsignByTripId[tripId];
                 let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
-                                        Service to ${lastStopName}
+                                        Service to ${headsign}
                                     </h3>`;
                 
                 if (tripId in vehicleByTripId) {
@@ -236,7 +244,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                     if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
                         stopMap.stopDepartures.push({
                             routeMap: routeById[routeId],
-                            lastStopName: lastStopName,
+                            headsign: headsign,
                             platform: platform,
                             time: stop.departure.time
                         });
@@ -301,7 +309,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                     const row = document.createElement("tr");
                     
                     const serviceCell = document.createElement("td");
-                    serviceCell.textContent = stopDeparture.lastStopName;
+                    serviceCell.textContent = stopDeparture.headsign;
                     serviceCell.style.backgroundColor = stopDeparture.routeMap.routeColour;
                     serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
                     row.appendChild(serviceCell);
