@@ -50,7 +50,7 @@ const map = L.map("map", {
     rotate: true,
     rotateControl: { closeOnZeroBearing: false },
     touchRotate: true
-}).fitBounds([[-38.0, 145.2], [-37.6, 144.8]]);
+}).fitBounds([[-37.95, 145.2], [-37.6, 144.85]]);
 
 map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
 

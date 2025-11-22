@@ -29,6 +29,78 @@ function calculateBearing(fromLat, fromLon, toLat, toLon) {
     return Math.atan2(y, x) * 180 / Math.PI;
 }
 
+function createConsistInfo(mode, vehicle) {
+    let vehicleConsistInfo = "", vehicleModelCode = "";
+    if (mode === "metroTrain") {
+        const consist = vehicle.vehicle.vehicle.id;
+        const splitConsist = consist.split("-");
+        let carCode = splitConsist.find((car) => {
+            return car[car.length-1] === 'T';
+        });
+        
+        let carCount, vehicleModelName;
+        if (carCode) {
+            carCount = splitConsist.length;
+            
+            const carNumber = parseInt(carCode.slice(0, -1));
+            if (1000 <= carNumber && carNumber < 1200) {
+                vehicleModelName = "Comeng";
+                vehicleModelCode = "COM";
+            } else if (2500 <= carNumber && carNumber < 2600) {
+                vehicleModelName = "Siemens";
+                vehicleModelCode = "SIE";
+            } else if (1300 <= carNumber && carNumber < 1700) {
+                vehicleModelName = "X'Trapolis 100";
+                vehicleModelCode = "XT1";
+            } else if (8100 <= carNumber && carNumber < 8900) {
+                vehicleModelName = "X'Trapolis 2.0";
+                vehicleModelCode = "XT2";
+            }
+        } else if (splitConsist.length > 0) {
+            carCode = splitConsist[0];
+
+            const carNumber = parseInt(carCode.slice(0, -1));
+            if (9000 <= carNumber && carNumber < 10000) {
+                carCount = 7;
+                vehicleModelName = "High Capacity Metro Train";
+                vehicleModelCode = "HCM";
+            } else if (7000 <= carNumber && carNumber < 7030) {
+                carCount = 1;
+                vehicleModelName = "Sprinter";
+                vehicleModelCode = "SPR";
+            }
+        }
+        
+        if ((!carCount || !vehicleModelName) && routeId === "aus:vic:vic-02-STY:") {
+            carCount = 1;
+            vehicleModelName = "Sprinter";
+            vehicleModelCode = "SPR";
+        }
+        
+        vehicleConsistInfo += `<p style="margin-bottom: 0">
+                                <b>`;
+        
+        if (carCount) {
+            vehicleConsistInfo += `${carCount}-car`;
+        }
+        
+        if (vehicleModelName) {
+            vehicleConsistInfo += ` ${vehicleModelName}`;
+        }
+        
+        vehicleConsistInfo += `</b>
+                    </p>
+                    <p style="margin-top: 0">
+                        ${consist}
+                    </p>`;
+    } else if (mode === "metroTram") {
+        vehicleModelCode = vehicle.vehicle.vehicle.label;
+        vehicleConsistInfo = `<p><b>${vehicleModelCode}-Class</b> ${vehicle.vehicle.vehicle.id}</p>`
+    }
+    
+    return { vehicleConsistInfo, vehicleModelCode };
+}
+
 async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, mode) {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
@@ -72,67 +144,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
                                         .slideTo([latitude, longitude]);
                 vehicleMaps.add(vehicleMap);
             } else {
-                const consist = vehicle.vehicle.vehicle.id;
-                const splitConsist = consist.split("-");
-                let carCode = splitConsist.find((car) => {
-                    return car[car.length-1] === 'T';
-                });
-                
-                let carCount, vehicleModelName, vehicleModelCode = "";
-                if (carCode) {
-                    carCount = splitConsist.length;
-                    
-                    const carNumber = parseInt(carCode.slice(0, -1));
-                    if (1000 <= carNumber && carNumber < 1200) {
-                        vehicleModelName = "Comeng";
-                        vehicleModelCode = "COM";
-                    } else if (2500 <= carNumber && carNumber < 2600) {
-                        vehicleModelName = "Siemens";
-                        vehicleModelCode = "SIE";
-                    } else if (1300 <= carNumber && carNumber < 1700) {
-                        vehicleModelName = "X'Trapolis 100";
-                        vehicleModelCode = "XT1";
-                    } else if (8100 <= carNumber && carNumber < 8900) {
-                        vehicleModelName = "X'Trapolis 2.0";
-                        vehicleModelCode = "XT2";
-                    }
-                } else if (splitConsist.length > 0) {
-                    carCode = splitConsist[0];
-
-                    const carNumber = parseInt(carCode.slice(0, -1));
-                    if (9000 <= carNumber && carNumber < 10000) {
-                        carCount = 7;
-                        vehicleModelName = "High Capacity Metro Train";
-                        vehicleModelCode = "HCM";
-                    } else if (7000 <= carNumber && carNumber < 7030) {
-                        carCount = 1;
-                        vehicleModelName = "Sprinter";
-                        vehicleModelCode = "SPR";
-                    }
-                }
-                
-                if ((!carCount || !vehicleModelName) && routeId === "aus:vic:vic-02-STY:") {
-                    carCount = 1;
-                    vehicleModelName = "Sprinter";
-                    vehicleModelCode = "SPR";
-                }
-                
-                let vehicleConsistInfo = `<p style="margin-bottom: 0">
-                                       <b>`;
-                
-                if (carCount) {
-                    vehicleConsistInfo += `${carCount}-car`;
-                }
-                
-                if (vehicleModelName) {
-                    vehicleConsistInfo += ` ${vehicleModelName}`;
-                }
-                
-                vehicleConsistInfo += `</b>
-                            </p>
-                            <p style="margin-top: 0">
-                                ${consist}
-                            </p>`;
+                const { vehicleConsistInfo, vehicleModelCode } = createConsistInfo(mode, vehicle);
                 
                 const vehicleLabelContent = document.createElement("div");
                 if (state.vehicleMarkerLabelSelection === "route") {
