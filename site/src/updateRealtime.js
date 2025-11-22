@@ -4,6 +4,22 @@ import { createStopPopup } from "./stopPopup.js";
 
 const URL = "https://api.metrominder.nhan.au";
 
+function calculateBearing(fromLat, fromLon, toLat, toLon) {
+    function toRad(deg) {
+        return deg * Math.PI / 180;
+    }
+
+    fromLat = toRad(fromLat);
+    fromLon = toRad(fromLon);
+    toLat = toRad(toLat);
+    toLon = toRad(toLon);
+
+    const y = Math.sin(toLon-fromLon) * Math.cos(toLat);
+    const x = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(toLon-fromLon);
+
+    return Math.atan2(y, x) * 180 / Math.PI;
+}
+
 async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, mode) {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
@@ -16,14 +32,24 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
         vehicleMaps.clear();
 
         for (const vehicle of feed.feed.entity) {
-            const { latitude, longitude, bearing } = vehicle.vehicle.position;
+            let { latitude, longitude, bearing } = vehicle.vehicle.position;
             const tripId = vehicle.vehicle.trip.tripId;
             const routeId = vehicle.vehicle.trip.routeId;
             const routeCode = routeById[routeId].routeCode;
             const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
-            const vehicleMap = vehicleByTripId[tripId];
             
-            if (oldVehicleMaps.has(vehicleMap)) {
+            if (tripId in vehicleByTripId) {
+                const vehicleMap = vehicleByTripId[tripId];
+
+                if (bearing === undefined) {
+                    if ("nextStopMap" in vehicleMap) {
+                        const stopMap = vehicleMap.nextStopMap;
+                        bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
+                    } else {
+                        bearing = 0;
+                    }
+                }
+
                 vehicleMap.vehicleMarker.setRotation(bearing)
                                         .slideTo([latitude, longitude]);
                 vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
@@ -107,7 +133,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
                             stroke: routeById[routeId].routeTextColour,
                             color: routeById[routeId].routeColour,
                             size: 40,
-                            rotation: bearing
+                            rotation: bearing || 0
                         },
                         pane: "vehiclePane",
                         interactive: false,
@@ -220,6 +246,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                                                  <td>${stopTime}</td>
                                              </tr>`;
                         } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
+                            vehicleByTripId[tripId].nextStopMap = stopMap;
                             vehiclePopup += `<table>
                                                  <tr>
                                                      <th style="text-align: left;">ARRIVING AT</td>
