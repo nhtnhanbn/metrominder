@@ -257,7 +257,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                         if (future) {
                             vehiclePopup += `<tr>
                                                  <td style="text-align: left;">${stopName}</td>
-                                                 <td>${platform}</td>
+                                                 ${ mode === "metroTrain" ? `<td>${platform}</td>` : "" }
                                                  <td>${stopTime}</td>
                                              </tr>`;
                         } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
@@ -265,12 +265,12 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                             vehiclePopup += `<table>
                                                  <tr>
                                                      <th style="text-align: left;">ARRIVING AT</td>
-                                                     <th>PLATFORM</td>
+                                                     ${ mode === "metroTrain" ? `<th>PLATFORM</td>` : "" }
                                                      <th>TIME</td>
                                                  </tr>
                                                  <tr>
                                                      <th style="text-align: left;">${stopName}</td>
-                                                     <th>${platform}</td>
+                                                     ${ mode === "metroTrain" ? `<th>${platform}</td>` : "" }
                                                      <th>${stopTime}</td>
                                                  </tr>`;
                             future = true;
@@ -298,7 +298,8 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                 const table = document.createElement("table");
                 
                 const header = document.createElement("tr");
-                for (const column of ["DEPARTING FOR", "PLATFORM", "TIME"]) {
+                const columns = mode === "metroTrain" ? ["DEPARTING FOR", "PLATFORM", "TIME"] : ["DEPARTING FOR", "TIME"];
+                for (const column of columns) {
                     const cell = document.createElement("th");
                     cell.textContent = column;
                     header.appendChild(cell);
@@ -314,14 +315,15 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                     serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
                     row.appendChild(serviceCell);
                     
-                    for (const column of [
-                        stopDeparture.platform,
-                        timeString(stopDeparture.time)
-                    ]) {
-                        const cell = document.createElement("td");
-                        cell.textContent = column;
-                        row.appendChild(cell);
+                    if (mode === "metroTrain") {
+                        const platformCell = document.createElement("td");
+                        platformCell.textContent = stopDeparture.platform;
+                        row.appendChild(platformCell);
                     }
+                    
+                    const timeCell = document.createElement("td");
+                    timeCell.textContent = timeString(stopDeparture.time);
+                    row.appendChild(timeCell);
                     
                     table.appendChild(row);
                 }
