@@ -24,7 +24,9 @@ function createRouteStructures(mode) {
         routeMaps = new Set();
         routeData = metroTramRouteData;
 
-        for (const routeDatum of routeData) {
+        for (const routeDatum of routeData.sort((a, b) => {
+            return a.route_short_name - b.route_short_name;
+        })) {
             const routeCode = routeDatum.route_short_name;
             routeMaps.add(new MetroTramRouteMap(routeCode));
         }

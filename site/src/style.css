@@ -53,6 +53,9 @@ button {
 
 .preset-button {
     width: 100%;
+}
+
+.colour-button {
     text-shadow:
         1px 1px white,
         1px -1px white,

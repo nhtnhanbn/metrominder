@@ -1,6 +1,6 @@
 import { setLines } from "./lineFilters.js";
 
-function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, stationLayer, state) {
+function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stopLayer, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
@@ -39,14 +39,14 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                 },
                 {
                     label: `<label title="Label train markers with type code">
-                                <input class="marker-radio" type="radio" name="labels" value="type">
+                                <input class="marker-radio" type="radio" name="labels" value="model">
                                 Type
                             </label>`,
                     eventedClasses: [{
                         className: "marker-radio",
                         event: "change",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            state.vehicleMarkerLabelSelection = "type";
+                            state.vehicleMarkerLabelSelection = "model";
                             for (const vehicleMap of vehicleMaps) {
                                 vehicleMap.vehicleLabelContent.textContent = vehicleMap.vehicleModelCode;
                             }
@@ -57,7 +57,7 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
         },
         {
             label: "Show stations",
-            layer: stationLayer
+            layer: stopLayer
         },
         {
             label: `<div class="leaflet-control-layers-separator"></div>`
@@ -183,7 +183,7 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
             label: "<b>Presets<b>",
             children: [
                 {
-                    label: `<button class="preset-button" title="Burnley, Clifton Hill, Caulfield and Northern groups and City Circle line" style="background: linear-gradient(to right, #152C6B 25%, #BE1014 25% 50%, #279FD5 50% 75%, #FFBE00 75%);">
+                    label: `<button class="preset-button colour-button" title="Burnley, Clifton Hill, Caulfield and Northern groups and City Circle line" style="background: linear-gradient(to right, #152C6B 25%, #BE1014 25% 50%, #279FD5 50% 75%, #FFBE00 75%);">
                                 City Loop
                             </button>`,
                     eventedClasses: [{
@@ -191,12 +191,12 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setLines("Melbourne Central", stopByName, routeMaps, map);
-                            routeByName["Flemington Racecourse"].layerGroup.remove();
+                            routeByShortName["Flemington Racecourse"].layerGroup.remove();
                         }
                     }]
                 },
                 {
-                    label: `<button class="preset-button" title="Burnley, Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #152C6B 25%, #028430 25% 50%, #279FD5 50% 75%, #F178AF 75%);">
+                    label: `<button class="preset-button colour-button" title="Burnley, Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #152C6B 25%, #028430 25% 50%, #279FD5 50% 75%, #F178AF 75%);">
                                 Richmond
                             </button>`,
                     eventedClasses: [{
@@ -204,13 +204,13 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setLines("Richmond", stopByName, routeMaps, map);
-                            routeByName["Werribee"].layerGroup.addTo(map);
-                            routeByName["Williamstown"].layerGroup.addTo(map);
+                            routeByShortName["Werribee"].layerGroup.addTo(map);
+                            routeByShortName["Williamstown"].layerGroup.addTo(map);
                         }
                     }]
                 },
                 {
-                    label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #028430 25%, #279FD5 25% 75%, #F178AF 75%);">
+                    label: `<button class="preset-button colour-button" title="Cross-city (except Stony Point line) and Caulfield groups and Sandringham line" style="background: linear-gradient(to right, #028430 25%, #279FD5 25% 75%, #F178AF 75%);">
                                 South Yarra
                             </button>`,
                     eventedClasses: [{
@@ -218,13 +218,13 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setLines("South Yarra", stopByName, routeMaps, map);
-                            routeByName["Werribee"].layerGroup.addTo(map);
-                            routeByName["Williamstown"].layerGroup.addTo(map);
+                            routeByShortName["Werribee"].layerGroup.addTo(map);
+                            routeByShortName["Williamstown"].layerGroup.addTo(map);
                         }
                     }]
                 },
                 {
-                    label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Caulfield groups" style="background: linear-gradient(to right, #028430 50%, #279FD5 50%);">
+                    label: `<button class="preset-button colour-button" title="Cross-city (except Stony Point line) and Caulfield groups" style="background: linear-gradient(to right, #028430 50%, #279FD5 50%);">
                                 Caulfield
                             </button>`,
                     eventedClasses: [{
@@ -232,13 +232,13 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setLines("Caulfield", stopByName, routeMaps, map);
-                            routeByName["Werribee"].layerGroup.addTo(map);
-                            routeByName["Williamstown"].layerGroup.addTo(map);
+                            routeByShortName["Werribee"].layerGroup.addTo(map);
+                            routeByShortName["Williamstown"].layerGroup.addTo(map);
                         }
                     }]
                 },
                 {
-                    label: `<button class="preset-button" title="Cross-city (except Stony Point line) and Northern groups" style="background: linear-gradient(to right, #028430 50%, #FFBE00 50%);">
+                    label: `<button class="preset-button colour-button" title="Cross-city (except Stony Point line) and Northern groups" style="background: linear-gradient(to right, #028430 50%, #FFBE00 50%);">
                                 North Melbourne
                             </button>`,
                     eventedClasses: [{
@@ -246,13 +246,13 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setLines("North Melbourne", stopByName, routeMaps, map);
-                            routeByName["Frankston"].layerGroup.addTo(map);
-                            routeByName["Flemington Racecourse"].layerGroup.remove();
+                            routeByShortName["Frankston"].layerGroup.addTo(map);
+                            routeByShortName["Flemington Racecourse"].layerGroup.remove();
                         }
                     }]
                 },
                 {
-                    label: `<button class="preset-button" title="Cross-city (except Stony Point line) group and Sunbury line" style="background: linear-gradient(to right, #028430 75%, #FFBE00 25%);">
+                    label: `<button class="preset-button colour-button" title="Cross-city (except Stony Point line) group and Sunbury line" style="background: linear-gradient(to right, #028430 75%, #FFBE00 25%);">
                                 Footscray
                             </button>`,
                     eventedClasses: [{
@@ -260,7 +260,7 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setLines("Footscray", stopByName, routeMaps, map);
-                            routeByName["Frankston"].layerGroup.addTo(map);
+                            routeByShortName["Frankston"].layerGroup.addTo(map);
                         }
                     }]
                 }
@@ -269,4 +269,4 @@ function createLayerTree(routeMaps, routeByName, stopByName, vehicleMaps, statio
     ];
 }
 
-export { createLayerTree };
+export { createMetroTrainLayerTree };

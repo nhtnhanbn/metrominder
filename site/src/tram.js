@@ -17,7 +17,7 @@ import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
 import { timeString } from "./stringConverters.js";
-import { createLayerTree } from "./layerTree.js";
+import { createMetroTramLayerTree } from "./metroTramLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
 import stopIcon from "./PICTO_MODE_Tram.svg";
@@ -41,7 +41,7 @@ const state = {
 }
 
 const searchLayer = L.layerGroup();
-const stationLayer = L.layerGroup();
+const stopLayer = L.layerGroup();
 
 const map = L.map("map", {
     zoomControl: false,
@@ -137,7 +137,7 @@ let foundMarker;
 })).addEventListener("search:locationfound", (data) => {
     if (
         foundMarker &&
-        (foundMarker.options.visibility == 0 || !map.hasLayer(stationLayer))
+        (foundMarker.options.visibility == 0 || !map.hasLayer(stopLayer))
     ) {
         foundMarker.remove();
     }
@@ -182,7 +182,7 @@ for (const routeMap of routeMaps) {
             if (stopId in stopById) {
                 const stopMarker = stopById[stopId].stopMarker;
                 stopMarker.options.visibility++;
-                stopMarker.addTo(stationLayer);
+                stopMarker.addTo(stopLayer);
             }
         }
     });
@@ -193,7 +193,7 @@ for (const routeMap of routeMaps) {
                 const stopMarker = stopById[stopId].stopMarker;
                 stopMarker.options.visibility--;
                 if (stopMarker.options.visibility == 0) {
-                    stopMarker.removeFrom(stationLayer);
+                    stopMarker.removeFrom(stopLayer);
                 }
             }
         }
@@ -202,7 +202,7 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup.addTo(map)
 }
 
-L.control.layers.tree(null, createLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stationLayer, state), {
+L.control.layers.tree(null, createMetroTramLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stopLayer, state), {
     selectorBack: true
 }).addTo(map);
 
