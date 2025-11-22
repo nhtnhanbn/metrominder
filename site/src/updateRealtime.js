@@ -2,12 +2,14 @@ import { VehicleMap } from "./vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
 
-async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map) {
+const URL = "https://api.metrominder.nhan.au";
+
+async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, mode) {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     try {
-        const response = await fetch("https://api.metrominder.nhan.au/positions");
+        const response = await fetch(`${URL}/${mode}/positions`);
         const feed = await response.json();
         
         const oldVehicleMaps = new Set(vehicleMaps);
@@ -160,16 +162,16 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
     }
     
     setTimeout(() => {
-        updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map);
+        updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, mode);
     }, 1000);
 }
 
-async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map) {
+async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, mode) {
     tripStatus.textContent = "Retrieving trip updates...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     try {
-        const response = await fetch("https://api.metrominder.nhan.au/trips");
+        const response = await fetch(`${URL}/${mode}/trips`);
         const feed = await response.json();
         
         for (const stopMap of stopMaps) {
@@ -305,7 +307,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
     }
     
     setTimeout(() => {
-        updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
+        updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, mode);
     }, 1000);
 };
 

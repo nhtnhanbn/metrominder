@@ -205,3 +205,36 @@ for (const routeMap of routeMaps) {
 L.control.layers.tree(null, createLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stationLayer, state), {
     selectorBack: true
 }).addTo(map);
+
+const attributionPrefix = document.createElement("span");
+
+const positionStatus = document.createElement("div");
+const tripStatus = document.createElement("div");
+
+const clock = document.createElement("div");
+setInterval(() => {
+    const time = timeString(Math.floor(Date.now()/1000), true);
+    clock.textContent = `Current time: ${time}`;
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+}, 1000);
+
+const dtpAttribution = document.createElement("div");
+
+const dtpLink = document.createElement("a");
+dtpLink.href = "https://opendata.transport.vic.gov.au/organization/public-transport";
+dtpLink.textContent = "DTP";
+dtpAttribution.appendChild(dtpLink);
+
+const dtpTime = document.createTextNode("");
+dtpAttribution.appendChild(dtpTime);
+
+const leafletAttribution = document.createElement("a");
+leafletAttribution.href = "https://leafletjs.com";
+leafletAttribution.textContent = "Leaflet";
+
+for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafletAttribution]) {
+    attributionPrefix.appendChild(element);
+}
+
+updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, mode);
+updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, mode);

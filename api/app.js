@@ -32,7 +32,28 @@ async function updateFeed(resource) {
     return feed;
 }
 
-let positionCache = { timestamp: 0 }, tripCache = { timestamp: 0};
+async function sendFeed(res, cache, endpoint, ttl) {
+    if (Date.now() - cache.timestamp > ttl) {
+        cache.feed = await updateFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
+        cache.timestamp = Date.now();
+    }
+    
+    res.json(cache);
+}
+
+function handleError(err, res, next, cache) {
+    if ("feed" in cache) {
+        res.json(cache);
+        console.log(err);
+    } else {
+        next(err);
+    }
+}
+
+const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0 };
+const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0 };
+const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0 };
+const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0 };
 
 const app = express();
 
@@ -63,54 +84,92 @@ app.use("/stops/:route_id/:route_type",
     }
 );
 
-app.use("/positions",
+app.use("/metrotrain/positions",
     cors(),
     async (req, res) => {
-        if (Date.now() - positionCache.timestamp > 4000) {
-            positionCache = {
-                timestamp: Date.now(),
-                feed: await updateFeed(
-                    "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/metro/vehicle-positions"
-                )
-            };
-        }
-        
-        res.json(positionCache);
+        await sendFeed(res, metroTrainPositionCache, "metro/vehicle-positions", 4000);
     }
 );
 
-app.use("/trips",
+app.use("/metrotrain/trips",
     cors(),
     async (req, res) => {
-        if (Date.now() - tripCache.timestamp > 8000) {
-            tripCache = {
-                timestamp: Date.now(),
-                feed: await updateFeed(
-                    "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/metro/trip-updates"
-                )
-            };
-        }
-        
-        res.json(tripCache);
+        await sendFeed(res, metroTrainTripCache, "metro/trip-updates", 8000);
     }
 );
 
-app.use("/positions", (err, req, res, next) => {
-    if ("feed" in positionCache) {
-        res.json(positionCache);
-        console.log(err);
-    } else {
-        next(err);
+app.use("/metrotram/positions",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, metroTramPositionCache, "tram/vehicle-positions", 4000);
     }
+);
+
+app.use("/metrotram/trips",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, metroTramTripCache, "tram/trip-updates", 8000);
+    }
+);
+
+app.use("/regiontrain/positions",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, regionTrainPositionCache, "vline/vehicle-positions", 4000);
+    }
+);
+
+app.use("/regiontrain/trips",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, regionTrainTripCache, "vline/trip-updates", 8000);
+    }
+);
+
+app.use("/bus/positions",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, busPositionCache, "bus/vehicle-positions", 4000);
+    }
+);
+
+app.use("/bus/trips",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, busTripCache, "bus/trip-updates", 8000);
+    }
+);
+
+app.use("/metrotrain/positions", (err, req, res, next) => {
+    handleError(err, res, next, metroTrainPositionCache);
 });
 
-app.use("/trips", (err, req, res, next) => {
-    if ("feed" in tripCache) {
-        res.json(tripCache);
-        console.log(err);
-    } else {
-        next(err);
-    }
+app.use("/metrotrain/trips", (err, req, res, next) => {
+    handleError(err, res, next, metroTrainTripCache);
+});
+
+app.use("/metrotram/positions", (err, req, res, next) => {
+    handleError(err, res, next, metroTramPositionCache);
+});
+
+app.use("/metrotram/trips", (err, req, res, next) => {
+    handleError(err, res, next, metroTramTripCache);
+});
+
+app.use("/regiontrain/positions", (err, req, res, next) => {
+    handleError(err, res, next, regionTrainPositionCache);
+});
+
+app.use("/regiontrain/trips", (err, req, res, next) => {
+    handleError(err, res, next, regionTrainTripCache);
+});
+
+app.use("/bus/positions", (err, req, res, next) => {
+    handleError(err, res, next, busPositionCache);
+});
+
+app.use("/bus/trips", (err, req, res, next) => {
+    handleError(err, res, next, busTripCache);
 });
 
 app.use((err, req, res, next) => {
