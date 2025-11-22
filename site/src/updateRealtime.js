@@ -2,7 +2,7 @@ import { VehicleMap } from "./vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
 
-const URL = "https://api.metrominder.nhan.au";
+const URL = "http://localhost:3000";//"https://api.metrominder.nhan.au";
 
 function calculateBearing(fromLat, fromLon, toLat, toLon) {
     function toRad(deg) {
@@ -42,7 +42,14 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
                 const vehicleMap = vehicleByTripId[tripId];
 
                 if (bearing === undefined) {
-                    if ("nextStopMap" in vehicleMap) {
+                    const { lat, lng } = vehicleMap.vehicleMarker.getLatLng();
+                    if (lat !== undefined && lng !== undefined && (latitude !== lat || longitude !== lng)) {
+                        vehicleMap.bearing = calculateBearing(lat, lng, latitude, longitude);
+                    }
+                    
+                    if ("bearing" in vehicleMap) {
+                        bearing = vehicleMap.bearing;
+                    } else if ("nextStopMap" in vehicleMap) {
                         const stopMap = vehicleMap.nextStopMap;
                         bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
                     } else {
