@@ -29,7 +29,7 @@ function calculateBearing(fromLat, fromLon, toLat, toLon) {
     return Math.atan2(y, x) * 180 / Math.PI;
 }
 
-function createConsistInfo(mode, vehicle) {
+function createConsistInfo(mode, vehicle, routeId) {
     let vehicleConsistInfo = "", vehicleModelCode = "";
     if (mode === "metroTrain") {
         const consist = vehicle.vehicle.vehicle.id;
@@ -144,7 +144,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
                                         .slideTo([latitude, longitude]);
                 vehicleMaps.add(vehicleMap);
             } else {
-                const { vehicleConsistInfo, vehicleModelCode } = createConsistInfo(mode, vehicle);
+                const { vehicleConsistInfo, vehicleModelCode } = createConsistInfo(mode, vehicle, routeId);
                 
                 const vehicleLabelContent = document.createElement("div");
                 if (state.vehicleMarkerLabelSelection === "route") {
@@ -276,7 +276,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                             vehicleByTripId[tripId].nextStopMap = stopMap;
                             vehiclePopup += `<table>
                                                  <tr>
-                                                     <th style="text-align: left;">ARRIVING AT</td>
+                                                     <th style="text-align: left;">ARRIVING</td>
                                                      ${ mode === "metroTrain" ? `<th>PLATFORM</td>` : "" }
                                                      <th>TIME</td>
                                                  </tr>
@@ -299,7 +299,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
         
         for (const stopMap of stopMaps) {
             const stopMarker = stopMap.stopMarker;
-            const stopPopup = createStopPopup(stopMap, routeMaps, stopByName, map);
+            const stopPopup = createStopPopup(stopMap, routeMaps, stopByName, map, mode);
             
             const stopDepartures = stopMap.stopDepartures;
             if (stopDepartures.length > 0) {
@@ -310,7 +310,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                 const table = document.createElement("table");
                 
                 const header = document.createElement("tr");
-                const columns = mode === "metroTrain" ? ["DEPARTING FOR", "PLATFORM", "TIME"] : ["DEPARTING FOR", "TIME"];
+                const columns = mode === "metroTrain" ? ["DEPARTING", "PLATFORM", "TIME"] : ["DEPARTING", "TIME"];
                 for (const column of columns) {
                     const cell = document.createElement("th");
                     cell.textContent = column;
@@ -322,7 +322,11 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                     const row = document.createElement("tr");
                     
                     const serviceCell = document.createElement("td");
-                    serviceCell.textContent = stopDeparture.headsign;
+                    if (mode === "metroTrain") {
+                        serviceCell.textContent = stopDeparture.headsign;
+                    } else if (mode === "metroTram") {
+                        serviceCell.textContent = `${stopDeparture.routeMap.routeShortName} ${stopDeparture.headsign}`;
+                    }
                     serviceCell.style.backgroundColor = stopDeparture.routeMap.routeColour;
                     serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
                     row.appendChild(serviceCell);
@@ -342,7 +346,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                 stopPopup.appendChild(table);
             } else {
                 const text = document.createElement("div");
-                text.textContent = "No departing trains.";
+                text.textContent = "No departing services.";
                 stopPopup.appendChild(text);
             }
             

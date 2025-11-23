@@ -27,7 +27,7 @@ npm run dev
 
 ## Thanks
 
-GTFS Schedule and GTFS Realtime data and metropolitan train pictogram © State of Victoria ([Department of Transport and Planning](https://opendata.transport.vic.gov.au/organization/public-transport)) licensed under a [Creative Commons Attribution 4.0 International licence](https://creativecommons.org/licenses/by/4.0).
+GTFS Schedule and GTFS Realtime data and transport mode pictogram © State of Victoria ([Department of Transport and Planning](https://opendata.transport.vic.gov.au/organization/public-transport)) licensed under a [Creative Commons Attribution 4.0 International licence](https://creativecommons.org/licenses/by/4.0).
 
 Rolling stock information and codes from [Metro Trains Melbourne](https://cmsportal.metrotrains.com.au/docnum.aspx?id=A8520) and [Vicsig](https://vicsig.net/suburban/fleet).
 

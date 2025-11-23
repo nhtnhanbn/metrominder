@@ -1,6 +1,6 @@
-import { setLines, addLines, filterLines } from "./lineFilters.js";
+import { setRoutes, addRoutes, filterRoutes } from "./routeFilters.js";
 
-function createStopPopup(stopMap, routeMaps, stopByName, map) {
+function createStopPopup(stopMap, routeMaps, stopByName, map, mode) {
     const stopName = stopMap.stopName;
     const stopMarker = stopMap.stopMarker;
 
@@ -12,7 +12,11 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     stopPopup.appendChild(header);
     
     const routesHeading = document.createElement("h4");
-    routesHeading.textContent = "Lines";
+    if (mode === "metroTrain") {
+        routesHeading.textContent = "Lines";
+    } else if (mode === "metroTram") {
+        routesHeading.textContent = "Routes";
+    }
     stopPopup.appendChild(routesHeading);
     
     const routesList = document.createElement("p");
@@ -33,7 +37,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const setButton = document.createElement("button");
     setButton.textContent = "Set";
     setButton.addEventListener("click", () => {
-        setLines(stopName, stopByName, routeMaps, map);
+        setRoutes(stopName, stopByName, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(setButton);
@@ -41,7 +45,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const addButton = document.createElement("button");
     addButton.textContent = "Add";
     addButton.addEventListener("click", () => {
-        addLines(stopName, stopByName, routeMaps, map);
+        addRoutes(stopName, stopByName, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(addButton);
@@ -49,7 +53,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const filterButton = document.createElement("button");
     filterButton.textContent = "Filter";
     filterButton.addEventListener("click", () => {
-        filterLines(stopName, stopByName, routeMaps, map);
+        filterRoutes(stopName, stopByName, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(filterButton);

@@ -1,4 +1,4 @@
-import { setLines } from "./lineFilters.js";
+import { setRoutes } from "./routeFilters.js";
 
 function createMetroTramLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stopLayer, state) {
     setInterval(() => {
@@ -10,7 +10,7 @@ function createMetroTramLayerTree(routeMaps, routeByShortName, stopByName, vehic
     const layerLeaves = [...routeMaps].map((routeMap) => {
         return {
             label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
-                        Route ${routeMap.routeShortName}&nbsp
+                        ${routeMap.routeShortName} ${routeMap.routeLongName}&nbsp
                     </span>`,
             layer: routeMap.layerGroup
         };
@@ -77,7 +77,7 @@ function createMetroTramLayerTree(routeMaps, routeByShortName, stopByName, vehic
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setLines("Melbourne University/Swanston St #1", stopByName, routeMaps, map);
+                            setRoutes("Melbourne University/Swanston St #1", stopByName, routeMaps, map);
                         }
                     }]
                 }

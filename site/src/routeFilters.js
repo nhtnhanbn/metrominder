@@ -1,4 +1,4 @@
-function setLines(stopName, stopByName, routeMaps, map) {
+function setRoutes(stopName, stopByName, routeMaps, map) {
     for (const routeMap of routeMaps) {
         routeMap.layerGroup.remove();
     }
@@ -8,13 +8,13 @@ function setLines(stopName, stopByName, routeMaps, map) {
     }
 }
 
-function addLines(stopName, stopByName, routeMaps, map) {
+function addRoutes(stopName, stopByName, routeMaps, map) {
     for (const routeMap of stopByName[stopName].routeMaps){
         routeMap.layerGroup.addTo(map);
     }
 }
 
-function filterLines(stopName, stopByName, routeMaps, map) {
+function filterRoutes(stopName, stopByName, routeMaps, map) {
     for (const routeMap of routeMaps) {
         if (!stopByName[stopName].routeMaps.has(routeMap)) {
             routeMap.layerGroup.remove();
@@ -22,4 +22,4 @@ function filterLines(stopName, stopByName, routeMaps, map) {
     }
 }
 
-export { setLines, addLines, filterLines };
+export { setRoutes, addRoutes, filterRoutes };
