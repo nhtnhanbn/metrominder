@@ -3,8 +3,21 @@ import "dotenv/config";
 import cors from "cors";
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { createHmac } from "crypto";
+import fs from "fs/promises";
+import { parse } from "csv-parse/sync";
 
 const PORT = process.env.PORT || 3000;
+
+const headsignByTripId = {};
+(async () => {
+    for (let number = 1; number <= 4; number++) {
+        const rawTripData = await fs.readFile(`../data/gtfsschedule/${number}/trips.txt`);
+        const tripData = parse(rawTripData, { bom: true, columns: true });
+        for (const tripDatum of tripData) {
+            headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
+        }
+    }
+})();
 
 async function updateFeed(resource) {
     const response = await fetch(
@@ -35,6 +48,10 @@ async function updateFeed(resource) {
 async function sendFeed(res, cache, endpoint, ttl) {
     if (Date.now() - cache.timestamp > ttl) {
         cache.feed = await updateFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
+        cache.headsignByTripId = {};
+        for (const entity of cache.feed.entity) {
+            cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
+        }
         cache.timestamp = Date.now();
     }
     

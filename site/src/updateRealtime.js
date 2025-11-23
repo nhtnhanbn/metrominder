@@ -1,17 +1,8 @@
 import { VehicleMap } from "./vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
-import metroTrainTripData from "../../data/gtfsschedule/2/trips.txt";
-import metroTramTripData from "../../data/gtfsschedule/3/trips.txt";
 
 const URL = "https://api.metrominder.nhan.au";
-
-const headsignByTripId = {};
-for (const tripData of [metroTrainTripData, metroTramTripData]) {
-    for (const tripDatum of tripData) {
-        headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
-    }
-}
 
 function calculateBearing(fromLat, fromLon, toLat, toLon) {
     function toRad(deg) {
@@ -239,7 +230,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
             if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate) {
                 const routeId = tripUpdate.trip.routeId;
                 const stopTimeUpdate = tripUpdate.stopTimeUpdate;
-                const headsign = headsignByTripId[tripId];
+                const headsign = feed.headsignByTripId[tripId];
                 let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
                                         Service to ${headsign}
                                     </h3>`;
