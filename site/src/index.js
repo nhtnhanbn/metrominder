@@ -32,7 +32,7 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const modes = ["metroTrain", "regionTrain", "metroTram"];
+const modes = ["metroTrain", "regionTrain", "metroTram", "bus"];
 const { routeMaps, routeById, routeByCode } = createRouteStructures(modes);
 const { stopMaps, stopById, stopByName, platformById } = createStopStructures(modes, routeMaps);
 

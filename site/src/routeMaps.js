@@ -2,16 +2,27 @@ import { metroTrainRouteMaps, regionTrainRouteMaps } from "./routeMapsInitial.js
 import metroTrainRouteData from "../../data/gtfsschedule/2/routes.txt";
 import metroTramRouteData from "../../data/gtfsschedule/3/routes.txt";
 import regionTrainRouteData from "../../data/gtfsschedule/1/routes.txt";
+import busRouteData from "../../data/gtfsschedule/4/routes.txt";
 import stopRoutes from "../../data/stopRoutes.json";
 import metroTrainGeojson from "./metroTrainRoutes.geojson";
 import metroTramGeojson from "./metroTramRoutes.geojson";
 import regionTrainGeojson from "./regionTrainRoutes.geojson";
+import busGeojson from "./busRoutes.geojson";
 
 class MetroTramRouteMap {
     constructor(routeCode) {
         // routeCode same as short name
         this.routeCode = routeCode;
         this.routeId = `aus:vic:vic-03-${routeCode}:`;
+        this.geojson = [];
+    }
+}
+
+class BusRouteMap {
+    constructor(routeId, routeCode) {
+        // routeCode same as short name
+        this.routeId = routeId;
+        this.routeCode = routeCode;
         this.geojson = [];
     }
 }
@@ -34,6 +45,15 @@ function createRouteStructures(modes) {
         } else if (mode === "regionTrain") {
             routeData.push(...regionTrainRouteData);
             routeMaps = routeMaps.union(regionTrainRouteMaps);
+        } else if (mode === "bus") {
+            routeData.push(...busRouteData);
+
+            for (const routeDatum of busRouteData.sort((a, b) => {
+                return a.route_short_name - b.route_short_name;
+            })) {
+                const routeCode = routeDatum.route_short_name;
+                routeMaps.add(new BusRouteMap(routeDatum.route_id, routeCode));
+            }
         }
     }
 
@@ -70,6 +90,13 @@ function createRouteStructures(modes) {
         } else if (mode === "regionTrain") {
             for (const feature of regionTrainGeojson.features) {
                 routeByCode[feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
+            }
+        } else if (mode === "bus") {
+            for (const feature of busGeojson.features) {
+                const routeCode = feature.properties.SHORT_NAME;
+                if (routeCode in routeByCode) {
+                    routeByCode[routeCode].geojson.push(feature);
+                }
             }
         }
     }

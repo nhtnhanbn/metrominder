@@ -32,6 +32,10 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
         return (feature.properties.MODE == "REGIONAL TRAIN") && regionTrainShapeIds.includes(feature.properties.SHAPE_ID);
     });
 
+    const busFeatures = data.features.filter((feature) => {
+        return feature.properties.MODE == "METRO BUS" || feature.properties.MODE == "REGIONAL BUS";
+    });
+
     console.log("Filtered.");
     
     console.log("Stringifying...");
@@ -54,11 +58,18 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
         features: regionTrainFeatures
     });
 
+    const busRoutes = JSON.stringify({
+        type: "FeatureCollection",
+        name: "busRoutes",
+        features: busFeatures
+    });
+
     console.log("Stringified.");
     
     console.log("Writing...");
     await fs.writeFile("../site/src/metroTrainRoutes.geojson", metroTrainRoutes);
     await fs.writeFile("../site/src/metroTramRoutes.geojson", metroTramRoutes);
     await fs.writeFile("../site/src/regionTrainRoutes.geojson", regionTrainRoutes);
+    await fs.writeFile("../site/src/busRoutes.geojson", busRoutes);
     console.log("Written.");
 })();

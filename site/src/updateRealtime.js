@@ -174,6 +174,11 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
                 let { latitude, longitude, bearing } = vehicle.vehicle.position;
                 const tripId = vehicle.vehicle.trip.tripId;
                 const routeId = vehicle.vehicle.trip.routeId;
+
+                if (!(routeId in routeById)) {
+                    continue;
+                }
+
                 const routeCode = routeById[routeId].routeCode;
                 const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
                 
@@ -295,8 +300,8 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
             for (const trip of feed.feed.entity) {
                 const tripUpdate = trip.tripUpdate;
                 const tripId = tripUpdate.trip.tripId;
-                if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate) {
-                    const routeId = tripUpdate.trip.routeId;
+                const routeId = tripUpdate.trip.routeId;
+                if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate && routeId in routeById) {
                     const stopTimeUpdate = tripUpdate.stopTimeUpdate;
 
                     let headsign = feed.headsignByTripId[tripId];
