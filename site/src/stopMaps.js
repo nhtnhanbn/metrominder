@@ -36,7 +36,9 @@ function createStopStructures(modes, routeMaps, stopDatas) {
         let { stop_id, stop_name, stop_lat, stop_lon, parent_station, platform_code } = stopDatum;
         
         if (parent_station === "") {
-            stop_name = shortName(stop_name);
+            if (stop_id[0] === 'v') {
+                stop_name = shortName(stop_name);
+            }
 
             const stopMap = new StopMap(stop_id, stop_name, stop_lat, stop_lon);
             stopMaps.add(stopMap);

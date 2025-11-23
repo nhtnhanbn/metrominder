@@ -281,7 +281,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
     }, 1000);
 }
 
-async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes) {
+async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes) {
     tripStatus.textContent = "Retrieving trip updates...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
@@ -307,7 +307,12 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                     let headsign = feed.headsignByTripId[tripId];
                     if (headsign === undefined) {
                         const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-                        headsign = shortName(stopById[lastStop.stopId].stopName);
+                        const lastStopMap = stopById[lastStop.stopId];
+                        if (lastStopMap.isStation()) {
+                            headsign = shortName(lastStopMap.stopName);
+                        } else {
+                            headsign = lastStopMap.stopName;
+                        }
                     }
 
                     let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
@@ -334,7 +339,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                         
                         if (tripId in vehicleByTripId && stop.arrival) {
                             const vehicleMap = vehicleByTripId[tripId];
-                            const stopName = shortName(stopMap.stopName);
+                            const stopName = stopMap.isStation() ? shortName(stopMap.stopName) : stopMap.stopName;
                             const stopTime = timeString(stop.arrival.time);
                             
                             if (future) {
@@ -371,7 +376,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
         
         for (const stopMap of stopMaps) {
             const stopMarker = stopMap.stopMarker;
-            const stopPopup = createStopPopup(stopMap, routeMaps, stopByName, map);
+            const stopPopup = createStopPopup(stopMap, routeMaps, stopById, map);
             
             const stopDepartures = stopMap.stopDepartures;
             if (stopDepartures.length > 0) {
@@ -439,7 +444,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
     }
     
     setTimeout(() => {
-        updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);
+        updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);
     }, 1000);
 };
 

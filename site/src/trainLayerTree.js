@@ -1,6 +1,6 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state) {
+function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
@@ -240,7 +240,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("Melbourne Central", stopByName, routeMaps, map);
+                            setRoutes("vic:rail:MCE", stopById, routeMaps, map);
                             routeByCode["RCE"].layerGroup.remove();
                         }
                     }]
@@ -253,7 +253,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("Richmond", stopByName, routeMaps, map);
+                            setRoutes("vic:rail:RMD", stopById, routeMaps, map);
                             routeByCode["WER"].layerGroup.addTo(map);
                             routeByCode["WIL"].layerGroup.addTo(map);
                         }
@@ -267,7 +267,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("South Yarra", stopByName, routeMaps, map);
+                            setRoutes("vic:rail:SYR", stopById, routeMaps, map);
                             routeByCode["WER"].layerGroup.addTo(map);
                             routeByCode["WIL"].layerGroup.addTo(map);
                         }
@@ -281,7 +281,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("Caulfield", stopByName, routeMaps, map);
+                            setRoutes("vic:rail:CFD", stopById, routeMaps, map);
                             routeByCode["WER"].layerGroup.addTo(map);
                             routeByCode["WIL"].layerGroup.addTo(map);
                         }
@@ -295,7 +295,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("North Melbourne", stopByName, routeMaps, map);
+                            setRoutes("vic:rail:NME", stopById, routeMaps, map);
                             routeByCode["FKN"].layerGroup.addTo(map);
                             routeByCode["RCE"].layerGroup.remove();
                         }
@@ -309,7 +309,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("Footscray", stopByName, routeMaps, map);
+                            setRoutes("vic:rail:FSY", stopById, routeMaps, map);
                             routeByCode["FKN"].layerGroup.addTo(map);
                         }
                     }]

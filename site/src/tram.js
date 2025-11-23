@@ -164,7 +164,7 @@ for (const stopMap of stopMaps) {
     stopMap.stopMarker = stopMarker;
 
     stopMarker.bindPopup(
-        createStopPopup(stopMap, routeMaps, stopByName, map),
+        createStopPopup(stopMap, routeMaps, stopById, map),
         { autoPan: false }
     );
     
@@ -200,10 +200,10 @@ for (const routeMap of routeMaps) {
         }
     });
 
-    routeMap.layerGroup.addTo(map)
+    routeMap.layerGroup.addTo(map);
 }
 
-L.control.layers.tree(null, createMetroTramLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state), {
+L.control.layers.tree(null, createMetroTramLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, state), {
     selectorBack: true
 }).addTo(map);
 
@@ -238,4 +238,4 @@ for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafle
 }
 
 updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, modes);
-updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);
+updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);

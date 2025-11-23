@@ -1,8 +1,7 @@
 import { setRoutes, addRoutes, filterRoutes } from "./routeFilters.js";
 
-function createStopPopup(stopMap, routeMaps, stopByName, map) {
-    const stopName = stopMap.stopName;
-    const stopMarker = stopMap.stopMarker;
+function createStopPopup(stopMap, routeMaps, stopById, map) {
+    const { stopId, stopName, stopMarker } = stopMap;
 
     const stopPopup = document.createElement("div");
     stopPopup.style.textAlign = "center";
@@ -37,7 +36,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const setButton = document.createElement("button");
     setButton.textContent = "Set";
     setButton.addEventListener("click", () => {
-        setRoutes(stopName, stopByName, routeMaps, map);
+        setRoutes(stopId, stopById, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(setButton);
@@ -45,7 +44,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const addButton = document.createElement("button");
     addButton.textContent = "Add";
     addButton.addEventListener("click", () => {
-        addRoutes(stopName, stopByName, routeMaps, map);
+        addRoutes(stopId, stopById, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(addButton);
@@ -53,7 +52,7 @@ function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const filterButton = document.createElement("button");
     filterButton.textContent = "Filter";
     filterButton.addEventListener("click", () => {
-        filterRoutes(stopName, stopByName, routeMaps, map);
+        filterRoutes(stopId, stopById, routeMaps, map);
         stopMarker.closePopup();
     });
     routesList.appendChild(filterButton);

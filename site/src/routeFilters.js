@@ -1,22 +1,22 @@
-function setRoutes(stopName, stopByName, routeMaps, map) {
+function setRoutes(stopId, stopById, routeMaps, map) {
     for (const routeMap of routeMaps) {
         routeMap.layerGroup.remove();
     }
 
-    for (const routeMap of stopByName[stopName].routeMaps){
+    for (const routeMap of stopById[stopId].routeMaps){
         routeMap.layerGroup.addTo(map);
     }
 }
 
-function addRoutes(stopName, stopByName, routeMaps, map) {
-    for (const routeMap of stopByName[stopName].routeMaps){
+function addRoutes(stopId, stopById, routeMaps, map) {
+    for (const routeMap of stopById[stopId].routeMaps){
         routeMap.layerGroup.addTo(map);
     }
 }
 
-function filterRoutes(stopName, stopByName, routeMaps, map) {
+function filterRoutes(stopId, stopById, routeMaps, map) {
     for (const routeMap of routeMaps) {
-        if (!stopByName[stopName].routeMaps.has(routeMap)) {
+        if (!stopById[stopId].routeMaps.has(routeMap)) {
             routeMap.layerGroup.remove();
         }
     }

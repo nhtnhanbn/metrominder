@@ -24,7 +24,7 @@ import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
 import { timeString } from "./stringConverters.js";
-import { createTrainLayerTree } from "./trainLayerTree.js";
+import { createIndexLayerTree } from "./indexLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
 import metroTrainStopIcon from "./PICTO_MODE_Train.svg";
@@ -32,6 +32,18 @@ import regionTrainStopIcon from "./PICTO_MODE_RegionalTrain.svg";
 import tramStopIcon from "./PICTO_MODE_Tram.svg";
 import busStopIcon from "./PICTO_MODE_Bus.svg";
 import "./style.css";
+
+function computeMode(routeId) {
+    if (routeId[0] !== 'a') {
+        return "bus";
+    } else if (routeId[13] === '1') {
+        return "regionTrain";
+    } else if (routeId[13] === '2') {
+        return "metroTrain";
+    } else if (routeId[13] === '3') {
+        return "metroTram";
+    }
+}
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -172,12 +184,16 @@ searchLayer.remove();
 for (const stopMap of stopMaps) {
     let stopIcon = regionTrainStopIcon;
     for (const routeMap of stopMap.routeMaps) {
-        if (routeMap.routeId[0] !== 'a') {
-            stopIcon = busStopIcon;
-        } else if (routeMap.routeId[13] === '2') {
-            stopIcon = metroTrainStopIcon;
-        } else if (routeMap.routeId[13] === '3') {
-            stopIcon = tramStopIcon;
+        switch (computeMode(routeMap.routeId)) {
+            case "bus":
+                stopIcon = busStopIcon;
+                break;
+            case "metroTrain":
+                stopIcon = metroTrainStopIcon;
+                break;
+            case "metroTram":
+                stopIcon = tramStopIcon;
+                break;
         }
     }
 
@@ -195,12 +211,19 @@ for (const stopMap of stopMaps) {
     stopMap.stopMarker = stopMarker;
 
     stopMarker.bindPopup(
-        createStopPopup(stopMap, routeMaps, stopByName, map),
+        createStopPopup(stopMap, routeMaps, stopById, map),
         { autoPan: false }
     );
     
     stopMarker.addTo(searchLayer);
 }
+
+const layerGroupByMode = {
+    metroTrain: L.layerGroup(),
+    regionTrain: L.layerGroup(),
+    metroTram: L.layerGroup(),
+    bus: L.layerGroup()
+};
 
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
@@ -234,10 +257,10 @@ for (const routeMap of routeMaps) {
         }
     });
 
-    routeMap.layerGroup.addTo(map)
+    routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
 }
 
-L.control.layers.tree(null, createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state), {
+L.control.layers.tree(null, createIndexLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, layerGroupByMode, state), {
     selectorBack: true
 }).addTo(map);
 
@@ -273,4 +296,4 @@ for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafle
 
 
 updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, modes);
-updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);
+updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);

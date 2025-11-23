@@ -1,27 +1,18 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createMetroTramLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, state) {
+function createIndexLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, layerGroupByMode, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
         ).checked = true;
     }, 0);
 
-    const layerLeaves = [...routeMaps].map((routeMap) => {
-        return {
-            label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
-                        ${routeMap.routeShortName} ${routeMap.routeLongName}&nbsp
-                    </span>`,
-            layer: routeMap.layerGroup
-        };
-    });
-
     return [
         {
-            label: "Tram marker labels",
+            label: "Vehicle marker labels",
             children: [
                 {
-                    label: `<label title="Label tram markers with route code">
+                    label: `<label title="Label vehicle markers with route code">
                                 <input class="marker-radio" type="radio" name="labels" value="route">
                                 Route
                             </label>`,
@@ -37,9 +28,9 @@ function createMetroTramLayerTree(routeMaps, routeByCode, stopById, vehicleMaps,
                     }]
                 },
                 {
-                    label: `<label title="Label tram markers with class code">
+                    label: `<label title="Label vehicle markers with type code">
                                 <input class="marker-radio" type="radio" name="labels" value="model">
-                                Class
+                                Type
                             </label>`,
                     eventedClasses: [{
                         className: "marker-radio",
@@ -62,22 +53,26 @@ function createMetroTramLayerTree(routeMaps, routeByCode, stopById, vehicleMaps,
             label: `<div class="leaflet-control-layers-separator"></div>`
         },
         {
-            label: "<b>All routes<b>",
-            selectAllCheckbox: true,
-            children: layerLeaves
+            label: `<b style="background-color: #0072CE; color: white;">
+                        Metropolitan trains
+                    </b>
+                    &nbsp`,
+            layer: layerGroupByMode.metroTrain
         },
         {
             label: "<b>Presets<b>",
             children: [
                 {
-                    label: `<button class="preset-button" title="Routes 1, 3, 5, 6, 16, 64, 67 and 72">
-                                Melbourne University/Swanston St
+                    label: `<button class="preset-button" title="Clear all">
+                                Clear all
                             </button>`,
                     eventedClasses: [{
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("19489", stopById, routeMaps, map);
+                            for (const layerGroup of Object.values(layerGroupByMode)) {
+                                layerGroup.remove();
+                            }
                         }
                     }]
                 }
@@ -86,4 +81,4 @@ function createMetroTramLayerTree(routeMaps, routeByCode, stopById, vehicleMaps,
     ];
 }
 
-export { createMetroTramLayerTree };
+export { createIndexLayerTree };
