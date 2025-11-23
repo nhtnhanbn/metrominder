@@ -173,7 +173,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
             for (const vehicle of feed.feed.entity) {
                 let { latitude, longitude, bearing } = vehicle.vehicle.position;
                 const tripId = vehicle.vehicle.trip.tripId;
-                const routeId = vehicle.vehicle.trip.routeId;
+                const routeId = mode === "bus" ? feed.routeIdByTripId[tripId] : vehicle.vehicle.trip.routeId;
 
                 if (!(routeId in routeById)) {
                     continue;
@@ -300,7 +300,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
             for (const trip of feed.feed.entity) {
                 const tripUpdate = trip.tripUpdate;
                 const tripId = tripUpdate.trip.tripId;
-                const routeId = tripUpdate.trip.routeId;
+                const routeId = mode === "bus" ? feed.routeIdByTripId[tripId] : tripUpdate.trip.routeId;
                 if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate && routeId in routeById) {
                     const stopTimeUpdate = tripUpdate.stopTimeUpdate;
 

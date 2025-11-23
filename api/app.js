@@ -8,7 +8,7 @@ import { parse } from "csv-parse/sync";
 
 const PORT = process.env.PORT || 3000;
 
-const headsignByTripId = {};
+const headsignByTripId = {}, routeIdByTripId = {};
 (async () => {
     for (let number = 1; number <= 4; number++) {
         const rawTripData = await fs.readFile(`../data/gtfsschedule/${number}/trips.txt`);
@@ -16,6 +16,12 @@ const headsignByTripId = {};
         for (const tripDatum of tripData) {
             headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
         }
+    }
+
+    const rawTripData = await fs.readFile(`../data/gtfsschedule/${4}/trips.txt`);
+    const tripData = parse(rawTripData, { bom: true, columns: true });
+    for (const tripDatum of tripData) {
+        routeIdByTripId[tripDatum.trip_id] = tripDatum.route_id;
     }
 })();
 
@@ -48,10 +54,19 @@ async function updateFeed(resource) {
 async function sendFeed(res, cache, endpoint, ttl) {
     if (Date.now() - cache.timestamp > ttl) {
         cache.feed = await updateFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
+
         cache.headsignByTripId = {};
         for (const entity of cache.feed.entity) {
             cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
         }
+
+        if (endpoint.slice(0, 3) === "bus") {
+            cache.routeIdByTripId = {};
+            for (const entity of cache.feed.entity) {
+                cache.routeIdByTripId[entity.id] = routeIdByTripId[entity.id];
+            }
+        }
+
         cache.timestamp = Date.now();
     }
     
