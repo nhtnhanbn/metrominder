@@ -11,7 +11,7 @@ function createStopPopup(stopMap, routeMaps, stopById, map) {
     stopPopup.appendChild(header);
     
     const routesHeading = document.createElement("h4");
-    if (stopMap.stopId[0] === 'v') {
+    if (stopMap.isStation()) {
         routesHeading.textContent = "Lines";
     } else {
         routesHeading.textContent = "Routes";

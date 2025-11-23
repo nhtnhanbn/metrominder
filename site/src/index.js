@@ -160,12 +160,13 @@ let foundMarker;
     position: "topright",
     layer: searchLayer,
     zoom: 14,
+    initial: false,
     delayType: 0,
     firstTipSubmit: true,
     autoResize: false,
     autoCollapse: true,
-    textErr: "Station not found.",
-    textPlaceholder: "Search stations...",
+    textErr: "Feature not found.",
+    textPlaceholder: "Search stops and routes...                         ",
     marker: false
 })).addEventListener("search:locationfound", (data) => {
     if (
@@ -180,6 +181,66 @@ let foundMarker;
     foundMarker.openPopup();
 }).addTo(map);
 searchLayer.remove();
+
+const layerGroupByMode = {
+    metroTrain: L.layerGroup(),
+    regionTrain: L.layerGroup(),
+    metroTram: L.layerGroup(),
+    bus: L.layerGroup()
+};
+
+for (const routeMap of routeMaps) {
+    routeMap.layerGroup = L.layerGroup();
+
+    const geojsonLayer = L.geoJSON(
+        routeMap.geojson,
+        {
+            style: { color: routeMap.routeColour },
+            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+        }
+    );
+    geojsonLayer.addTo(routeMap.layerGroup);
+    
+    routeMap.layerGroup.addEventListener("add", () => {
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                const stopMarker = stopById[stopId].stopMarker;
+                stopMarker.options.visibility++;
+                stopMarker.addTo(stopLayer);
+            }
+        }
+    });
+    
+    routeMap.layerGroup.addEventListener("remove", () => {
+        for (const stopId of routeMap.stopIds) {
+            if (stopId in stopById) {
+                const stopMarker = stopById[stopId].stopMarker;
+                stopMarker.options.visibility--;
+                if (stopMarker.options.visibility == 0) {
+                    stopMarker.removeFrom(stopLayer);
+                }
+            }
+        }
+    });
+
+    routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
+
+    const dummyLayer = L.circleMarker([-37.8, 145], { radius: 0, opacity: 0 });
+    if (["metroTrain", "regionTrain"].includes(computeMode(routeMap.routeId))) {
+        dummyLayer.options.title = `${routeMap.routeShortName} line` || " ";
+        if (routeMap.routeCode === "vPK") {
+            dummyLayer.options.title += " (V/Line)";
+        }
+    } else {
+        dummyLayer.options.title = `${routeMap.routeShortName} ${routeMap.routeLongName}` || " ";
+    }
+
+    dummyLayer.addEventListener("add", () => {
+        routeMap.layerGroup.addTo(map);
+        map.fitBounds(geojsonLayer.getBounds(), { padding: [100, 100] });
+    });
+    dummyLayer.addTo(searchLayer);
+}
 
 for (const stopMap of stopMaps) {
     let stopIcon = regionTrainStopIcon;
@@ -216,48 +277,6 @@ for (const stopMap of stopMaps) {
     );
     
     stopMarker.addTo(searchLayer);
-}
-
-const layerGroupByMode = {
-    metroTrain: L.layerGroup(),
-    regionTrain: L.layerGroup(),
-    metroTram: L.layerGroup(),
-    bus: L.layerGroup()
-};
-
-for (const routeMap of routeMaps) {
-    routeMap.layerGroup = L.layerGroup();
-    L.geoJSON(
-        routeMap.geojson,
-        {
-            style: { color: routeMap.routeColour },
-            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
-        }
-    ).addTo(routeMap.layerGroup);
-    
-    routeMap.layerGroup.addEventListener("add", () => {
-        for (const stopId of routeMap.stopIds) {
-            if (stopId in stopById) {
-                const stopMarker = stopById[stopId].stopMarker;
-                stopMarker.options.visibility++;
-                stopMarker.addTo(stopLayer);
-            }
-        }
-    });
-    
-    routeMap.layerGroup.addEventListener("remove", () => {
-        for (const stopId of routeMap.stopIds) {
-            if (stopId in stopById) {
-                const stopMarker = stopById[stopId].stopMarker;
-                stopMarker.options.visibility--;
-                if (stopMarker.options.visibility == 0) {
-                    stopMarker.removeFrom(stopLayer);
-                }
-            }
-        }
-    });
-
-    routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
 }
 
 L.control.layers.tree(null, createIndexLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, layerGroupByMode, state), {

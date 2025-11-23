@@ -96,6 +96,10 @@ function createIndexLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                             for (const layerGroup of Object.values(layerGroupByMode)) {
                                 layerGroup.remove();
                             }
+
+                            for (const routeMap of routeMaps) {
+                                routeMap.layerGroup.remove();
+                            }
                         }
                     }]
                 }

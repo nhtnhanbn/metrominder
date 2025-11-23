@@ -133,7 +133,7 @@ let foundMarker;
     autoResize: false,
     autoCollapse: true,
     textErr: "Stop not found.",
-    textPlaceholder: "Search stops...                         ",
+    textPlaceholder: "Search stops...                              ",
     marker: false
 })).addEventListener("search:locationfound", (data) => {
     if (
