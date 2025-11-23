@@ -10,6 +10,10 @@ class VehicleMap {
         this.vehicleMode = vehicleMode;
         this.live = true;
     }
+
+    isTrain() {
+        return this.vehicleMode === "metroTrain" || this.vehicleMode === "regionTrain";
+    }
 }
 const vehicleMaps = new Set(), vehicleByTripId = {};
 

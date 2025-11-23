@@ -47,110 +47,113 @@ const xt1Name = {
 
 function createConsistInfo(mode, vehicle, routeId) {
     let vehicleConsistInfo = "", vehicleModelCode = "";
-    if (mode === "metroTrain") {
-        const consist = vehicle.vehicle.vehicle.id;
-        const splitConsist = consist.split("-");
-        let carCode = splitConsist.find((car) => {
-            return car[car.length-1] === 'T';
-        });
-        
-        let carCount, vehicleModelName;
-        if (carCode) {
-            carCount = splitConsist.length;
-            
-            const carNumber = parseInt(carCode.slice(0, -1));
-            if (1000 <= carNumber && carNumber < 1200) {
-                vehicleModelName = "Comeng";
-                vehicleModelCode = "COM";
-            } else if (2500 <= carNumber && carNumber < 2600) {
-                vehicleModelName = "Siemens";
-                vehicleModelCode = "SIE";
-            } else if (1300 <= carNumber && carNumber < 1700) {
-                vehicleModelName = "X'Trapolis 100";
-                vehicleModelCode = "XT1";
-            } else if (8100 <= carNumber && carNumber < 8900) {
-                vehicleModelName = "X'Trapolis 2.0";
-                vehicleModelCode = "XT2";
-            }
-        } else if (splitConsist.length > 0) {
-            carCode = splitConsist[0];
 
-            const carNumber = parseInt(carCode.slice(0, -1));
-            if (9000 <= carNumber && carNumber < 10000) {
-                carCount = 7;
-                vehicleModelName = "High Capacity Metro Train";
-                vehicleModelCode = "HCM";
-            } else if (7000 <= carNumber && carNumber < 7030) {
+    if ("vehicle" in vehicle.vehicle) {
+        if (mode === "metroTrain") {
+            const consist = vehicle.vehicle.vehicle.id;
+            const splitConsist = consist.split("-");
+            let carCode = splitConsist.find((car) => {
+                return car[car.length-1] === 'T';
+            });
+            
+            let carCount, vehicleModelName;
+            if (carCode) {
+                carCount = splitConsist.length;
+                
+                const carNumber = parseInt(carCode.slice(0, -1));
+                if (1000 <= carNumber && carNumber < 1200) {
+                    vehicleModelName = "Comeng";
+                    vehicleModelCode = "COM";
+                } else if (2500 <= carNumber && carNumber < 2600) {
+                    vehicleModelName = "Siemens";
+                    vehicleModelCode = "SIE";
+                } else if (1300 <= carNumber && carNumber < 1700) {
+                    vehicleModelName = "X'Trapolis 100";
+                    vehicleModelCode = "XT1";
+                } else if (8100 <= carNumber && carNumber < 8900) {
+                    vehicleModelName = "X'Trapolis 2.0";
+                    vehicleModelCode = "XT2";
+                }
+            } else if (splitConsist.length > 0) {
+                carCode = splitConsist[0];
+
+                const carNumber = parseInt(carCode.slice(0, -1));
+                if (9000 <= carNumber && carNumber < 10000) {
+                    carCount = 7;
+                    vehicleModelName = "High Capacity Metro Train";
+                    vehicleModelCode = "HCM";
+                } else if (7000 <= carNumber && carNumber < 7030) {
+                    carCount = 1;
+                    vehicleModelName = "Sprinter";
+                    vehicleModelCode = "SPR";
+                }
+            }
+            
+            if ((!carCount || !vehicleModelName) && routeId === "aus:vic:vic-02-STY:") {
                 carCount = 1;
                 vehicleModelName = "Sprinter";
                 vehicleModelCode = "SPR";
             }
-        }
-        
-        if ((!carCount || !vehicleModelName) && routeId === "aus:vic:vic-02-STY:") {
-            carCount = 1;
-            vehicleModelName = "Sprinter";
-            vehicleModelCode = "SPR";
-        }
-        
-        vehicleConsistInfo += `<p style="margin-bottom: 0">
-                                <b>`;
-        
-        if (carCount) {
-            vehicleConsistInfo += `${carCount}-car`;
-        }
-        
-        if (vehicleModelName) {
-            vehicleConsistInfo += ` ${vehicleModelName}`;
-        }
-        
-        vehicleConsistInfo += `</b>
-                    </p>
-                    <p style="margin-top: 0">
-                        ${consist}
-                    </p>`;
-    } else if (mode === "metroTram") {
-        vehicleModelCode = vehicle.vehicle.vehicle.label;
-        vehicleConsistInfo = `<p><b>${vehicleModelCode}-Class</b> ${vehicle.vehicle.vehicle.id}</p>`
-    } else if (mode === "regionTrain") {
-        const carCode = vehicle.vehicle.vehicle.id;
-        let consist, carCount, vehicleModelName;
-        vehicleConsistInfo += `<p style="margin-bottom: 0">
-                                <b>`;
+            
+            vehicleConsistInfo += `<p style="margin-bottom: 0">
+                                    <b>`;
+            
+            if (carCount) {
+                vehicleConsistInfo += `${carCount}-car`;
+            }
+            
+            if (vehicleModelName) {
+                vehicleConsistInfo += ` ${vehicleModelName}`;
+            }
+            
+            vehicleConsistInfo += `</b>
+                        </p>
+                        <p style="margin-top: 0">
+                            ${consist}
+                        </p>`;
+        } else if (mode === "metroTram") {
+            vehicleModelCode = vehicle.vehicle.vehicle.label;
+            vehicleConsistInfo = `<p><b>${vehicleModelCode}-Class</b> ${vehicle.vehicle.vehicle.id}</p>`
+        } else if (mode === "regionTrain") {
+            const carCode = vehicle.vehicle.vehicle.id;
+            let consist, carCount, vehicleModelName;
+            vehicleConsistInfo += `<p style="margin-bottom: 0">
+                                    <b>`;
 
-        switch (carCode[0]) {
-            case 'V':
-                vehicleModelName = "VLocity";
-                vehicleModelCode = "VLO";
+            switch (carCode[0]) {
+                case 'V':
+                    vehicleModelName = "VLocity";
+                    vehicleModelCode = "VLO";
 
-                const initial = carCode[1], offset = carCode.slice(-2), set = `VL${parseInt(`${parseInt(initial)-1}${offset}`)}`;
-                if (set === "VL9") {
-                    consist = `${set} <i>Michelle Payne</i>: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
-                } else {
-                    consist = `${set}: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
-                }
+                    const initial = carCode[1], offset = carCode.slice(-2), set = `VL${parseInt(`${parseInt(initial)-1}${offset}`)}`;
+                    if (set === "VL9") {
+                        consist = `${set} <i>Michelle Payne</i>: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
+                    } else {
+                        consist = `${set}: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
+                    }
 
-                break;
-            case 'N':
-                vehicleModelName = "N-Set";
-                vehicleModelCode = "N";
-                consist = `${carCode} <i>${nClassName[carCode]}</i>`;
-                break;
+                    break;
+                case 'N':
+                    vehicleModelName = "N-Set";
+                    vehicleModelCode = "N";
+                    consist = `${carCode} <i>${nClassName[carCode]}</i>`;
+                    break;
+            }
+            
+            if (carCount) {
+                vehicleConsistInfo += `${carCount}-car`;
+            }
+            
+            if (vehicleModelName) {
+                vehicleConsistInfo += ` ${vehicleModelName}`;
+            }
+            
+            vehicleConsistInfo += `</b>
+                        </p>
+                        <p style="margin-top: 0">
+                            ${consist}
+                        </p>`;
         }
-        
-        if (carCount) {
-            vehicleConsistInfo += `${carCount}-car`;
-        }
-        
-        if (vehicleModelName) {
-            vehicleConsistInfo += ` ${vehicleModelName}`;
-        }
-        
-        vehicleConsistInfo += `</b>
-                    </p>
-                    <p style="margin-top: 0">
-                        ${consist}
-                    </p>`;
     }
     
     return { vehicleConsistInfo, vehicleModelCode };
@@ -325,26 +328,27 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                         }
                         
                         if (tripId in vehicleByTripId && stop.arrival) {
+                            const vehicleMap = vehicleByTripId[tripId];
                             const stopName = shortName(stopMap.stopName);
                             const stopTime = timeString(stop.arrival.time);
                             
                             if (future) {
                                 vehiclePopup += `<tr>
                                                     <td style="text-align: left;">${stopName}</td>
-                                                    ${ mode === "metroTrain" ? `<td>${platform}</td>` : "" }
+                                                    ${ vehicleMap.isTrain() ? `<td>${platform}</td>` : "" }
                                                     <td>${stopTime}</td>
                                                 </tr>`;
                             } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
-                                vehicleByTripId[tripId].nextStopMap = stopMap;
+                                vehicleMap.nextStopMap = stopMap;
                                 vehiclePopup += `<table>
                                                     <tr>
                                                         <th style="text-align: left;">ARRIVING</td>
-                                                        ${ mode === "metroTrain" ? `<th>PLATFORM</td>` : "" }
+                                                        ${ vehicleMap.isTrain() ? `<th>PLATFORM</td>` : "" }
                                                         <th>TIME</td>
                                                     </tr>
                                                     <tr>
                                                         <th style="text-align: left;">${stopName}</td>
-                                                        ${ mode === "metroTrain" ? `<th>${platform}</td>` : "" }
+                                                        ${ vehicleMap.isTrain() ? `<th>${platform}</td>` : "" }
                                                         <th>${stopTime}</td>
                                                     </tr>`;
                                 future = true;
@@ -373,7 +377,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName,
                 const table = document.createElement("table");
                 
                 const header = document.createElement("tr");
-                const columns = stopMap.stopId[0] === 'v' ? ["DEPARTING", "PLATFORM", "TIME"] : ["DEPARTING", "TIME"];
+                const columns = stopMap.isStation() ? ["DEPARTING", "PLATFORM", "TIME"] : ["DEPARTING", "TIME"];
                 for (const column of columns) {
                     const cell = document.createElement("th");
                     cell.textContent = column;

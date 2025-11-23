@@ -12,6 +12,10 @@ class StopMap {
         this.routeMaps = new Set();
         this.stopDepartures = [];
     }
+
+    isStation() {
+        return this.stopId[0] === 'v';
+    }
 }
 
 function createStopStructures(modes, routeMaps) {

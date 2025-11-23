@@ -212,12 +212,18 @@ function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, s
             selectAllCheckbox: true,
             children: [
                 {
-                    label: "Metropolitan lines",
+                    label: `<b style="background-color: #0072CE; color: white;">
+                                Metropolitan lines
+                            </b>
+                            &nbsp`,
                     selectAllCheckbox: true,
                     children: metroTrainTree
                 },
                 {
-                    label: "Regional lines",
+                    label: `<b style="background-color: #8F1A95; color: white;">
+                                Regional lines
+                            </b>
+                            &nbsp`,
                     selectAllCheckbox: true,
                     children: regionTrainTree
                 }

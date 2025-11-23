@@ -19,7 +19,8 @@ import { timeString } from "./stringConverters.js";
 import { createTrainLayerTree } from "./trainLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
-import stopIcon from "./PICTO_MODE_Train.svg";
+import metroTrainStopIcon from "./PICTO_MODE_Train.svg";
+import regionTrainStopIcon from "./PICTO_MODE_RegionalTrain.svg";
 import "./style.css";
 
 if ("serviceWorker" in navigator) {
@@ -149,6 +150,13 @@ let foundMarker;
 searchLayer.remove();
 
 for (const stopMap of stopMaps) {
+    let stopIcon = regionTrainStopIcon;
+    for (const routeMap of stopMap.routeMaps) {
+        if (routeMap.routeId[13] === '2') {
+            stopIcon = metroTrainStopIcon;
+        }
+    }
+
     const stopMarker = L.marker(
         [stopMap.stopLat, stopMap.stopLon],
         {
