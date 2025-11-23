@@ -31,9 +31,9 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const mode = "metroTrain";
-const { routeMaps, routeById, routeByShortName } = createRouteStructures(mode);
-const { stopMaps, stopById, stopByName, platformById } = createStopStructures(mode, routeMaps);
+const modes = ["metroTrain", "regionTrain"];
+const { routeMaps, routeById, routeByCode } = createRouteStructures(modes);
+const { stopMaps, stopById, stopByName, platformById } = createStopStructures(modes, routeMaps);
 
 const state = {
     vehicleMarkerLabelSelection: "route"
@@ -200,7 +200,7 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup.addTo(map)
 }
 
-L.control.layers.tree(null, createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stopLayer, state), {
+L.control.layers.tree(null, createMetroTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state), {
     selectorBack: true
 }).addTo(map);
 
@@ -234,5 +234,6 @@ for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafle
     attributionPrefix.appendChild(element);
 }
 
-updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, mode);
-updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, mode);
+
+updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, modes);
+updateTrips(routeMaps, routeById, stopMaps, stopById, stopByName, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);

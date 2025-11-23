@@ -1,6 +1,6 @@
 import { setRoutes, addRoutes, filterRoutes } from "./routeFilters.js";
 
-function createStopPopup(stopMap, routeMaps, stopByName, map, mode) {
+function createStopPopup(stopMap, routeMaps, stopByName, map) {
     const stopName = stopMap.stopName;
     const stopMarker = stopMap.stopMarker;
 
@@ -12,9 +12,9 @@ function createStopPopup(stopMap, routeMaps, stopByName, map, mode) {
     stopPopup.appendChild(header);
     
     const routesHeading = document.createElement("h4");
-    if (mode === "metroTrain") {
+    if (stopMap.stopId[0] === 'v') {
         routesHeading.textContent = "Lines";
-    } else if (mode === "metroTram") {
+    } else {
         routesHeading.textContent = "Routes";
     }
     stopPopup.appendChild(routesHeading);
