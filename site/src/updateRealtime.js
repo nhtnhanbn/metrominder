@@ -20,6 +20,31 @@ function calculateBearing(fromLat, fromLon, toLat, toLon) {
     return Math.atan2(y, x) * 180 / Math.PI;
 }
 
+const nClassName = {
+    "N451": "City of Portland",
+    "N452": "Rural City of Wodonga",
+    "N453": "City of Albury",
+    "N456": "City of Colac",
+    "N458": "City of Maryborough",
+    "N459": "City of Echuca",
+    "N460": "City of Castlemaine",
+    "N462": "City of Shepparton",
+    "N465": "City of Ballaarat",
+    "N467": "City of Stawell",
+    "N468": "City of Bairnsdale",
+    "N471": "City of Benalla",
+    "N474": "City of Traralgon"
+};
+
+const xt1Name = {
+    1626: "Iramoo",
+    1630: "Westernport",
+    1633: "Flash",
+    1636: "Melbourne Rocks",
+    1637: "Croydon West",
+    1663: "Don Corrie",
+};
+
 function createConsistInfo(mode, vehicle, routeId) {
     let vehicleConsistInfo = "", vehicleModelCode = "";
     if (mode === "metroTrain") {
@@ -88,10 +113,30 @@ function createConsistInfo(mode, vehicle, routeId) {
         vehicleModelCode = vehicle.vehicle.vehicle.label;
         vehicleConsistInfo = `<p><b>${vehicleModelCode}-Class</b> ${vehicle.vehicle.vehicle.id}</p>`
     } else if (mode === "regionTrain") {
-        const consist = vehicle.vehicle.vehicle.id;
-        let carCount, vehicleModelName;
+        const carCode = vehicle.vehicle.vehicle.id;
+        let consist, carCount, vehicleModelName;
         vehicleConsistInfo += `<p style="margin-bottom: 0">
                                 <b>`;
+
+        switch (carCode[0]) {
+            case 'V':
+                vehicleModelName = "VLocity";
+                vehicleModelCode = "VLO";
+
+                const initial = carCode[1], offset = carCode.slice(-2), set = `VL${parseInt(`${parseInt(initial)-1}${offset}`)}`;
+                if (set === "VL9") {
+                    consist = `${set} <i>Michelle Payne</i>: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
+                } else {
+                    consist = `${set}: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
+                }
+
+                break;
+            case 'N':
+                vehicleModelName = "N-Set";
+                vehicleModelCode = "N";
+                consist = `${carCode} <i>${nClassName[carCode]}</i>`;
+                break;
+        }
         
         if (carCount) {
             vehicleConsistInfo += `${carCount}-car`;
