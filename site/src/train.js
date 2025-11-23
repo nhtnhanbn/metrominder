@@ -16,7 +16,7 @@ import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
 import { timeString } from "./stringConverters.js";
-import { createMetroTrainLayerTree } from "./metroTrainLayerTree.js";
+import { createTrainLayerTree } from "./trainLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
 import stopIcon from "./PICTO_MODE_Train.svg";
@@ -200,7 +200,7 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup.addTo(map)
 }
 
-L.control.layers.tree(null, createMetroTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state), {
+L.control.layers.tree(null, createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state), {
     selectorBack: true
 }).addTo(map);
 

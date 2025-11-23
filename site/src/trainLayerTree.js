@@ -1,21 +1,166 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createMetroTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state) {
+function createTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
         ).checked = true;
     }, 0);
 
-    const layerLeaves = {};
+    const layerLeafByCode = {};
     for (const routeMap of routeMaps) {
-        layerLeaves[routeMap.routeShortName] = {
+        layerLeafByCode[routeMap.routeCode] = {
             label: `<span style="background-color: ${routeMap.routeColour}; color: ${routeMap.routeTextColour};">
                         ${routeMap.routeShortName} line&nbsp
                     </span>`,
             layer: routeMap.layerGroup
         };
     }
+
+    const metroTrainTree = [
+        layerLeafByCode["SHM"],
+        {
+            label: `<span style="background-color: #279FD5; color: black;">
+                        Caulfield group
+                    <span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["CBE"],
+                layerLeafByCode["PKM"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #BE1014; color: white;">
+                        Clifton Hill group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["HBE"],
+                layerLeafByCode["MDD"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #FFBE00; color: black;">
+                        Northern group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["CGB"],
+                layerLeafByCode["SUY"],
+                layerLeafByCode["UFD"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #028430; color: white;">
+                        Cross-city group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["FKN"],
+                layerLeafByCode["STY"],
+                layerLeafByCode["WER"],
+                layerLeafByCode["WIL"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #152C6B; color: white;">
+                        Burnley group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["ALM"],
+                layerLeafByCode["BEG"],
+                layerLeafByCode["GWY"],
+                layerLeafByCode["LIL"]
+            ]
+        },
+        {
+            label: "Special services",
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["RCE"],
+                layerLeafByCode["CCL"]
+            ]
+        }
+    ];
+
+    const regionTrainTree = [
+        {
+            label: `<span style="background-color: #8F1A95; color: white;">
+                        Ballarat group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["ART"],
+                layerLeafByCode["BAT"],
+                layerLeafByCode["MBY"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #8F1A95; color: white;">
+                        Bendigo group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["BGO"],
+                layerLeafByCode["ECH"],
+                layerLeafByCode["SWL"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #8F1A95; color: white;">
+                        Geelong group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["GEL"],
+                layerLeafByCode["WBL"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #8F1A95; color: white;">
+                        Gippsland group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["BDE"],
+                layerLeafByCode["TRN"],
+                layerLeafByCode["vPK"]
+            ]
+        },
+        {
+            label: `<span style="background-color: #8F1A95; color: white;">
+                        Seymour group
+                    </span>
+                    &nbsp`,
+            collapsed: true,
+            selectAllCheckbox: true,
+            children: [
+                layerLeafByCode["ABY"],
+                layerLeafByCode["SER"],
+                layerLeafByCode["SNH"]
+            ]
+        }
+    ]
 
     return [
         {
@@ -66,80 +211,15 @@ function createMetroTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMa
             label: "<b>All lines<b>",
             selectAllCheckbox: true,
             children: [
-                layerLeaves["Sandringham"],
                 {
-                    label: `<span style="background-color: #279FD5; color: black;">
-                                Caulfield group
-                            <span>
-                            &nbsp`,
-                    collapsed: true,
+                    label: "Metropolitan lines",
                     selectAllCheckbox: true,
-                    children: [
-                        layerLeaves["Cranbourne"],
-                        layerLeaves["Pakenham"]
-                    ]
+                    children: metroTrainTree
                 },
                 {
-                    label: `<span style="background-color: #BE1014; color: white;">
-                                Clifton Hill group
-                            </span>
-                            &nbsp`,
-                    collapsed: true,
+                    label: "Regional lines",
                     selectAllCheckbox: true,
-                    children: [
-                        layerLeaves["Hurstbridge"],
-                        layerLeaves["Mernda"]
-                    ]
-                },
-                {
-                    label: `<span style="background-color: #FFBE00; color: black;">
-                                Northern group
-                            </span>
-                            &nbsp`,
-                    collapsed: true,
-                    selectAllCheckbox: true,
-                    children: [
-                        layerLeaves["Craigieburn"],
-                        layerLeaves["Sunbury"],
-                        layerLeaves["Upfield"]
-                    ]
-                },
-                {
-                    label: `<span style="background-color: #028430; color: white;">
-                                Cross-city group
-                            </span>
-                            &nbsp`,
-                    collapsed: true,
-                    selectAllCheckbox: true,
-                    children: [
-                        layerLeaves["Frankston"],
-                        layerLeaves["Stony Point"],
-                        layerLeaves["Werribee"],
-                        layerLeaves["Williamstown"]
-                    ]
-                },
-                {
-                    label: `<span style="background-color: #152C6B; color: white;">
-                                Burnley group
-                            </span>
-                            &nbsp`,
-                    collapsed: true,
-                    selectAllCheckbox: true,
-                    children: [
-                        layerLeaves["Alamein"],
-                        layerLeaves["Belgrave"],
-                        layerLeaves["Glen Waverley"],
-                        layerLeaves["Lilydale"]
-                    ]
-                },
-                {
-                    label: "Special services",
-                    collapsed: true,
-                    selectAllCheckbox: true,
-                    children: [
-                        layerLeaves["Flemington Racecourse"],
-                        layerLeaves["City Circle"]
-                    ]
+                    children: regionTrainTree
                 }
             ]
         },
@@ -233,4 +313,4 @@ function createMetroTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMa
     ];
 }
 
-export { createMetroTrainLayerTree };
+export { createTrainLayerTree };

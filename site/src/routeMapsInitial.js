@@ -43,17 +43,17 @@ const metroTrainRouteMaps = new Set([
 const regionTrainRouteMaps = new Set([
     new RegionTrainRouteMap("ABY", ["9.2.R"]),
     new RegionTrainRouteMap("ART", ["9.6.R"]),
-    new RegionTrainRouteMap("BAT", ["10.1.H"]),
+    new RegionTrainRouteMap("BAT", ["9.7.H"]),
     new RegionTrainRouteMap("BDE", ["9.5.R"]),
     new RegionTrainRouteMap("BGO", ["10.1.H"]),
     new RegionTrainRouteMap("ECH", ["9.6.R"]),
     new RegionTrainRouteMap("GEL", ["10.1.H"]),
-    new RegionTrainRouteMap("MBY", ["10.1.H"]),
+    new RegionTrainRouteMap("MBY", ["5.2.H"]),
     new RegionTrainRouteMap("SER", ["10.1.H"]),
     new RegionTrainRouteMap("SNH", ["9.9.R"]),
     new RegionTrainRouteMap("SWL", ["9.4.R"]),
     new RegionTrainRouteMap("TRN", ["9.9.R"]),
-    new RegionTrainRouteMap("vPK", ["10.1.H"]),
+    new RegionTrainRouteMap("vPK", ["9.2.R"]),
     new RegionTrainRouteMap("WBL", ["9.5.R"]),
 ]);
 
