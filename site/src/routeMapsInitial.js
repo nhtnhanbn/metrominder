@@ -5,7 +5,17 @@ class MetroTrainRouteMap {
         this.shapeIds = shapeIds.map((shapeId) => {
             return `2-${this.routeCode}-vpt-${shapeId}`;
         });
-        this.geojson = []
+        this.geojson = [];
+    }
+}
+class RegionTrainRouteMap {
+    constructor(routeCode, shapeIds) {
+        this.routeCode = routeCode;
+        this.routeId = `aus:vic:vic-01-${routeCode}:`;
+        this.shapeIds = shapeIds.map((shapeId) => {
+            return `1-${this.routeCode}-mjp-${shapeId}`;
+        });
+        this.geojson = [];
     }
 }
 
@@ -30,4 +40,21 @@ const metroTrainRouteMaps = new Set([
     new MetroTrainRouteMap("CCL", ["42.1.H"])
 ]);
 
-export { metroTrainRouteMaps };
+const regionTrainRouteMaps = new Set([
+    new RegionTrainRouteMap("ABY", ["9.2.R"]),
+    new RegionTrainRouteMap("ART", ["9.6.R"]),
+    new RegionTrainRouteMap("BAT", ["10.1.H"]),
+    new RegionTrainRouteMap("BDE", ["9.5.R"]),
+    new RegionTrainRouteMap("BGO", ["10.1.H"]),
+    new RegionTrainRouteMap("ECH", ["9.6.R"]),
+    new RegionTrainRouteMap("GEL", ["10.1.H"]),
+    new RegionTrainRouteMap("MBY", ["10.1.H"]),
+    new RegionTrainRouteMap("SER", ["10.1.H"]),
+    new RegionTrainRouteMap("SNH", ["9.9.R"]),
+    new RegionTrainRouteMap("SWL", ["9.4.R"]),
+    new RegionTrainRouteMap("TRN", ["9.9.R"]),
+    new RegionTrainRouteMap("vPK", ["10.1.H"]),
+    new RegionTrainRouteMap("WBL", ["9.5.R"]),
+]);
+
+export { metroTrainRouteMaps, regionTrainRouteMaps };
