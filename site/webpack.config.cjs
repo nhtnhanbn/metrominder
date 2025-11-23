@@ -6,6 +6,7 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 module.exports = {
     mode: "development",
     entry: {
+        index: "./src/index.js",
         train: "./src/train.js",
         tram: "./src/tram.js"
     },
@@ -15,6 +16,12 @@ module.exports = {
         clean: true
     },
     plugins: [
+        new HtmlWebpackPlugin({
+            template: "./src/template.html",
+            filename: "index.html",
+            chunks: ["index"],
+            favicon: "./src/favicon.svg"
+        }),
         new HtmlWebpackPlugin({
             template: "./src/template.html",
             filename: "train/index.html",

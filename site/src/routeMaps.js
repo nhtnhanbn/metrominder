@@ -25,7 +25,7 @@ function createRouteStructures(modes) {
         } else if (mode === "metroTram") {
             routeData.push(...metroTramRouteData);
 
-            for (const routeDatum of routeData.sort((a, b) => {
+            for (const routeDatum of metroTramRouteData.sort((a, b) => {
                 return a.route_short_name - b.route_short_name;
             })) {
                 const routeCode = routeDatum.route_short_name;
