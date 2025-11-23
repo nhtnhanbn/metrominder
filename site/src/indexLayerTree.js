@@ -53,11 +53,34 @@ function createIndexLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
             label: `<div class="leaflet-control-layers-separator"></div>`
         },
         {
-            label: `<b style="background-color: #0072CE; color: white;">
-                        Metropolitan trains
-                    </b>
-                    &nbsp`,
-            layer: layerGroupByMode.metroTrain
+            label: "Use search for individual routes and buses."
+        },
+        {
+            label: "<b>All railways<b>",
+            selectAllCheckbox: true,
+            children: [
+                {
+                    label: `<span style="background-color: #78BE20; color: white;">
+                                Trams
+                            </span>
+                            &nbsp`,
+                    layer: layerGroupByMode.metroTram
+                },
+                {
+                    label: `<span style="background-color: #0072CE; color: white;">
+                                Metropolitan trains
+                            </span>
+                            &nbsp`,
+                    layer: layerGroupByMode.metroTrain
+                },
+                {
+                    label: `<span style="background-color: #8F1A95; color: white;">
+                                Regional trains
+                            </span>
+                            &nbsp`,
+                    layer: layerGroupByMode.regionTrain
+                }
+            ]
         },
         {
             label: "<b>Presets<b>",
