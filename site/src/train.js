@@ -52,6 +52,8 @@ const map = L.map("map", {
 }).fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);
 
 map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
+map.createPane("metroRoutePane", map.getPane("rotatePane")).style.zIndex = 450;
+map.createPane("regionRoutePane", map.getPane("rotatePane")).style.zIndex = 425;
 
 L.Control.zoomHome().addTo(map);
 L.control.scale().addTo(map);
@@ -172,7 +174,10 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
     L.geoJSON(
         routeMap.geojson,
-        { style: { color: routeMap.routeColour } }
+        {
+            style: { color: routeMap.routeColour },
+            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+        }
     ).addTo(routeMap.layerGroup);
     
     routeMap.layerGroup.addEventListener("add", () => {
