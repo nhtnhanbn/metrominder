@@ -170,7 +170,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
             const time = timeString(feed.timestamp/1000, true);
             dtpTime.textContent = ` last updated ${time}`;
 
-            for (const vehicle of feed.feed.entity) {
+            if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {
                 let { latitude, longitude, bearing } = vehicle.vehicle.position;
                 const tripId = vehicle.vehicle.trip.tripId;
                 const routeId = mode === "bus" ? feed.routeIdByTripId[tripId] : vehicle.vehicle.trip.routeId;
@@ -297,7 +297,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             const feed = await response.json();
             
             tripUpdateTime = timeString(feed.feed.header.timestamp, true);
-            for (const trip of feed.feed.entity) {
+            if ("entity" in feed.feed) for (const trip of feed.feed.entity) {
                 const tripUpdate = trip.tripUpdate;
                 const tripId = tripUpdate.trip.tripId;
                 const routeId = mode === "bus" ? feed.routeIdByTripId[tripId] : tripUpdate.trip.routeId;
