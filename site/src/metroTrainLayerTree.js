@@ -1,6 +1,6 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehicleMaps, stopLayer, state) {
+function createMetroTrainLayerTree(routeMaps, routeByCode, stopByName, vehicleMaps, stopLayer, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
@@ -155,7 +155,7 @@ function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehi
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("Melbourne Central", stopByName, routeMaps, map);
-                            routeByShortName["Flemington Racecourse"].layerGroup.remove();
+                            routeByCode["RCE"].layerGroup.remove();
                         }
                     }]
                 },
@@ -168,8 +168,8 @@ function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehi
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("Richmond", stopByName, routeMaps, map);
-                            routeByShortName["Werribee"].layerGroup.addTo(map);
-                            routeByShortName["Williamstown"].layerGroup.addTo(map);
+                            routeByCode["WER"].layerGroup.addTo(map);
+                            routeByCode["WIL"].layerGroup.addTo(map);
                         }
                     }]
                 },
@@ -182,8 +182,8 @@ function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehi
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("South Yarra", stopByName, routeMaps, map);
-                            routeByShortName["Werribee"].layerGroup.addTo(map);
-                            routeByShortName["Williamstown"].layerGroup.addTo(map);
+                            routeByCode["WER"].layerGroup.addTo(map);
+                            routeByCode["WIL"].layerGroup.addTo(map);
                         }
                     }]
                 },
@@ -196,8 +196,8 @@ function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehi
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("Caulfield", stopByName, routeMaps, map);
-                            routeByShortName["Werribee"].layerGroup.addTo(map);
-                            routeByShortName["Williamstown"].layerGroup.addTo(map);
+                            routeByCode["WER"].layerGroup.addTo(map);
+                            routeByCode["WIL"].layerGroup.addTo(map);
                         }
                     }]
                 },
@@ -210,8 +210,8 @@ function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehi
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("North Melbourne", stopByName, routeMaps, map);
-                            routeByShortName["Frankston"].layerGroup.addTo(map);
-                            routeByShortName["Flemington Racecourse"].layerGroup.remove();
+                            routeByCode["FKN"].layerGroup.addTo(map);
+                            routeByCode["RCE"].layerGroup.remove();
                         }
                     }]
                 },
@@ -224,7 +224,7 @@ function createMetroTrainLayerTree(routeMaps, routeByShortName, stopByName, vehi
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("Footscray", stopByName, routeMaps, map);
-                            routeByShortName["Frankston"].layerGroup.addTo(map);
+                            routeByCode["FKN"].layerGroup.addTo(map);
                         }
                     }]
                 }
