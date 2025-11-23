@@ -165,6 +165,7 @@ let foundMarker;
     firstTipSubmit: true,
     autoResize: false,
     autoCollapse: true,
+    autoCollapseTime: 1e9,
     textErr: "Feature not found.",
     textPlaceholder: "Search stops and routes...                         ",
     marker: false
@@ -225,14 +226,14 @@ for (const routeMap of routeMaps) {
 
     routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
 
-    const dummyLayer = L.circleMarker([-37.8, 145], { radius: 0, opacity: 0 });
+    const dummyLayer = L.circleMarker([-37.8, 145], { radius: 0, opacity: 0, title: " " });
     if (["metroTrain", "regionTrain"].includes(computeMode(routeMap.routeId))) {
         dummyLayer.options.title = `${routeMap.routeShortName} line` || " ";
         if (routeMap.routeCode === "vPK") {
             dummyLayer.options.title += " (V/Line)";
         }
-    } else {
-        dummyLayer.options.title = `${routeMap.routeShortName} ${routeMap.routeLongName}` || " ";
+    } else if (routeMap.routeShortName) {
+        dummyLayer.options.title = `${routeMap.routeShortName} ${routeMap.routeLongName}`;
     }
 
     dummyLayer.addEventListener("add", () => {

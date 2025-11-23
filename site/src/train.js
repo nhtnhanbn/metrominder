@@ -142,6 +142,7 @@ let foundMarker;
     firstTipSubmit: true,
     autoResize: false,
     autoCollapse: true,
+    autoCollapseTime: 1e9,
     textErr: "Station not found.",
     textPlaceholder: "Search stations...",
     marker: false

@@ -132,6 +132,7 @@ let foundMarker;
     firstTipSubmit: true,
     autoResize: false,
     autoCollapse: true,
+    autoCollapseTime: 1e9,
     textErr: "Stop not found.",
     textPlaceholder: "Search stops...                              ",
     marker: false
