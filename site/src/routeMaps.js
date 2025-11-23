@@ -4,10 +4,6 @@ import metroTramRouteData from "../../data/gtfsschedule/3/routes.txt";
 import regionTrainRouteData from "../../data/gtfsschedule/1/routes.txt";
 import busRouteData from "../../data/gtfsschedule/4/routes.txt";
 import stopRoutes from "../../data/stopRoutes.json";
-import metroTrainGeojson from "./metroTrainRoutes.geojson";
-import metroTramGeojson from "./metroTramRoutes.geojson";
-import regionTrainGeojson from "./regionTrainRoutes.geojson";
-import busGeojson from "./busRoutes.geojson";
 
 class MetroTramRouteMap {
     constructor(routeCode) {
@@ -27,7 +23,7 @@ class BusRouteMap {
     }
 }
 
-function createRouteStructures(modes) {
+function createRouteStructures(modes, geojsons) {
     let routeData = [], routeMaps = new Set();
     for (const mode of modes) {
         if (mode === "metroTrain") {
@@ -80,19 +76,19 @@ function createRouteStructures(modes) {
 
     for (const mode of modes) {
         if (mode === "metroTrain") {
-            for (const feature of metroTrainGeojson.features) {
+            for (const feature of geojsons.metroTrainGeojson.features) {
                 routeByCode[feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
             }
         } else if (mode === "metroTram") {
-            for (const feature of metroTramGeojson.features) {
+            for (const feature of geojsons.metroTramGeojson.features) {
                 routeByCode[feature.properties.SHORT_NAME].geojson.push(feature);
             }
         } else if (mode === "regionTrain") {
-            for (const feature of regionTrainGeojson.features) {
+            for (const feature of geojsons.regionTrainGeojson.features) {
                 routeByCode[feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
             }
         } else if (mode === "bus") {
-            for (const feature of busGeojson.features) {
+            for (const feature of geojsons.busGeojson.features) {
                 const routeCode = feature.properties.SHORT_NAME;
                 if (routeCode in routeByCode) {
                     routeByCode[routeCode].geojson.push(feature);

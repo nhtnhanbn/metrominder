@@ -1,7 +1,3 @@
-import metroTrainStopData from "../../data/gtfsschedule/2/stops.txt";
-import metroTramStopData from "../../data/gtfsschedule/3/stops.txt";
-import regionTrainStopData from "../../data/gtfsschedule/1/stops.txt";
-import busStopData from "../../data/gtfsschedule/4/stops.txt";
 import { shortName } from "./stringConverters.js";
 
 class StopMap {
@@ -19,17 +15,17 @@ class StopMap {
     }
 }
 
-function createStopStructures(modes, routeMaps) {
+function createStopStructures(modes, routeMaps, stopDatas) {
     let stopData = [];
     for (const mode of modes) {
         if (mode === "metroTrain") {
-            stopData.push(...metroTrainStopData);
+            stopData.push(...stopDatas.metroTrainStopData);
         } else if (mode === "metroTram") {
-            stopData.push(...metroTramStopData);
+            stopData.push(...stopDatas.metroTramStopData);
         } else if (mode === "regionTrain") {
-            stopData.push(...regionTrainStopData);
+            stopData.push(...stopDatas.regionTrainStopData);
         } else if (mode === "bus") {
-            stopData.push(...busStopData);
+            stopData.push(...stopDatas.busStopData);
         }
     }
 

@@ -12,6 +12,10 @@ import "leaflet.marker.slideto";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
+import metroTrainGeojson from "./metroTrainRoutes.geojson";
+import regionTrainGeojson from "./regionTrainRoutes.geojson";
+import metroTrainStopData from "../../data/gtfsschedule/2/stops.txt";
+import regionTrainStopData from "../../data/gtfsschedule/1/stops.txt";
 import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";
 import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
@@ -33,8 +37,14 @@ if ("serviceWorker" in navigator) {
 };
 
 const modes = ["metroTrain", "regionTrain"];
-const { routeMaps, routeById, routeByCode } = createRouteStructures(modes);
-const { stopMaps, stopById, stopByName, platformById } = createStopStructures(modes, routeMaps);
+const { routeMaps, routeById, routeByCode } = createRouteStructures(modes, {
+    metroTrainGeojson: metroTrainGeojson,
+    regionTrainGeojson: regionTrainGeojson
+});
+const { stopMaps, stopById, stopByName, platformById } = createStopStructures(modes, routeMaps, {
+    metroTrainStopData: metroTrainStopData,
+    regionTrainStopData: regionTrainStopData
+});
 
 const state = {
     vehicleMarkerLabelSelection: "route"
