@@ -49,9 +49,11 @@ async function sendFeed(res, cache, endpoint, ttl) {
     if (Date.now() - cache.timestamp > ttl) {
         cache.feed = await updateFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
 
-        cache.headsignByTripId = {};
-        for (const entity of cache.feed.entity) {
-            cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
+        if ("headsignByTripId" in cache) {
+            cache.headsignByTripId = {};
+            for (const entity of cache.feed.entity) {
+                cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
+            }
         }
 
         cache.timestamp = Date.now();
@@ -69,10 +71,10 @@ function handleError(err, res, next, cache) {
     }
 }
 
-const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0 }, metroTrainAlertCache = { timestamp: 0 };
-const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0 }, metroTramAlertCache = { timestamp: 0 };
-const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0 };
-const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0 };
+const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0, headsignByTripId: {} }, metroTrainAlertCache = { timestamp: 0 };
+const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0, headsignByTripId: {} }, metroTramAlertCache = { timestamp: 0 };
+const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0, headsignByTripId: {} };
+const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0, headsignByTripId: {} };
 
 const app = express();
 
