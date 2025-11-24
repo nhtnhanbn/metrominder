@@ -85,6 +85,7 @@ const map = L.map("map", {
 }).fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);
 
 map.createPane("vehiclePane", map.getPane("norotatePane")).style.zIndex = 625;
+map.createPane("stationPane", map.getPane("markerPane")).style.zIndex = 620;
 map.createPane("metroRoutePane", map.getPane("rotatePane")).style.zIndex = 450;
 map.createPane("regionRoutePane", map.getPane("rotatePane")).style.zIndex = 425;
 
@@ -249,7 +250,8 @@ for (const stopMap of stopMaps) {
                 iconSize: [18, 18]
             }),
             title: stopMap.stopName,
-            visibility: 0
+            visibility: 0,
+            pane: stopMap.isStation() ? "stationPane" : "markerPane"
         }
     );
     stopMap.stopMarker = stopMarker;
