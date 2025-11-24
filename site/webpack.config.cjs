@@ -20,23 +20,28 @@ module.exports = {
             template: "./src/template.html",
             filename: "index.html",
             chunks: ["index"],
-            favicon: "./src/favicon.svg"
+            favicon: "./src/favicon.svg",
+            title: "MetroMinder"
         }),
         new HtmlWebpackPlugin({
             template: "./src/template.html",
             filename: "train/index.html",
             chunks: ["train"],
-            favicon: "./src/favicon.svg"
+            favicon: "./src/favicon.svg",
+            title: "Trains - MetroMinder"
         }),
         new HtmlWebpackPlugin({
             template: "./src/template.html",
             filename: "tram/index.html",
             chunks: ["tram"],
-            favicon: "./src/favicon.svg"
+            favicon: "./src/favicon.svg",
+            title: "Trams - MetroMinder"
         }),
         new WorkboxPlugin.GenerateSW({
             maximumFileSizeToCacheInBytes: 20971520,
-            swDest: "./serviceWorker.js"
+            swDest: "./serviceWorker.js",
+            clientsClaim: true,
+            skipWaiting: true
         }),
         new WebpackPwaManifest({
             publicPath: ".",
@@ -79,8 +84,7 @@ module.exports = {
             { test: /\.css$/i, use: ["style-loader", "css-loader"] },
             { test: /\.geojson$/, type: "json" },
             { test: /\.txt$/i, loader: "csv-loader", options: { header: true, skipEmptyLines: true } },
-            { test: /\.(png|svg|jpg|jpeg|gif)$/i, type: "asset/resource" },
-            { test: /\.html$/i, loader: "html-loader" }
+            { test: /\.(png|svg|jpg|jpeg|gif)$/i, type: "asset/resource" }
         ]
     },
     // devtool: "eval-source-map",
