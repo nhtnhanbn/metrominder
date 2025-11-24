@@ -73,7 +73,7 @@ function createConsistInfo(mode, vehicle, routeId) {
                     vehicleModelName = "Comeng";
                     vehicleModelCode = "COM";
                 } else if (2500 <= carNumber && carNumber < 2600) {
-                    vehicleModelName = "Siemens";
+                    vehicleModelName = "Siemens Nexas";
                     vehicleModelCode = "SIE";
                 } else if (1300 <= carNumber && carNumber < 1700) {
                     vehicleModelName = "X'Trapolis 100";
