@@ -1,5 +1,3 @@
-import { shortName } from "./stringConverters.js";
-
 class StopMap {
     constructor(stopId, stopName, stopLat, stopLon, hasPlatforms) {
         this.stopId = stopId;
@@ -64,6 +62,12 @@ function createStopStructures(modes, routeMaps, stopDatas) {
             if (stopId in stopById) {
                 stopById[stopId].routeMaps.add(routeMap);
             }
+        }
+    }
+
+    for (const stopMap of stopMaps) {
+        if (stopMap.routeMaps.size === 0) {
+            stopMaps.delete(stopMap);
         }
     }
 

@@ -54,7 +54,7 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const modes = ["metroTrain", "regionTrain", "metroTram", "bus"];
+const modes = ["metroTrain", "regionTrain", "bus", "metroTram"];
 const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     metroTramGeojson: metroTramGeojson,
