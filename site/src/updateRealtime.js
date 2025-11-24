@@ -399,7 +399,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                 const header = document.createElement("tr");
 
                 let columns;
-                if (stopMap.hasPlatforms) {
+                if (stopMap.hasPlatforms || stopMap.isStation()) {
                     if (stopMap.isStation()) {
                         columns = ["DEPARTING", "PLATFORM", "TIME"];
                     } else {
@@ -420,7 +420,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                     const row = document.createElement("tr");
                     
                     const serviceCell = document.createElement("td");
-                    if (stopMap.stopId[0] === 'v') {
+                    if (stopMap.isStation()) {
                         serviceCell.textContent = stopDeparture.headsign;
                     } else {
                         serviceCell.textContent = `${stopDeparture.routeMap.routeShortName} ${stopDeparture.headsign}`;
@@ -429,7 +429,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                     serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
                     row.appendChild(serviceCell);
                     
-                    if (stopMap.hasPlatforms) {
+                    if (stopMap.hasPlatforms || stopMap.isStation()) {
                         const platformCell = document.createElement("td");
                         platformCell.textContent = stopDeparture.platform;
                         row.appendChild(platformCell);

@@ -34,15 +34,15 @@ function createStopStructures(modes, routeMaps, stopDatas) {
     for (const stopDatum of stopData) {
         const { stop_id, stop_name, stop_lat, stop_lon, parent_station, platform_code } = stopDatum;
         
+        platformById[stop_id] = platform_code || platformById[stop_id];
+        
         if (parent_station === "") {
             const stopMap = new StopMap(stop_id, stop_name, stop_lat, stop_lon, platform_code !== undefined);
             stopMaps.add(stopMap);
             stopById[stop_id] = stopMap;
             stopByName[stop_name] = stopMap;
-            platformById[stop_id] = platform_code;
         } else {
             parentById[stop_id] = parent_station;
-            platformById[stop_id] = platform_code;
         }
     }
 
