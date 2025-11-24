@@ -173,7 +173,17 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
             if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {
                 let { latitude, longitude, bearing } = vehicle.vehicle.position;
                 const tripId = vehicle.vehicle.trip.tripId;
-                const routeId = mode === "bus" ? feed.routeIdByTripId[tripId] : vehicle.vehicle.trip.routeId;
+
+                let routeId;
+                if (mode === "bus") {
+                    if (tripId in feed.routeIdByTripId) {
+                        routeId = feed.routeIdByTripId[tripId];
+                    } else {
+                        routeId = `${tripId.slice(0, 6)}-aus-1`;
+                    }
+                } else {
+                    routeId = vehicle.vehicle.trip.routeId;
+                }
 
                 if (!(routeId in routeById)) {
                     continue;
