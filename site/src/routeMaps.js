@@ -26,11 +26,19 @@ class BusRouteMap {
 }
 
 function createRouteStructures(modes, geojsons) {
+    const routeById = {}, routeByModeCode = {};
+
     let routeData = [], routeMaps = new Set();
     for (const mode of modes) {
+        routeByModeCode[mode] = {};
+
         if (mode === "metroTrain") {
             routeData.push(...metroTrainRouteData);
             routeMaps = routeMaps.union(metroTrainRouteMaps);
+
+            for (const routeMap of metroTrainRouteMaps) {
+                routeByModeCode[mode][routeMap.routeCode] = routeMap;
+            }
         } else if (mode === "metroTram") {
             routeData.push(...metroTramRouteData);
 
@@ -38,11 +46,17 @@ function createRouteStructures(modes, geojsons) {
                 return parseInt(a.route_short_name) - parseInt(b.route_short_name);
             })) {
                 const routeCode = routeDatum.route_short_name;
-                routeMaps.add(new MetroTramRouteMap(routeCode));
+                const routeMap = new MetroTramRouteMap(routeCode);
+                routeMaps.add(routeMap);
+                routeByModeCode[mode][routeCode] = routeMap;
             }
         } else if (mode === "regionTrain") {
             routeData.push(...regionTrainRouteData);
             routeMaps = routeMaps.union(regionTrainRouteMaps);
+
+            for (const routeMap of regionTrainRouteMaps) {
+                routeByModeCode[mode][routeMap.routeCode] = routeMap;
+            }
         } else if (mode === "bus") {
             routeData.push(...busRouteData);
 
@@ -50,12 +64,12 @@ function createRouteStructures(modes, geojsons) {
                 return parseInt(a.route_short_name) - parseInt(b.route_short_name);
             })) {
                 const routeCode = routeDatum.route_short_name;
-                routeMaps.add(new BusRouteMap(routeCode));
+                const routeMap = new BusRouteMap(routeCode);
+                routeMaps.add(routeMap);
+                routeByModeCode[mode][routeCode] = routeMap;
             }
         }
     }
-
-    const routeById = {}, routeByCode = {};
 
     for (const routeMap of routeMaps) {
         routeById[routeMap.routeId] = routeMap;
@@ -73,34 +87,30 @@ function createRouteStructures(modes, geojsons) {
         }
     }
 
-    for (const routeMap of routeMaps) {
-        routeByCode[routeMap.routeCode] = routeMap;
-    }
-
     for (const mode of modes) {
         if (mode === "metroTrain") {
             for (const feature of geojsons.metroTrainGeojson.features) {
-                routeByCode[feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
+                routeByModeCode[mode][feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
             }
         } else if (mode === "metroTram") {
             for (const feature of geojsons.metroTramGeojson.features) {
-                routeByCode[feature.properties.SHORT_NAME].geojson.push(feature);
+                routeByModeCode[mode][feature.properties.SHORT_NAME].geojson.push(feature);
             }
         } else if (mode === "regionTrain") {
             for (const feature of geojsons.regionTrainGeojson.features) {
-                routeByCode[feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
+                routeByModeCode[mode][feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
             }
         } else if (mode === "bus") {
             for (const feature of geojsons.busGeojson.features) {
                 const routeCode = feature.properties.SHORT_NAME;
-                if (routeCode in routeByCode) {
-                    routeByCode[routeCode].geojson.push(feature);
+                if (routeCode in routeByModeCode[mode]) {
+                    routeByModeCode[mode][routeCode].geojson.push(feature);
                 }
             }
         }
     }
 
-    return { routeMaps, routeById, routeByCode };
+    return { routeMaps, routeById };
 }
 
 export { createRouteStructures };
