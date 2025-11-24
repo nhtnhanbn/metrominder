@@ -237,6 +237,7 @@ for (const routeMap of routeMaps) {
     }
 
     dummyLayer.addEventListener("add", () => {
+        dummyLayer.remove();
         routeMap.layerGroup.addTo(map);
         map.fitBounds(geojsonLayer.getBounds(), { padding: [100, 100] });
     });
