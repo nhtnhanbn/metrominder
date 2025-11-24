@@ -90,7 +90,7 @@ function createRouteStructures(modes, geojsons) {
     for (const mode of modes) {
         if (mode === "metroTrain") {
             for (const feature of geojsons.metroTrainGeojson.features) {
-                routeByModeCode[mode][feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
+                routeByModeCode[mode][feature.properties.SHORT_NAME].geojson.push(feature);
             }
         } else if (mode === "metroTram") {
             for (const feature of geojsons.metroTramGeojson.features) {
@@ -98,7 +98,7 @@ function createRouteStructures(modes, geojsons) {
             }
         } else if (mode === "regionTrain") {
             for (const feature of geojsons.regionTrainGeojson.features) {
-                routeByModeCode[mode][feature.properties.SHAPE_ID.slice(2, 5)].geojson.push(feature);
+                routeByModeCode[mode][feature.properties.SHORT_NAME].geojson.push(feature);
             }
         } else if (mode === "bus") {
             for (const feature of geojsons.busGeojson.features) {

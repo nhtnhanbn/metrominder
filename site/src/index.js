@@ -189,7 +189,7 @@ const layerGroupByMode = {
     bus: L.layerGroup()
 };
 
-for (const routeMap of routeMaps) {//console.log(routeMap.routeCode, routeMap.routeLongName, routeMap.geojson);
+for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
 
     const geojsonLayer = L.geoJSON(
