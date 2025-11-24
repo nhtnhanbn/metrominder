@@ -6,6 +6,7 @@ class MetroTrainRouteMap {
             return `2-${this.routeCode}-vpt-${shapeId}`;
         });
         this.geojson = [];
+        this.stopIds = [];
     }
 }
 class RegionTrainRouteMap {
@@ -16,6 +17,7 @@ class RegionTrainRouteMap {
             return `1-${this.routeCode}-mjp-${shapeId}`;
         });
         this.geojson = [];
+        this.stopIds = [];
     }
 }
 

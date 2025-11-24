@@ -175,17 +175,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
             if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {
                 let { latitude, longitude, bearing } = vehicle.vehicle.position;
                 const tripId = vehicle.vehicle.trip.tripId;
-
-                let routeId;
-                if (mode === "bus") {
-                    if (tripId in feed.routeIdByTripId) {
-                        routeId = feed.routeIdByTripId[tripId];
-                    } else {
-                        routeId = `${tripId.slice(0, 6)}-aus-1`;
-                    }
-                } else {
-                    routeId = vehicle.vehicle.trip.routeId;
-                }
+                const routeId = vehicle.vehicle.trip.routeId;
                 
                 if (!(routeId in routeById)) {
                     continue;
@@ -312,7 +302,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             if ("entity" in feed.feed) for (const trip of feed.feed.entity) {
                 const tripUpdate = trip.tripUpdate;
                 const tripId = tripUpdate.trip.tripId;
-                const routeId = mode === "bus" ? feed.routeIdByTripId[tripId] : tripUpdate.trip.routeId;
+                const routeId = mode === "bus" ? tripId.slice(3, 6) : tripUpdate.trip.routeId;
                 if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate && routeId in routeById) {
                     const stopTimeUpdate = tripUpdate.stopTimeUpdate;
 

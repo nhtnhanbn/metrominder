@@ -52,6 +52,10 @@ function createStopStructures(modes, routeMaps, stopDatas) {
         }
         stopById[stopId] = stopById[parentId];
     }
+
+    for (const stopMap of stopMaps) {
+        stopById[stopMap.stopId] = stopByName[stopMap.stopName];
+    }
     
     for (const routeMap of routeMaps) {
         for (const stopId of routeMap.stopIds) {

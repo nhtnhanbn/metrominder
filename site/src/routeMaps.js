@@ -11,15 +11,17 @@ class MetroTramRouteMap {
         this.routeCode = routeCode;
         this.routeId = `aus:vic:vic-03-${routeCode}:`;
         this.geojson = [];
+        this.stopIds = [];
     }
 }
 
 class BusRouteMap {
-    constructor(routeId, routeCode) {
+    constructor(routeCode) {
         // routeCode same as short name
-        this.routeId = routeId;
+        this.routeId = routeCode;
         this.routeCode = routeCode;
         this.geojson = [];
+        this.stopIds = [];
     }
 }
 
@@ -33,7 +35,7 @@ function createRouteStructures(modes, geojsons) {
             routeData.push(...metroTramRouteData);
 
             for (const routeDatum of metroTramRouteData.sort((a, b) => {
-                return a.route_short_name - b.route_short_name;
+                return parseInt(a.route_short_name) - parseInt(b.route_short_name);
             })) {
                 const routeCode = routeDatum.route_short_name;
                 routeMaps.add(new MetroTramRouteMap(routeCode));
@@ -45,10 +47,10 @@ function createRouteStructures(modes, geojsons) {
             routeData.push(...busRouteData);
 
             for (const routeDatum of busRouteData.sort((a, b) => {
-                return a.route_short_name - b.route_short_name;
+                return parseInt(a.route_short_name) - parseInt(b.route_short_name);
             })) {
                 const routeCode = routeDatum.route_short_name;
-                routeMaps.add(new BusRouteMap(routeDatum.route_id, routeCode));
+                routeMaps.add(new BusRouteMap(routeCode));
             }
         }
     }
@@ -60,8 +62,9 @@ function createRouteStructures(modes, geojsons) {
     }
 
     for (const routeDatum of routeData) {
-        if (routeDatum.route_id in routeById) {
-            const routeMap = routeById[routeDatum.route_id];
+        const routeId = routeDatum.route_id[0] === 'a' ? routeDatum.route_id : routeDatum.route_short_name;
+        if (routeId in routeById) {
+            const routeMap = routeById[routeId];
             routeMap.routeShortName = routeDatum.route_short_name;
             routeMap.routeLongName = routeDatum.route_long_name;
             routeMap.routeColour = "#" + routeDatum.route_color;

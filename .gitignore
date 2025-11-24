@@ -10,3 +10,5 @@ node_modules/
 !.env.example
 
 *.geojson
+stop_times.txt
+*Zone.Identifier
