@@ -265,7 +265,7 @@ for (const stopMap of stopMaps) {
         {
             icon: L.icon({
                 iconUrl: stopIcon,
-                iconSize: [20, 20]
+                iconSize: [18, 18]
             }),
             title: stopMap.stopName,
             visibility: 0
