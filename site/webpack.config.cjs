@@ -4,7 +4,7 @@ const WorkboxPlugin = require("workbox-webpack-plugin");
 const WebpackPwaManifest = require("webpack-pwa-manifest");
 
 module.exports = {
-    mode: "development",
+    mode: "production",
     entry: {
         index: "./src/index.js",
         train: "./src/train.js",
@@ -83,7 +83,7 @@ module.exports = {
             { test: /\.html$/i, loader: "html-loader" }
         ]
     },
-    devtool: "eval-source-map",
+    // devtool: "eval-source-map",
     devServer: {
         watchFiles: ["./src/template.html"]
     }

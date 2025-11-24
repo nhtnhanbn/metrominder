@@ -11,7 +11,6 @@ import "leaflet.zoomhome";
 import "leaflet.marker.slideto";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
-import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import metroTrainGeojson from "./metroTrainRoutes.geojson";
 import metroTramGeojson from "./metroTramRoutes.geojson";
 import regionTrainGeojson from "./regionTrainRoutes.geojson";

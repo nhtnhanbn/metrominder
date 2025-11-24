@@ -1,6 +1,7 @@
 import { VehicleMap } from "./vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
+import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 
 const URL = "https://api.metrominder.nhan.au";
 
@@ -468,5 +469,32 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
         updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);
     }, 1000);
 };
+
+async function updateAlerts(alertStatus, map, modes) {
+    alertStatus.textContent = "Retrieving service alerts...";
+    map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+
+    try {
+        for (const mode of modes) if (["metroTrain", "metroTram"].includes(mode)) {
+            const response = await fetch(`${URL}/${mode}/alerts`);
+            const feed = await response.json();
+
+            if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {
+            }
+        }
+
+        alertStatus.textContent = "";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    } catch (error) {
+        console.log(error);
+        alertStatus.textContent = "Failed to retrieve service alerts.";
+        map.attributionControl.setPrefix(attributionPrefix.outerHTML);
+    }
+
+
+    setTimeout(() => {
+        updateAlerts(alertStatus, map, modes);
+    }, 60000);
+}
 
 export { updatePositions, updateTrips };

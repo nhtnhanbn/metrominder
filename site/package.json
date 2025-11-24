@@ -31,5 +31,6 @@
     "leaflet.marker.slideto": "^0.3.0",
     "leaflet.zoomhome": "^1.0.0"
   },
-  "type": "module"
+  "type": "module",
+  "sideEffects": ["*.css", "*.html", "**/L.ArrowCircle.js"]
 }
