@@ -26,6 +26,7 @@ import { timeString } from "./stringConverters.js";
 import { createIndexLayerTree } from "./indexLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
+import { LControlWatermark, LControlInfo } from "./leafletControls.js";
 import metroTrainStopIcon from "./PICTO_MODE_Train.svg";
 import regionTrainStopIcon from "./PICTO_MODE_RegionalTrain.svg";
 import tramStopIcon from "./PICTO_MODE_Tram.svg";
@@ -127,54 +128,11 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
     }
 })).addTo(map);
 
-(new (L.Control.extend({
-    onAdd: (map) => {
-        const title = L.DomUtil.create("a", "watermark");
-        title.title = "About MetroMinder";
-        
-        const metro = L.DomUtil.create("span", null, title);
-        metro.style.fontWeight = 1;
-        metro.textContent = "METRO";
-
-        const minder = L.DomUtil.create("span", null, title);
-        minder.style.fontWeight = 1000;
-        minder.textContent = "MINDER";
-        
-        const about = document.querySelector("dialog");
-        title.addEventListener("click", (event) => {
-            event.preventDefault();
-            about.showModal();
-        });
-        
-        return title;
-    },
-    
-    onRemove: (map) => {}
-}))({
+(new LControlWatermark({
     position: "topright"
 })).addTo(map);
 
-(new (L.Control.extend({
-    onAdd: (map) => {
-        const container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
-
-        const link = L.DomUtil.create("a", "leaflet-bar-part", container);
-        link.textContent = "i";
-        link.href = "#";
-        link.title = "About MetroMinder";
-
-        const about = document.querySelector("dialog");
-        L.DomEvent.on(link, "click", (event) => {
-            L.DomEvent.stopPropagation(event);
-            L.DomEvent.preventDefault(event);
-            about.showModal();
-        }, this);
-
-        return container;
-    },
-    
-    onRemove: (map) => {}
-}))({
+(new LControlInfo({
     position: "topright"
 })).addTo(map);
 
