@@ -1,6 +1,6 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, state) {
+function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
@@ -241,7 +241,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("vic:rail:MCE", stopById, routeMaps, map);
-                            routeByCode["RCE"].layerGroup.remove();
+                            routeById["aus:vic:vic-02-RCE:"].layerGroup.remove();
                         }
                     }]
                 },
@@ -254,8 +254,8 @@ function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("vic:rail:RMD", stopById, routeMaps, map);
-                            routeByCode["WER"].layerGroup.addTo(map);
-                            routeByCode["WIL"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-WER:"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-WIL:"].layerGroup.addTo(map);
                         }
                     }]
                 },
@@ -268,8 +268,8 @@ function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("vic:rail:SYR", stopById, routeMaps, map);
-                            routeByCode["WER"].layerGroup.addTo(map);
-                            routeByCode["WIL"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-WER:"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-WIL:"].layerGroup.addTo(map);
                         }
                     }]
                 },
@@ -282,8 +282,8 @@ function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("vic:rail:CFD", stopById, routeMaps, map);
-                            routeByCode["WER"].layerGroup.addTo(map);
-                            routeByCode["WIL"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-WER:"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-WIL:"].layerGroup.addTo(map);
                         }
                     }]
                 },
@@ -296,8 +296,8 @@ function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("vic:rail:NME", stopById, routeMaps, map);
-                            routeByCode["FKN"].layerGroup.addTo(map);
-                            routeByCode["RCE"].layerGroup.remove();
+                            routeById["aus:vic:vic-02-FKN:"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-RCE:"].layerGroup.remove();
                         }
                     }]
                 },
@@ -310,7 +310,7 @@ function createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, sto
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
                             setRoutes("vic:rail:FSY", stopById, routeMaps, map);
-                            routeByCode["FKN"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-FKN:"].layerGroup.addTo(map);
                         }
                     }]
                 }

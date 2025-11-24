@@ -1,6 +1,6 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createIndexLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, layerGroupByMode, state) {
+function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, layerGroupByMode, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`

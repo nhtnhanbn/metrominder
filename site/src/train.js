@@ -37,7 +37,7 @@ if ("serviceWorker" in navigator) {
 };
 
 const modes = ["metroTrain", "regionTrain"];
-const { routeMaps, routeById, routeByCode } = createRouteStructures(modes, {
+const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     regionTrainGeojson: regionTrainGeojson
 });
@@ -224,7 +224,7 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup.addTo(map);
 }
 
-L.control.layers.tree(null, createTrainLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, state), {
+L.control.layers.tree(null, createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state), {
     selectorBack: true
 }).addTo(map);
 

@@ -1,6 +1,6 @@
 import { setRoutes } from "./routeFilters.js";
 
-function createMetroTramLayerTree(routeMaps, routeByCode, stopById, vehicleMaps, stopLayer, state) {
+function createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state) {
     setInterval(() => {
         document.querySelector(
             `input[name=labels][value=${state.vehicleMarkerLabelSelection}]`
