@@ -1,4 +1,4 @@
-import { setRoutes } from "./routeFilters.js";
+import { setRoutes, addRoutes } from "./routeFilters.js";
 
 function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, layerGroupByMode, state) {
     setInterval(() => {
@@ -86,7 +86,7 @@ function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
             label: "<b>Presets<b>",
             children: [
                 {
-                    label: `<button class="preset-button" title="Clear all">
+                    label: `<button class="preset-button" title="Clear all routes">
                                 Clear all
                             </button>`,
                     eventedClasses: [{
@@ -100,6 +100,20 @@ function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                             for (const routeMap of routeMaps) {
                                 routeMap.layerGroup.remove();
                             }
+                        }
+                    }]
+                },
+                {
+                    label: `<button class="preset-button" title="Bus routes to Monash University Clayton campus and Pakenham and Cranbourne lines">
+                                Monash University Clayton
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            setRoutes("19809", stopById, routeMaps, map);
+                            addRoutes("22446", stopById, routeMaps, map);
+                            addRoutes("vic:rail:HUN", stopById, routeMaps, map);
                         }
                     }]
                 }
