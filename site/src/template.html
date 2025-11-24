@@ -9,39 +9,44 @@
     <body>
         <div id="map"></div>
         <dialog closedby="any">
+            <div style="display: flex; justify-content: space-around">
+                <button onclick="location.href='/'" title="All train, tram and bus modes" style="background-color: grey; color: white;">Omnimap</button>
+                <button onclick="location.href='train'" title="Metro Trains Melbourne and V/Line regional trains" style="background-color: #0072CE; color: white;">Trains</button>
+                <button onclick="location.href='tram'" title="Trams" style="background-color: #78BE20; color: white;">Trams</button>
+            </div>
             <h1>
                 <div style="display: flex; justify-content: space-between">
                     <div>About MetroMinder</div>
-                    <button onclick="document.querySelector('dialog').close()">Back to map</button>
+                    <button autofocus="true" onclick="document.querySelector('dialog').close()">Back to map</button>
                 </div>
             </h1>
             
-            <h2>A live Melbourne train tracker</h2>
-            <p>This site maps realtime positions of metropolitan trains operated by Metro Trains Melbourne using public data distributed by Transport Victoria.</p>
-            <p><strong>Use information on this site as a guide only. Do not rely on its accuracy.</strong> This site is not endorsed by the DTP or MTM.</p>
+            <h2>A live Victorian PT tracker</h2>
+            <p>This site maps realtime positions of trains, trams and buses using public data distributed by Transport Victoria.</p>
+            <p><strong>Use information on this site as a guide only. Do not rely on its accuracy.</strong> This site is not endorsed by the DTP.</p>
             <p>Realtime data including positions, service, arrival and departure information are sourced from <a href="https://gtfs.org/documentation/overview/#gtfs-realtime">GTFS Realtime</a> APIs made available by the Victorian Department of Transport and Planning and consumed by other third party software such as Google Maps. As such, the quality of the information on this site is subject to the DTP data's quality (and any upstream outages, omissions and errors). It is the same data used by the PTV app and website, but they do not use the public API layer so the PTV app may still be able to display realtime information when outages affect this and other third party apps. Vehicle positions appear to be updated in the API about once a minute.</p>
-            <p>Arrival and departure information is sourced exclusively from the PTV GTFS Realtime - Trip Updates - Metro Train API and does not include static timetable data (such as from the GTFS Schedule dataset) or the PTV Timetable API. For more complete arrival and departure information, visit the PTV or other sources.</p>
+            <p>Arrival and departure information is sourced exclusively from the PTV GTFS Realtime Trip Updates APIs and does not include static timetable data (such as from the GTFS Schedule dataset) or the PTV Timetable API. For more complete arrival and departure information, visit the PTV or other sources.</p>
             <p>
                 Features include:
                 <ul>
-                    <li>Display coloured routes and train positions and directions on the map</li>
-                    <li>Optional display of station markers</li>
+                    <li>Display coloured routes and vehicle positions and directions on the map</li>
+                    <li>Optional display of stop markers</li>
                     <li>Select and filter individual lines or line groups</li>
                     <li>
-                        Details on each train:
+                        Details on each vehicle:
                         <ul>
                             <li>Service destination</li>
                             <li>Model and consist</li>
-                            <li>Future arrival stations</li>
-                            <li>Future arrival platforms</li>
+                            <li>Future arrival stops</li>
+                            <li>Future arrival platforms/bays</li>
                             <li>Future arrival times</li>
                         </ul>
                     </li>
                     <li>
-                        Details on each station:
+                        Details on each stop:
                         <ul>
-                            <li>Lines servicing the station</li>
-                            <li>Set, add and filter lines displayed</li>
+                            <li>Routes servicing the stop</li>
+                            <li>Set, add and filter routes displayed</li>
                             <li>Future departure service destinations</li>
                             <li>Future departure platforms</li>
                             <li>Future departure times</li>
@@ -52,7 +57,7 @@
             </p>
             
             <h2>Usage</h2>
-            <p>Most functionality and interaction should be fairly conventional. The map can be interacted with using the buttons on the left or mouse/trackpad/touch gestures, and supports fullscreen, rotation, zoom, panning and returning to initial view.</p>
+            <p>Most interactions follow conventional patterns. The map can be interacted with using the buttons on the left or mouse/trackpad/touch gestures, and supports fullscreen, rotation, zoom, panning and returning to initial view.</p>
             <p>The compass button's functionality differs between mouse and touch. When using a mouse, click on the compass, hold and drag to the right to rotate the map. Click and release on the button to return to the default rotation (north pointing directly up).</p>
             <p>
                 When using a touchscreen, the compass button has three modes which are cycled through when pressed. To return to the default rotation (north pointing directly up), press on the button until you get there.
@@ -64,19 +69,19 @@
             </p>
             <p>You can zoom in and out using the plus/minus zoom buttons or by pinching on the trackpad or touchscreen. You can also zoom to a rectangle that you can specify by holding shift while you click and drag.</p>
             <p>
-                Use the search button to search for a station. When you search for a station or click on the station marker, there are buttons to Set, Add and Filter. These change which lines are displayed on the map. Consider examples with an initial state of the Cranbourne and Frankston lines visible and hitting a button on Huntingdale station (on the Cranbourne and Pakenham lines).
+                Use the search button to search for a stop (or also route depending on the page). When you search for a stop or click on the stop marker, there are buttons to Set, Add and Filter. These change which routes are displayed on the map. Consider examples with an initial state of the Cranbourne and Frankston lines visible and hitting a button on Huntingdale station (which is serviced by the Cranbourne and Pakenham lines).
                 <ul>
-                    <li>Set: add all corresponding lines and remove all other lines. If I hit Set lines, the Pakenham line will be shown in addition to the Cranbourne line, and the Frankston line will be hidden.</li>
-                    <li>Add: add all corresponding lines (an OR operation). If I hit Add lines, the Pakenham line will be shown in addition to the Cranbourne and Frankston lines.</li>
-                    <li>Filter: remove all other lines (an AND operation). If I hit Filter lines, the Frankston line will be hidden, and the Cranbourne line will remain shown.</li>
+                    <li>Set: add all corresponding routes and remove all other routes. If I hit Set routes, the Pakenham line will be shown in addition to the Cranbourne line, and the Frankston line will be hidden.</li>
+                    <li>Add: add all corresponding routes (an OR operation). If I hit Add routes, the Pakenham line will be shown in addition to the Cranbourne and Frankston lines.</li>
+                    <li>Filter: remove all other routes (an AND operation). If I hit Filter routes, the Frankston line will be hidden, and the Cranbourne line will remain shown.</li>
                 </ul>
             </p>
             <p>This can be useful if you want to see trains running between two stations. Suppose that I need to take a single train from Caulfield station to Parliament station. To view relevant trains, I can first Set lines on Caulfield station then Filter lines on Parliament station (removing the Frankston line).</p>
-            <p>Alternatively, suppose that I wish to take the train from Box Hill station to Dandenong station, although to do so I must transfer in the city. To view relevant trains, I can first Set lines on Box Hill station then Add lines on Dandenong station.</p>
-            <p>You can show and hide station markers, individual lines, line groups and presets using the layer control in the top right. Performance degrades a bit the more station and train markers there are, so filter the lines that you need and hide station markers for the best performance.</p>
+            <p>Alternatively, suppose that I wish to take the train from Box Hill station to Dandenong station, although to do so I must transfer in the city. To view relevant trains, I can first Set routes on Box Hill station then Add routes on Dandenong station.</p>
+            <p>You can show and hide stop markers, routes and presets using the layer control in the top right. Performance degrades a bit the more stop and vehicle markers there are, so filter the routes that you need and hide stop markers for the best performance.</p>
             
             <h2>Other sites</h2>
-            <p>In addition to PTV and operator websites and apps, there are a number of third party projects, commercial and not, that use the PTV API.</p>
+            <p>In addition to PTV and operator websites and apps, there are a number of third party projects, commercial and not, that use the DTP public transport APIs.</p>
             <p>
                 Some other projects, covering more public transport modes, include:
                 <ul>
@@ -91,8 +96,8 @@
             
             <h2>Attribution</h2>
             <p>By <a href="https://nhan.au">Nhan</a>.</p>
-            <p>GTFS Schedule and GTFS Realtime data and transport mode pictogram &copy; State of Victoria (<a href="https://opendata.transport.vic.gov.au">Department of Transport and Planning</a>) licensed under a <a href="https://creativecommons.org/licenses/by/4.0">Creative Commons Attribution 4.0 International licence</a>.</p>
-            <p>Rolling stock information and codes from <a href="https://cmsportal.metrotrains.com.au/docnum.aspx?id=A8520">Metro Trains Melbourne</a> and <a href="https://vicsig.net/suburban/fleet">Vicsig</a>.</p>
+            <p>GTFS Schedule and GTFS Realtime data and transport mode pictograms &copy; State of Victoria (<a href="https://opendata.transport.vic.gov.au">Department of Transport and Planning</a>) licensed under a <a href="https://creativecommons.org/licenses/by/4.0">Creative Commons Attribution 4.0 International licence</a>.</p>
+            <p>Rolling stock information, codes and names from <a href="https://cmsportal.metrotrains.com.au/docnum.aspx?id=A8520">Metro Trains Melbourne</a> and <a href="https://vicsig.net/suburban/fleet">Vicsig</a>.</p>
             <p>Map tiles &copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>.</p>
             <p>Built using <a href="https://leafletjs.com">Leaflet</a>.</p>
             <p>See the <a href="https://github.com/nhtnhanbn/metrominder">README</a> for full software details and build instructions.</p>

@@ -50,7 +50,7 @@ module.exports = {
             "short_name": "MetroMinder live PTV map",
             "start_url": ".",
             "display": "standalone",
-            "description": "A live Melbourne train tracker.\nThis app maps realtime positions of metropolitan trains operated by Metro Trains Melbourne using public data distributed by Transport Victoria. View live departure and arrival updates, service information and consists with ease.",
+            "description": "A live Victorian PT tracker.\nThis app maps realtime positions of trains, trams and buses using public data distributed by Transport Victoria. View live departure and arrival updates, service information and consists with ease.",
             "icons": [
                 {
                     "src": "./src/favicon192.png",

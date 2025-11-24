@@ -10,16 +10,6 @@ table {
     margin: auto;
 }
 
-h3 {
-    margin: 0.3em 0;
-    font-size: 12pt;
-    padding: 0 0.2em;
-}
-
-h4 {
-    margin: 0;
-}
-
 .leaflet-popup-content {
     text-align: center;
 }
@@ -117,4 +107,8 @@ span.leaflet-layerstree-header-label {
 
 .leaflet-layerstree-header-label label {
     font-style: normal;
+}
+
+.leaflet-bar-part {
+    font-size: 26px;
 }

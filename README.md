@@ -1,6 +1,6 @@
 # MetroMinder
 
-A live Melbourne train tracker. This site maps realtime positions of metropolitan trains operated by Metro Trains Melbourne using public data distributed by Transport Victoria.
+A live Victorian PT tracker. This site maps realtime positions of trains, trams and buses using public data distributed by Transport Victoria.
 
 ## Visit
 
