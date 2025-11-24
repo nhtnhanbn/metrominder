@@ -162,6 +162,7 @@ function createConsistInfo(mode, vehicle, routeId) {
                         </p>`;
         } else if (mode === "bus") {
             vehicleConsistInfo = `<p>${vehicle.vehicle.vehicle.id}</p>`;
+            vehicleModelCode = routeId;
         }
     }
     
