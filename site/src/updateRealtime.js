@@ -153,6 +153,8 @@ function createConsistInfo(mode, vehicle, routeId) {
                         <p style="margin-top: 0">
                             ${consist}
                         </p>`;
+        } else if (mode === "bus") {
+            vehicleConsistInfo = `<p>${vehicle.vehicle.vehicle.id}</p>`;
         }
     }
     
@@ -184,7 +186,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
                 } else {
                     routeId = vehicle.vehicle.trip.routeId;
                 }
-
+                
                 if (!(routeId in routeById)) {
                     continue;
                 }
