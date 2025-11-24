@@ -11,8 +11,8 @@ class VehicleMap {
         this.live = true;
     }
 
-    isTrain() {
-        return this.vehicleMode === "metroTrain" || this.vehicleMode === "regionTrain";
+    hasPlatforms() {
+        return this.vehicleMode === "metroTrain" || this.vehicleMode === "regionTrain" || this.vehicleMode === "bus";
     }
 }
 const vehicleMaps = new Set(), vehicleByTripId = {};

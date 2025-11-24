@@ -45,6 +45,13 @@ const xt1Name = {
     1663: "Don Corrie",
 };
 
+const platformTermByMode = {
+    "metroTrain": "<th>PLATFORM</th>",
+    "regionTrain": "<th>PLATFORM</th>",
+    "metroTram": "",
+    "bus": "<th>BAY</th>"
+}
+
 function createConsistInfo(mode, vehicle, routeId) {
     let vehicleConsistInfo = "", vehicleModelCode = "";
 
@@ -328,7 +335,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                     let future = false;
                     for (const stop of stopTimeUpdate) {
                         const stopMap = stopById[stop.stopId];
-                        const platform = platformById[stop.stopId] || "";
+                        const platform = (platformById[stop.stopId] || "").replace("Bay", "").trim();
                         
                         if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
                             stopMap.stopDepartures.push({
@@ -347,7 +354,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                             if (future) {
                                 vehiclePopup += `<tr>
                                                     <td style="text-align: left;">${stopName}</td>
-                                                    ${ vehicleMap.isTrain() ? `<td>${platform}</td>` : "" }
+                                                    ${ vehicleMap.hasPlatforms() ? `<td>${platform}</td>` : "" }
                                                     <td>${stopTime}</td>
                                                 </tr>`;
                             } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
@@ -355,12 +362,12 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                                 vehiclePopup += `<table>
                                                     <tr>
                                                         <th style="text-align: left;">ARRIVING</td>
-                                                        ${ vehicleMap.isTrain() ? `<th>PLATFORM</td>` : "" }
+                                                        ${platformTermByMode[vehicleMap.vehicleMode]}
                                                         <th>TIME</td>
                                                     </tr>
                                                     <tr>
                                                         <th style="text-align: left;">${stopName}</td>
-                                                        ${ vehicleMap.isTrain() ? `<th>${platform}</td>` : "" }
+                                                        ${ vehicleMap.hasPlatforms() ? `<th>${platform}</td>` : "" }
                                                         <th>${stopTime}</td>
                                                     </tr>`;
                                 future = true;
@@ -389,7 +396,18 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                 const table = document.createElement("table");
                 
                 const header = document.createElement("tr");
-                const columns = stopMap.isStation() ? ["DEPARTING", "PLATFORM", "TIME"] : ["DEPARTING", "TIME"];
+
+                let columns;
+                if (stopMap.hasPlatforms) {
+                    if (stopMap.isStation()) {
+                        columns = ["DEPARTING", "PLATFORM", "TIME"];
+                    } else {
+                        columns = ["DEPARTING", "BAY", "TIME"];
+                    }
+                } else {
+                    columns = ["DEPARTING", "TIME"];
+                }
+
                 for (const column of columns) {
                     const cell = document.createElement("th");
                     cell.textContent = column;
@@ -410,7 +428,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                     serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
                     row.appendChild(serviceCell);
                     
-                    if (stopMap.stopId[0] === 'v') {
+                    if (stopMap.hasPlatforms) {
                         const platformCell = document.createElement("td");
                         platformCell.textContent = stopDeparture.platform;
                         row.appendChild(platformCell);

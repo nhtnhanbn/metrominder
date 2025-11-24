@@ -1,11 +1,12 @@
 import { shortName } from "./stringConverters.js";
 
 class StopMap {
-    constructor(stopId, stopName, stopLat, stopLon) {
+    constructor(stopId, stopName, stopLat, stopLon, hasPlatforms) {
         this.stopId = stopId;
         this.stopName = stopName;
         this.stopLat = stopLat;
         this.stopLon = stopLon;
+        this.hasPlatforms = hasPlatforms;
         this.routeMaps = new Set();
         this.stopDepartures = [];
     }
@@ -36,10 +37,11 @@ function createStopStructures(modes, routeMaps, stopDatas) {
         const { stop_id, stop_name, stop_lat, stop_lon, parent_station, platform_code } = stopDatum;
         
         if (parent_station === "") {
-            const stopMap = new StopMap(stop_id, stop_name, stop_lat, stop_lon);
+            const stopMap = new StopMap(stop_id, stop_name, stop_lat, stop_lon, platform_code !== undefined);
             stopMaps.add(stopMap);
             stopById[stop_id] = stopMap;
             stopByName[stop_name] = stopMap;
+            platformById[stop_id] = platform_code;
         } else {
             parentById[stop_id] = parent_station;
             platformById[stop_id] = platform_code;
