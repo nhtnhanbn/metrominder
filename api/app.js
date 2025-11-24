@@ -82,8 +82,8 @@ function handleError(err, res, next, cache) {
     }
 }
 
-const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0 };
-const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0 };
+const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0 }, metroTrainAlertCache = { timestamp: 0 };
+const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0 }, metroTramAlertCache = { timestamp: 0 };
 const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0 };
 const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0 };
 
@@ -130,6 +130,13 @@ app.use("/metrotrain/trips",
     }
 );
 
+app.use("/metrotrain/alerts",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, metroTrainAlertCache, "metro/service-alerts", 60000);
+    }
+);
+
 app.use("/metrotram/positions",
     cors(),
     async (req, res) => {
@@ -141,6 +148,13 @@ app.use("/metrotram/trips",
     cors(),
     async (req, res) => {
         await sendFeed(res, metroTramTripCache, "tram/trip-updates", 8000);
+    }
+);
+
+app.use("/metrotram/alerts",
+    cors(),
+    async (req, res) => {
+        await sendFeed(res, metroTramAlertCache, "tram/service-alerts", 60000);
     }
 );
 
