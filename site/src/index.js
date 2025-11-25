@@ -44,6 +44,17 @@ function computeMode(routeId) {
     }
 }
 
+function addGeoJSONLayer(routeMap) {
+    routeMap.geojsonLayer = L.geoJSON(
+        routeMap.geojson,
+        {
+            style: { color: routeMap.routeColour },
+            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+        }
+    );
+    routeMap.geojsonLayer.addTo(routeMap.layerGroup);
+}
+
 async function addGeoJSON(routeMaps) {
     const params = new URLSearchParams();
     for (const routeMap of routeMaps) {
@@ -55,14 +66,7 @@ async function addGeoJSON(routeMaps) {
 
     for (const routeMap of routeMaps) {
         routeMap.geojson = data[routeMap.mode][routeMap.routeCode];
-        routeMap.geojsonLayer = L.geoJSON(
-            routeMap.geojson,
-            {
-                style: { color: routeMap.routeColour },
-                pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
-            }
-        );
-        routeMap.geojsonLayer.addTo(routeMap.layerGroup);
+        addGeoJSONLayer(routeMap);
     }
 }
 
@@ -233,14 +237,7 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
 
     if (routeMap.geojson.length > 0) {
-        routeMap.geojsonLayer = L.geoJSON(
-            routeMap.geojson,
-            {
-                style: { color: routeMap.routeColour },
-                pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
-            }
-        );
-        routeMap.geojsonLayer.addTo(routeMap.layerGroup);
+        addGeoJSONLayer(routeMap);
         
         const bounds = routeMap.geojsonLayer.getBounds();
 
