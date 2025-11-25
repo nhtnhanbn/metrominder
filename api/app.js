@@ -19,6 +19,22 @@ const headsignByTripId = {};
     }
 })();
 
+const geojsonById = {};
+(async () => {
+    for (const filename of [
+        "../data/metroTrainRoutes.geojson",
+        "../data/metroTramRoutes.geojson",
+        "../data/regionTrainRoutes.geojson",
+        "../data/busRoutes.geojson"
+    ]) {
+        const response = await fs.readFile(filename);
+        const data = JSON.parse(response);
+        for (const feature of data.features) {
+            geojsonById[feature.properties.SHAPE_ID] = feature;
+        }
+    }
+})();
+
 async function getFeed(resource) {
     const response = await fetch(
         resource,
@@ -138,6 +154,24 @@ app.use("/stops/:route_id/:route_type",
         const response = await fetch(`https://timetableapi.ptv.vic.gov.au${url}&signature=${signature}`);
         const feed = await response.json();
         res.send(feed);
+    }
+);
+
+app.use("/geojson",
+    cors(),
+    (req, res) => {
+        let shapeIds;
+        if (Array.isArray(req.query.id)) {
+            shapeIds = req.query.id;
+        } else {
+            shapeIds = [req.query.id];
+        }
+
+        const response = {};
+        for (const shapeId of shapeIds) {
+            response[shapeId] = geojsonById[shapeId];
+        }
+        res.json(response);
     }
 );
 

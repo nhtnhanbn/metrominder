@@ -72,7 +72,6 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
                 feature.properties.SHORT_NAME = feature.properties.SHAPE_ID.slice(2, 5);
             }
 
-            delete feature.properties.SHAPE_ID;
             delete feature.properties.HEADSIGN;
             delete feature.properties.LONG_NAME;
             delete feature.properties.MODE;
