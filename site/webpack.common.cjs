@@ -4,7 +4,6 @@ const WorkboxPlugin = require("workbox-webpack-plugin");
 const WebpackPwaManifest = require("webpack-pwa-manifest");
 
 module.exports = {
-    mode: "production",
     entry: {
         index: "./src/index.js",
         train: "./src/train.js",
@@ -94,9 +93,5 @@ module.exports = {
             { test: /\.txt$/i, loader: "csv-loader", options: { header: true, skipEmptyLines: true } },
             { test: /\.(png|svg|jpg|jpeg|gif)$/i, type: "asset/resource" }
         ]
-    },
-    // devtool: "eval-source-map",
-    devServer: {
-        watchFiles: ["./src/template.html"]
     }
 };
