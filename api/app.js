@@ -19,7 +19,7 @@ const headsignByTripId = {};
     }
 })();
 
-async function updateFeed(resource) {
+async function getFeed(resource) {
     const response = await fetch(
         resource,
         {
@@ -45,21 +45,17 @@ async function updateFeed(resource) {
     return feed;
 }
 
-async function sendFeed(res, cache, endpoint, ttl) {
-    if (Date.now() - cache.timestamp > ttl) {
-        cache.feed = await updateFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
+async function updateCache(cache, endpoint) {
+    cache.feed = await getFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
 
-        if ("headsignByTripId" in cache) {
-            cache.headsignByTripId = {};
-            for (const entity of cache.feed.entity) {
-                cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
-            }
+    if ("headsignByTripId" in cache) {
+        cache.headsignByTripId = {};
+        for (const entity of cache.feed.entity) {
+            cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
         }
-
-        cache.timestamp = Date.now();
     }
-    
-    res.json(cache);
+
+    cache.timestamp = Date.now();
 }
 
 function handleError(err, res, next, cache) {
@@ -75,6 +71,46 @@ const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timest
 const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0, headsignByTripId: {} }, metroTramAlertCache = { timestamp: 0 };
 const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0, headsignByTripId: {} };
 const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0, headsignByTripId: {} };
+
+setInterval(() => {
+    updateCache(metroTrainPositionCache, "metro/vehicle-positions");
+}, 4000);
+
+setInterval(() => {
+    updateCache(metroTrainTripCache, "metro/trip-updates");
+}, 8000);
+
+setInterval(() => {
+    updateCache(metroTrainAlertCache, "metro/service-alerts");
+}, 60000);
+
+setInterval(() => {
+    updateCache(metroTramPositionCache, "tram/vehicle-positions");
+}, 4000);
+
+setInterval(() => {
+    updateCache(metroTramTripCache, "tram/trip-updates");
+}, 8000);
+
+setInterval(() => {
+    updateCache(metroTramAlertCache, "tram/service-alerts");
+}, 60000);
+
+setInterval(() => {
+    updateCache(regionTrainPositionCache, "vline/vehicle-positions");
+}, 4000);
+
+setInterval(() => {
+    updateCache(regionTrainTripCache, "vline/trip-updates");
+}, 8000);
+
+setInterval(() => {
+    updateCache(busPositionCache, "bus/vehicle-positions");
+}, 4000);
+
+setInterval(() => {
+    updateCache(busTripCache, "bus/trip-updates");
+}, 8000);
 
 const app = express();
 
@@ -107,71 +143,71 @@ app.use("/stops/:route_id/:route_type",
 
 app.use("/metrotrain/positions",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, metroTrainPositionCache, "metro/vehicle-positions", 4000);
+    (req, res) => {
+        res.json(metroTrainPositionCache);
     }
 );
 
 app.use("/metrotrain/trips",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, metroTrainTripCache, "metro/trip-updates", 8000);
+    (req, res) => {
+        res.json(metroTrainTripCache);
     }
 );
 
 app.use("/metrotrain/alerts",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, metroTrainAlertCache, "metro/service-alerts", 60000);
+    (req, res) => {
+        res.json(metroTrainAlertCache);
     }
 );
 
 app.use("/metrotram/positions",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, metroTramPositionCache, "tram/vehicle-positions", 4000);
+    (req, res) => {
+        res.json(metroTramPositionCache);
     }
 );
 
 app.use("/metrotram/trips",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, metroTramTripCache, "tram/trip-updates", 8000);
+    (req, res) => {
+        res.json(metroTramTripCache);
     }
 );
 
 app.use("/metrotram/alerts",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, metroTramAlertCache, "tram/service-alerts", 60000);
+    (req, res) => {
+        res.json(metroTramAlertCache);
     }
 );
 
 app.use("/regiontrain/positions",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, regionTrainPositionCache, "vline/vehicle-positions", 4000);
+    (req, res) => {
+        res.json(regionTrainPositionCache);
     }
 );
 
 app.use("/regiontrain/trips",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, regionTrainTripCache, "vline/trip-updates", 8000);
+    (req, res) => {
+        res.json(regionTrainTripCache);
     }
 );
 
 app.use("/bus/positions",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, busPositionCache, "bus/vehicle-positions", 4000);
+    (req, res) => {
+        res.json(busPositionCache);
     }
 );
 
 app.use("/bus/trips",
     cors(),
-    async (req, res) => {
-        await sendFeed(res, busTripCache, "bus/trip-updates", 8000);
+    (req, res) => {
+        res.json(busTripCache);
     }
 );
 
