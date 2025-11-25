@@ -2,7 +2,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-search/src/leaflet-search.css";
 import "leaflet-search";
 import L from "leaflet";
-import trainGeojson from "./fullTrainRoutes.geojson";
+import trainGeojson from "../../data/fullTrainRoutes.geojson";
 import "./style.css";
 
 const map = L.map("map").fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);

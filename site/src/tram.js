@@ -11,7 +11,7 @@ import "leaflet.zoomhome";
 import "leaflet.marker.slideto";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
-import metroTramGeojson from "./metroTramRoutes.geojson";
+import metroTramGeojson from "../../data/metroTramRoutes.geojson";
 import metroTramStopData from "../../data/gtfsschedule/3/stops.txt";
 import { createRouteStructures } from "./routeMaps.js";
 import { createStopStructures } from "./stopMaps.js";

@@ -127,10 +127,10 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
     console.log("Stringified.");
     
     console.log("Writing...");
-    await fs.writeFile("../site/src/metroTrainRoutes.geojson", metroTrainRoutes);
-    await fs.writeFile("../site/src/metroTramRoutes.geojson", metroTramRoutes);
-    await fs.writeFile("../site/src/regionTrainRoutes.geojson", regionTrainRoutes);
-    await fs.writeFile("../site/src/busRoutes.geojson", busRoutes);
-    await fs.writeFile("../site/src/fullTrainRoutes.geojson", fullTrainRoutes);
+    await fs.writeFile("./metroTrainRoutes.geojson", metroTrainRoutes);
+    await fs.writeFile("./metroTramRoutes.geojson", metroTramRoutes);
+    await fs.writeFile("./regionTrainRoutes.geojson", regionTrainRoutes);
+    await fs.writeFile("./busRoutes.geojson", busRoutes);
+    await fs.writeFile("./fullTrainRoutes.geojson", fullTrainRoutes);
     console.log("Written.");
 })();
