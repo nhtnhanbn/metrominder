@@ -1,9 +1,7 @@
+import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
 import { VehicleMap } from "./vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
-import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
-
-const URL = "https://api.metrominder.nhan.au";
 
 function calculateBearing(fromLat, fromLon, toLat, toLon) {
     function toRad(deg) {
@@ -176,7 +174,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
     
     try {
         for (const mode of modes) {
-            const response = await fetch(`${URL}/${mode}/positions`);
+            const response = await fetch(`${process.env.APIURL}/${mode}/positions`);
             const feed = await response.json();
             const time = timeString(feed.timestamp/1000, true);
             dtpTime.textContent = ` last updated ${time}`;
@@ -304,7 +302,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
         }
 
         for (const mode of modes) {
-            const response = await fetch(`${URL}/${mode}/trips`);
+            const response = await fetch(`${process.env.APIURL}/${mode}/trips`);
             const feed = await response.json();
             
             tripUpdateTime = timeString(feed.feed.header.timestamp, true);
@@ -476,7 +474,7 @@ async function updateAlerts(alertStatus, map, modes) {
 
     try {
         for (const mode of modes) if (["metroTrain", "metroTram"].includes(mode)) {
-            const response = await fetch(`${URL}/${mode}/alerts`);
+            const response = await fetch(`${process.env.APIURL}/${mode}/alerts`);
             const feed = await response.json();
 
             if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx webpack --config webpack.prod.cjs",
-    "dev": "npx webpack serve --server-type https --config webpack.dev.cjs"
+    "dev": "npx webpack serve --server-type https --config webpack.dev.cjs --env"
   },
   "author": "Nht Nhan",
   "license": "MIT",

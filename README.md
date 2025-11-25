@@ -22,7 +22,7 @@ To run the frontend site locally,
 ```
 cd site
 npm install
-npm run dev
+npm run dev --env APIURL="YOUR API URL HERE"
 ```
 
 ## Thanks
