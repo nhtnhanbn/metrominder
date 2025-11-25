@@ -141,7 +141,7 @@ let foundMarker;
 (new L.Control.Search({
     position: "topright",
     layer: searchLayer,
-    zoom: 14,
+    moveToLocation: (latlng, title, map) => {},
     initial: false,
     delayType: 0,
     firstTipSubmit: true,
@@ -162,6 +162,13 @@ let foundMarker;
     foundMarker = data.layer;
     foundMarker.addTo(map);
     foundMarker.openPopup();
+
+    if ("routeLayer" in foundMarker.options) {
+        foundMarker.options.routeLayer.addTo(map);
+        map.fitBounds(foundMarker.options.bounds, { padding: [100, 100] });
+    } else {
+        map.setView(foundMarker.getLatLng(), 14);
+    }
 }).addTo(map);
 searchLayer.remove();
 
@@ -208,22 +215,31 @@ for (const routeMap of routeMaps) {
 
     routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
 
-    const dummyLayer = L.circleMarker([-37.8, 145], { radius: 0, opacity: 0, title: " " });
-    if (["metroTrain", "regionTrain"].includes(computeMode(routeMap.routeId))) {
-        dummyLayer.options.title = `${routeMap.routeShortName} line` || " ";
-        if (routeMap.routeCode === "vPK") {
-            dummyLayer.options.title += " (V/Line)";
-        }
-    } else if (routeMap.routeShortName) {
-        dummyLayer.options.title = `${routeMap.routeShortName} ${routeMap.routeLongName}`;
-    }
+    if (routeMap.geojson.length > 0) {
+        const bounds = geojsonLayer.getBounds();
 
-    dummyLayer.addEventListener("add", () => {
-        dummyLayer.remove();
-        routeMap.layerGroup.addTo(map);
-        map.fitBounds(geojsonLayer.getBounds(), { padding: [100, 100] });
-    });
-    dummyLayer.addTo(searchLayer);
+        const dummyLayer = L.circleMarker(
+            bounds.getCenter(),
+            {
+                radius: 0,
+                opacity: 0,
+                title: " ",
+                routeLayer: routeMap.layerGroup,
+                bounds: bounds
+            }
+        );
+
+        if (["metroTrain", "regionTrain"].includes(computeMode(routeMap.routeId))) {
+            dummyLayer.options.title = `${routeMap.routeShortName} line` || " ";
+            if (routeMap.routeCode === "vPK") {
+                dummyLayer.options.title += " (V/Line)";
+            }
+        } else if (routeMap.routeShortName) {
+            dummyLayer.options.title = `${routeMap.routeShortName} ${routeMap.routeLongName}`;
+        }
+
+        dummyLayer.addTo(searchLayer);
+    }
 }
 
 for (const stopMap of stopMaps) {
