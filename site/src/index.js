@@ -164,6 +164,7 @@ let foundMarker;
     foundMarker.openPopup();
 
     if ("routeLayer" in foundMarker.options) {
+        foundMarker.remove();
         foundMarker.options.routeLayer.addTo(map);
         map.fitBounds(foundMarker.options.bounds, { padding: [100, 100] });
     } else {

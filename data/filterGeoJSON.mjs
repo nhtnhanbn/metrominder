@@ -38,9 +38,34 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
         return feature.properties.MODE == "METRO BUS" || feature.properties.MODE == "REGIONAL BUS";
     });
 
+    const fullTrainFeatures = JSON.parse(JSON.stringify(data.features.filter((feature) => {
+        return (["METRO TRAIN", "REGIONAL TRAIN"].includes(feature.properties.MODE)) && feature.properties.SHORT_NAME !== "Replacement Bus";
+    })));
+
     console.log("Filtered.");
 
+    function cutCoords(coordinates) {
+        return coordinates.filter((coordinate, index) => {
+            if (index % 4 == 0 || index == coordinates.length - 1) {
+                return true;
+            } else {
+                const [x0, y0] = coordinates[index-1];
+                const [x1, y1] = coordinate;
+                const [x2, y2] = coordinates[index+1];
+                const [a0, a1] = [x0-x1, y0-y1];
+                const [b0, b1] = [x2-x1, y2-y1];
+                const angle = Math.acos((a0*b0 + a1*b1) / Math.sqrt((a0*a0 + a1*a1) * (b0*b0 + b1*b1)));
+                return angle < Math.PI * 2/3;
+            }
+        }).map((coordinate) => {
+            return coordinate.map((ordinate) => {
+                return Math.round(ordinate*ROUNDER)/ROUNDER;
+            })
+        });
+    }
+
     console.log("Minifying...");
+
     for (const features of [metroTrainFeatures, metroTramFeatures, regionTrainFeatures, busFeatures]) {
         for (const feature of features) {
             if (["METRO TRAIN", "REGIONAL TRAIN"].includes(feature.properties.MODE)) {
@@ -52,25 +77,19 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
             delete feature.properties.LONG_NAME;
             delete feature.properties.MODE;
 
-            feature.geometry.coordinates = feature.geometry.coordinates.filter((coordinate, index) => {
-                if (index % 4 == 0 || index == feature.geometry.coordinates.length - 1) {
-                    return true;
-                } else {
-                    const [x0, y0] = feature.geometry.coordinates[index-1];
-                    const [x1, y1] = coordinate;
-                    const [x2, y2] = feature.geometry.coordinates[index+1];
-                    const [a0, a1] = [x0-x1, y0-y1];
-                    const [b0, b1] = [x2-x1, y2-y1];
-                    const angle = Math.acos((a0*b0 + a1*b1) / Math.sqrt((a0*a0 + a1*a1) * (b0*b0 + b1*b1)));
-                    return angle < Math.PI * 2/3;
-                }
-            }).map((coordinate) => {
-                return coordinate.map((ordinate) => {
-                    return Math.round(ordinate*ROUNDER)/ROUNDER;
-                })
-            });
+            feature.geometry.coordinates = cutCoords(feature.geometry.coordinates);
         }
     }
+
+    for (const feature of fullTrainFeatures) {
+        delete feature.properties.HEADSIGN;
+        delete feature.properties.LONG_NAME;
+        delete feature.properties.SHORT_NAME;
+        delete feature.properties.MODE;
+
+        feature.geometry.coordinates = cutCoords(feature.geometry.coordinates);
+    }
+
     console.log("Minified.");
     
     console.log("Stringifying...");
@@ -99,6 +118,12 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
         features: busFeatures
     });
 
+    const fullTrainRoutes = JSON.stringify({
+        type: "FeatureCollection",
+        name: "fullTrainRoutes",
+        features: fullTrainFeatures
+    });
+
     console.log("Stringified.");
     
     console.log("Writing...");
@@ -106,5 +131,6 @@ const regionTrainShapeIds = regionTrainRouteMaps.values().flatMap((routeMap) => 
     await fs.writeFile("../site/src/metroTramRoutes.geojson", metroTramRoutes);
     await fs.writeFile("../site/src/regionTrainRoutes.geojson", regionTrainRoutes);
     await fs.writeFile("../site/src/busRoutes.geojson", busRoutes);
+    await fs.writeFile("../site/src/fullTrainRoutes.geojson", fullTrainRoutes);
     console.log("Written.");
 })();

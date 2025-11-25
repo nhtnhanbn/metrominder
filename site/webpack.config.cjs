@@ -8,7 +8,8 @@ module.exports = {
     entry: {
         index: "./src/index.js",
         train: "./src/train.js",
-        tram: "./src/tram.js"
+        tram: "./src/tram.js",
+        trainroutes: "./src/trainroutes.js"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -36,6 +37,13 @@ module.exports = {
             chunks: ["tram"],
             favicon: "./src/favicon.svg",
             title: "Trams - MetroMinder"
+        }),
+        new HtmlWebpackPlugin({
+            template: "./src/template.html",
+            filename: "train/routes/index.html",
+            chunks: ["trainroutes"],
+            favicon: "./src/favicon.svg",
+            title: "Train routes - MetroMinder"
         }),
         new WorkboxPlugin.GenerateSW({
             maximumFileSizeToCacheInBytes: 20971520,
