@@ -14,7 +14,6 @@ import { LocateControl } from "leaflet.locatecontrol";
 import metroTrainGeojson from "../../data/metroTrainRoutes.geojson";
 import metroTramGeojson from "../../data/metroTramRoutes.geojson";
 import regionTrainGeojson from "../../data/regionTrainRoutes.geojson";
-import busGeojson from "../../data/busRoutes.geojson";
 import metroTrainStopData from "../../data/gtfsschedule/2/stops.txt";
 import metroTramStopData from "../../data/gtfsschedule/3/stops.txt";
 import regionTrainStopData from "../../data/gtfsschedule/1/stops.txt";
@@ -45,6 +44,28 @@ function computeMode(routeId) {
     }
 }
 
+async function addGeoJSON(routeMaps) {
+    const params = new URLSearchParams();
+    for (const routeMap of routeMaps) {
+        params.append(routeMap.mode, routeMap.routeCode);
+    }
+
+    const response = await fetch(`${process.env.APIURL}/geojson?${params}`);
+    const data = await response.json();
+
+    for (const routeMap of routeMaps) {
+        routeMap.geojson = data[routeMap.mode][routeMap.routeCode];
+        routeMap.geojsonLayer = L.geoJSON(
+            routeMap.geojson,
+            {
+                style: { color: routeMap.routeColour },
+                pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+            }
+        );
+        routeMap.geojsonLayer.addTo(routeMap.layerGroup);
+    }
+}
+
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -59,7 +80,7 @@ const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     metroTramGeojson: metroTramGeojson,
     regionTrainGeojson: regionTrainGeojson,
-    busGeojson: busGeojson
+    busGeojson: { features: [] }
 });
 const { stopMaps, stopById, stopByName, platformById } = createStopStructures(modes, routeMaps, {
     metroTrainStopData: metroTrainStopData,
@@ -183,16 +204,11 @@ const layerGroupByMode = {
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
 
-    const geojsonLayer = L.geoJSON(
-        routeMap.geojson,
-        {
-            style: { color: routeMap.routeColour },
-            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
-        }
-    );
-    geojsonLayer.addTo(routeMap.layerGroup);
-    
     routeMap.layerGroup.addEventListener("add", () => {
+        if (routeMap.geojson.length === 0) {
+            addGeoJSON([routeMap]);
+        }
+
         for (const stopId of routeMap.stopIds) {
             if (stopId in stopById) {
                 const stopMarker = stopById[stopId].stopMarker;
@@ -217,7 +233,16 @@ for (const routeMap of routeMaps) {
     routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
 
     if (routeMap.geojson.length > 0) {
-        const bounds = geojsonLayer.getBounds();
+        routeMap.geojsonLayer = L.geoJSON(
+            routeMap.geojson,
+            {
+                style: { color: routeMap.routeColour },
+                pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+            }
+        );
+        routeMap.geojsonLayer.addTo(routeMap.layerGroup);
+        
+        const bounds = routeMap.geojsonLayer.getBounds();
 
         const dummyLayer = L.circleMarker(
             bounds.getCenter(),
