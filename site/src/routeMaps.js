@@ -12,6 +12,7 @@ class MetroTramRouteMap {
         this.routeId = `aus:vic:vic-03-${routeCode}:`;
         this.geojson = [];
         this.stopIds = [];
+        this.mode = "metroTram";
     }
 }
 
@@ -22,6 +23,7 @@ class BusRouteMap {
         this.routeCode = routeCode;
         this.geojson = [];
         this.stopIds = [];
+        this.mode = "bus";
     }
 }
 

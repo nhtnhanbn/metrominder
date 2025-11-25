@@ -19,18 +19,19 @@ const headsignByTripId = {};
     }
 })();
 
-const geojsonById = {};
+const geojsonByModeShortName = {};
 (async () => {
-    for (const filename of [
-        "../data/metroTrainRoutes.geojson",
-        "../data/metroTramRoutes.geojson",
-        "../data/regionTrainRoutes.geojson",
-        "../data/busRoutes.geojson"
-    ]) {
-        const response = await fs.readFile(filename);
+    for (const mode of ["metroTrain", "metroTram", "regionTrain", "bus"]) {
+        geojsonByModeShortName[mode] = {};
+
+        const response = await fs.readFile(`../data/${mode}Routes.geojson`);
         const data = JSON.parse(response);
         for (const feature of data.features) {
-            geojsonById[feature.properties.SHAPE_ID] = feature;
+            const shortName = feature.properties.SHORT_NAME;
+            if (!(shortName in geojsonByModeShortName[mode])) {
+                geojsonByModeShortName[mode][shortName] = [];
+            }
+            geojsonByModeShortName[mode][shortName].push(feature);
         }
     }
 })();
@@ -160,16 +161,17 @@ app.use("/stops/:route_id/:route_type",
 app.use("/geojson",
     cors(),
     (req, res) => {
-        let shapeIds;
-        if (Array.isArray(req.query.id)) {
-            shapeIds = req.query.id;
-        } else {
-            shapeIds = [req.query.id];
-        }
-
         const response = {};
-        for (const shapeId of shapeIds) {
-            response[shapeId] = geojsonById[shapeId];
+        for (const mode in req.query) {
+            let shortNames = req.query[mode];
+            if (!Array.isArray(shortNames)) {
+                shortNames = [shortNames];
+            }
+
+            response[mode] = {};
+            for (const shortName of shortNames) {
+                response[mode][shortName] = mode in geojsonByModeShortName ? geojsonByModeShortName[mode][shortName] : [];
+            }
         }
         res.json(response);
     }

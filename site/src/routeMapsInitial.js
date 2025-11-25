@@ -7,6 +7,7 @@ class MetroTrainRouteMap {
         });
         this.geojson = [];
         this.stopIds = [];
+        this.mode = "metroTrain";
     }
 }
 class RegionTrainRouteMap {
@@ -18,6 +19,7 @@ class RegionTrainRouteMap {
         });
         this.geojson = [];
         this.stopIds = [];
+        this.mode = "regionTrain";
     }
 }
 
