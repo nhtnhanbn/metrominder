@@ -8,6 +8,44 @@ import { parse } from "csv-parse/sync";
 
 const PORT = process.env.PORT || 3000;
 
+const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0, headsignByTripId: {} }, metroTrainAlertCache = { timestamp: 0 };
+const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0, headsignByTripId: {} }, metroTramAlertCache = { timestamp: 0 };
+const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0, headsignByTripId: {} };
+const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0, headsignByTripId: {} };
+
+let positionsByRouteId = {}, tripsByRouteId = {};
+setInterval(() => {
+    positionsByRouteId = {};
+    for (const positionCache of [metroTrainPositionCache, metroTramPositionCache, regionTrainPositionCache, busPositionCache]) {
+        if ("feed" in positionCache && "entity" in positionCache.feed) {
+            for (const vehicle of positionCache.feed.entity) {
+                const routeId = vehicle.vehicle.trip.routeId;
+
+                if (!(routeId in positionsByRouteId)) {
+                    positionsByRouteId[routeId] = [];
+                }
+
+                positionsByRouteId[routeId].push(vehicle);
+            }
+        }
+    }
+
+    tripsByRouteId = {};
+    for (const tripCache of [metroTrainTripCache, metroTramTripCache, regionTrainTripCache, busTripCache]) {
+        if ("feed" in tripCache && "entity" in tripCache.feed) {
+            for (const trip of tripCache.feed.entity) {
+                const routeId = tripCache === busTripCache ? trip.tripUpdate.trip.tripId.slice(3, 6) : trip.tripUpdate.trip.routeId;
+
+                if (!(routeId in tripsByRouteId)) {
+                    tripsByRouteId[routeId] = [];
+                }
+
+                tripsByRouteId[routeId].push(trip);
+            }
+        }
+    }
+}, 1000);
+
 const headsignByTripId = {};
 (async () => {
     for (let number = 1; number <= 4; number++) {
@@ -19,19 +57,19 @@ const headsignByTripId = {};
     }
 })();
 
-const geojsonByModeShortName = {};
+const geojsonByModeRouteCode = {};
 (async () => {
     for (const mode of ["metroTrain", "metroTram", "regionTrain", "bus"]) {
-        geojsonByModeShortName[mode] = {};
+        geojsonByModeRouteCode[mode] = {};
 
         const response = await fs.readFile(`../data/${mode}Routes.geojson`);
         const data = JSON.parse(response);
         for (const feature of data.features) {
-            const shortName = feature.properties.SHORT_NAME;
-            if (!(shortName in geojsonByModeShortName[mode])) {
-                geojsonByModeShortName[mode][shortName] = [];
+            const routeCode = feature.properties.SHORT_NAME;
+            if (!(routeCode in geojsonByModeRouteCode[mode])) {
+                geojsonByModeRouteCode[mode][routeCode] = [];
             }
-            geojsonByModeShortName[mode][shortName].push(feature);
+            geojsonByModeRouteCode[mode][routeCode].push(feature);
         }
     }
 })();
@@ -63,16 +101,39 @@ async function getFeed(resource) {
 }
 
 async function updateCache(cache, endpoint) {
-    cache.feed = await getFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
+    try {
+        cache.feed = await getFeed(`https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/${endpoint}`);
 
-    if ("headsignByTripId" in cache) {
-        cache.headsignByTripId = {};
-        for (const entity of cache.feed.entity) {
-            cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
+        if ("headsignByTripId" in cache) {
+            cache.headsignByTripId = {};
+            for (const entity of cache.feed.entity) {
+                cache.headsignByTripId[entity.id] = headsignByTripId[entity.id];
+            }
         }
-    }
 
-    cache.timestamp = Date.now();
+        cache.timestamp = Date.now();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function routeCodeToId(mode, routeCode) {
+    let routeId;
+    switch (mode.toLowerCase()) {
+        case "metrotrain":
+            routeId = `aus:vic:vic-02-${routeCode}:`;
+            break;
+        case "regiontrain":
+            routeId = `aus:vic:vic-01-${routeCode}:`;
+            break;
+        case "metrotram":
+            routeId = `aus:vic:vic-03-${routeCode}:`;
+            break;
+        case "bus":
+            routeId = routeCode;
+            break;
+    }
+    return routeId;
 }
 
 function handleError(err, res, next, cache) {
@@ -83,11 +144,6 @@ function handleError(err, res, next, cache) {
         next(err);
     }
 }
-
-const metroTrainPositionCache = { timestamp: 0 }, metroTrainTripCache = { timestamp: 0, headsignByTripId: {} }, metroTrainAlertCache = { timestamp: 0 };
-const metroTramPositionCache = { timestamp: 0 }, metroTramTripCache = { timestamp: 0, headsignByTripId: {} }, metroTramAlertCache = { timestamp: 0 };
-const regionTrainPositionCache = { timestamp: 0 }, regionTrainTripCache = { timestamp: 0, headsignByTripId: {} };
-const busPositionCache = { timestamp: 0 }, busTripCache = { timestamp: 0, headsignByTripId: {} };
 
 setInterval(() => {
     updateCache(metroTrainPositionCache, "metro/vehicle-positions");
@@ -163,14 +219,72 @@ app.use("/geojson",
     (req, res) => {
         const response = {};
         for (const mode in req.query) {
-            let shortNames = req.query[mode];
-            if (!Array.isArray(shortNames)) {
-                shortNames = [shortNames];
+            let routeCodes = req.query[mode];
+            if (!Array.isArray(routeCodes)) {
+                routeCodes = [routeCodes];
             }
 
             response[mode] = {};
-            for (const shortName of shortNames) {
-                response[mode][shortName] = mode in geojsonByModeShortName ? geojsonByModeShortName[mode][shortName] : [];
+            for (const routeCode of routeCodes) {
+                response[mode][routeCode] = mode in geojsonByModeRouteCode ? geojsonByModeRouteCode[mode][routeCode] : [];
+            }
+        }
+        res.json(response);
+    }
+);
+
+app.use("/positions",
+    cors(),
+    (req, res) => {
+        const response = {
+                feed: {
+                header: {
+                    timestamp: metroTrainPositionCache.feed.header.timestamp.toInt()
+                },
+                entity: []
+            }
+        };
+
+        for (const mode in req.query) {
+            let routeCodes = req.query[mode];
+            if (!Array.isArray(routeCodes)) {
+                routeCodes = [routeCodes];
+            }
+
+            for (const routeCode of routeCodes) {
+                const routeId = routeCodeToId(mode, routeCode);
+                if (routeId in positionsByRouteId) {
+                    response.feed.entity.push(...positionsByRouteId[routeId]);
+                }
+            }
+        }
+        res.json(response);
+    }
+);
+
+app.use("/trips",
+    cors(),
+    (req, res) => {
+        const response = {
+                feed: {
+                header: {
+                    timestamp: metroTrainTripCache.feed.header.timestamp.toInt()
+                },
+                entity: []
+            }
+        };
+
+        for (const mode in req.query) {
+            let routeCodes = req.query[mode];
+            if (!Array.isArray(routeCodes)) {
+                routeCodes = [routeCodes];
+            }
+
+            for (const routeCode of routeCodes) {
+                const routeId = routeCodeToId(mode, routeCode);
+                if (routeId in tripsByRouteId) {
+                    response.feed.entity.push(...tripsByRouteId[routeId]);
+                }
             }
         }
         res.json(response);
