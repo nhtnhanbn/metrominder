@@ -237,7 +237,7 @@ app.use("/positions",
     cors(),
     (req, res) => {
         const response = {
-            timestamp: metroTrainPositionCache.feed.header.timestamp.toInt(),
+            timestamp: metroTrainPositionCache.timestamp,
             feed: {
                 entity: []
             }
@@ -264,12 +264,13 @@ app.use("/trips",
     cors(),
     (req, res) => {
         const response = {
-                feed: {
+            feed: {
                 header: {
                     timestamp: metroTrainTripCache.feed.header.timestamp.toInt()
                 },
                 entity: []
-            }
+            },
+            headsignByTripId: {}
         };
 
         for (const mode in req.query) {
@@ -281,7 +282,12 @@ app.use("/trips",
             for (const routeCode of routeCodes) {
                 const routeId = routeCodeToId(mode, routeCode);
                 if (routeId in tripsByRouteId) {
-                    response.feed.entity.push(...tripsByRouteId[routeId]);
+                    const trips = tripsByRouteId[routeId];
+                    response.feed.entity.push(...trips);
+
+                    for (const trip of trips) {
+                        response.headsignByTripId[trip.id] = headsignByTripId[trip.id];
+                    }
                 }
             }
         }

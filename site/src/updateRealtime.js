@@ -338,6 +338,23 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
         if ("entity" in feed.feed) for (const trip of feed.feed.entity) {
             const tripUpdate = trip.tripUpdate;
             const tripId = tripUpdate.trip.tripId;
+
+            let mode;
+            switch (tripId.slice(0, 2)) {
+                case "01":
+                    mode = "regionTrain";
+                    break;
+                case "02":
+                    mode = "metroTrain";
+                    break;
+                case "03":
+                    mode = "metroTram";
+                    break;
+                default:
+                    mode = "bus";
+                    break;
+            }
+
             const routeId = mode === "bus" ? tripId.slice(3, 6) : tripUpdate.trip.routeId;
             if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate && routeId in routeById) {
                 const stopTimeUpdate = tripUpdate.stopTimeUpdate;
