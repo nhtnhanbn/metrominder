@@ -42,6 +42,15 @@ searchLayer.remove();
 const geojsonLayers = new Set();
 for (const feature of trainGeojson.features) if (feature.properties.SHAPE_ID) {
     const geojsonLayer = L.geoJSON(feature);
+    geojsonLayer.bindTooltip(feature.properties.SHAPE_ID);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => {
+        geojsonLayer.remove();
+    });
+    geojsonLayer.bindPopup(deleteButton);
+
     const bounds = geojsonLayer.getBounds();
     
     const dummyLayer = L.circleMarker(
