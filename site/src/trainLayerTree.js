@@ -233,6 +233,18 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
             label: "<b>Presets<b>",
             children: [
                 {
+                    label: `<button class="preset-button colour-button" title="Pakenham and Sunbury lines" style="background-color: #279FD5;">
+                                Metro Tunnel
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            setRoutes("vic:rail:THL", stopById, routeMaps, map);
+                        }
+                    }]
+                },
+                {
                     label: `<button class="preset-button colour-button" title="Burnley, Clifton Hill, Caulfield and Northern groups and City Circle line" style="background: linear-gradient(to right, #152C6B 25%, #BE1014 25% 50%, #279FD5 50% 75%, #FFBE00 75%);">
                                 City Loop
                             </button>`,
