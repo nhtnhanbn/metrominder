@@ -37,6 +37,7 @@ jobs:
         unzip -o ./gtfsschedule/2/google_transit.zip -d ./gtfsschedule/2
         unzip -o ./gtfsschedule/3/google_transit.zip -d ./gtfsschedule/3
         unzip -o ./gtfsschedule/4/google_transit.zip -d ./gtfsschedule/4
+        npm install
         node shapesToGeoJSON.mjs
         node filterGeoJSON.mjs
       working-directory: data
