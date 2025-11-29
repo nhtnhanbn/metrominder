@@ -168,100 +168,122 @@ function createConsistInfo(mode, vehicle, routeId) {
     return { vehicleConsistInfo, vehicleModelCode };
 }
 
-async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, modes) {
+async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map) {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
     try {
-        for (const mode of modes) {
-            const response = await fetch(`${process.env.APIURL}/${mode}/positions`);
-            const feed = await response.json();
-            const time = timeString(feed.timestamp/1000, true);
-            dtpTime.textContent = ` last updated ${time}`;
+        const params = new URLSearchParams();
+        for (const routeMap of routeMaps) {
+            if (map.hasLayer(routeMap.layerGroup)) {
+                params.append(routeMap.mode, routeMap.routeCode);
+            }
+        }
 
-            if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {
-                let { latitude, longitude, bearing } = vehicle.vehicle.position;
-                const tripId = vehicle.vehicle.trip.tripId;
-                const routeId = vehicle.vehicle.trip.routeId;
-                
-                if (!(routeId in routeById)) {
-                    continue;
-                }
+        const response = await fetch(`${process.env.APIURL}/positions?${params}`);
+        const feed = await response.json();
 
-                const routeCode = routeById[routeId].routeCode;
-                const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
-                
-                if (tripId in vehicleByTripId) {
-                    const vehicleMap = vehicleByTripId[tripId];
-                    vehicleMap.live = true;
+        const time = timeString(feed.timestamp/1000, true);
+        dtpTime.textContent = ` last updated ${time}`;
 
-                    if (bearing === undefined) {
-                        const { lat, lng } = vehicleMap.vehicleMarker.getLatLng();
-                        if (lat !== undefined && lng !== undefined && (latitude !== lat || longitude !== lng)) {
-                            vehicleMap.bearing = calculateBearing(lat, lng, latitude, longitude);
-                        }
-                        
-                        if ("bearing" in vehicleMap) {
-                            bearing = vehicleMap.bearing;
-                        } else if ("nextStopMap" in vehicleMap) {
-                            const stopMap = vehicleMap.nextStopMap;
-                            bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
-                        } else {
-                            bearing = 0;
-                        }
+        if ("entity" in feed.feed) for (const vehicle of feed.feed.entity) {
+            let { latitude, longitude, bearing } = vehicle.vehicle.position;
+            const tripId = vehicle.vehicle.trip.tripId;
+            const routeId = vehicle.vehicle.trip.routeId;
+
+            let mode;
+            switch (tripId.slice(0, 2)) {
+                case "01":
+                    mode = "regionTrain";
+                    break;
+                case "02":
+                    mode = "metroTrain";
+                    break;
+                case "03":
+                    mode = "metroTram";
+                    break;
+                default:
+                    mode = "bus";
+                    break;
+            }
+            
+            if (!(routeId in routeById)) {
+                continue;
+            }
+
+            const routeCode = routeById[routeId].routeCode;
+            const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
+            
+            if (tripId in vehicleByTripId) {
+                const vehicleMap = vehicleByTripId[tripId];
+                vehicleMap.live = true;
+
+                if (bearing === undefined) {
+                    const { lat, lng } = vehicleMap.vehicleMarker.getLatLng();
+                    if (lat !== undefined && lng !== undefined && (latitude !== lat || longitude !== lng)) {
+                        vehicleMap.bearing = calculateBearing(lat, lng, latitude, longitude);
                     }
-
-                    vehicleMap.vehicleMarker.setRotation(bearing)
-                                            .slideTo([latitude, longitude]);
-                    vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
-                                            .slideTo([latitude, longitude]);
-                } else {
-                    const { vehicleConsistInfo, vehicleModelCode } = createConsistInfo(mode, vehicle, routeId);
                     
-                    const vehicleLabelContent = document.createElement("div");
-                    if (state.vehicleMarkerLabelSelection === "route") {
-                        vehicleLabelContent.textContent = routeCode;
+                    if ("bearing" in vehicleMap) {
+                        bearing = vehicleMap.bearing;
+                    } else if ("nextStopMap" in vehicleMap) {
+                        const stopMap = vehicleMap.nextStopMap;
+                        bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
                     } else {
-                        vehicleLabelContent.textContent = vehicleModelCode;
+                        bearing = 0;
                     }
-                    vehicleLabelContent.style.color = routeById[routeId].routeTextColour;
-                                    
-                    const vehicleMarker = L.marker.arrowCircle(
-                        [latitude, longitude],
-                        {
-                            iconOptions: {
-                                stroke: routeById[routeId].routeTextColour,
-                                color: routeById[routeId].routeColour,
-                                size: 40,
-                                rotation: bearing || 0
-                            },
-                            pane: "vehiclePane",
-                            interactive: false,
-                            rotateWithView: true
-                        }
-                    );
-                    
-                    const vehicleLabel = L.marker(
-                        [latitude, longitude],
-                        {
-                            icon: L.divIcon({
-                                html: vehicleLabelContent,
-                                tooltipAnchor: [9, 0],
-                                className: "vehicle-label"
-                            }),
-                            pane: "vehiclePane"
-                        }
-                    ).bindTooltip(
-                        L.tooltip().setContent(vehicleTooltip)
-                    ).bindPopup(
-                        vehicleConsistInfo + "No trip information.",
-                        { autoPan: false }
-                    );
-                    
-                    vehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, mode));
-                    
-                    routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
                 }
+
+                vehicleMap.vehicleMarker.setRotation(bearing)
+                                        .slideTo([latitude, longitude]);
+                vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
+                                        .slideTo([latitude, longitude]);
+            } else {
+                const { vehicleConsistInfo, vehicleModelCode } = createConsistInfo(mode, vehicle, routeId);
+                
+                const vehicleLabelContent = document.createElement("div");
+                if (state.vehicleMarkerLabelSelection === "route") {
+                    vehicleLabelContent.textContent = routeCode;
+                } else {
+                    vehicleLabelContent.textContent = vehicleModelCode;
+                }
+                vehicleLabelContent.style.color = routeById[routeId].routeTextColour;
+                                
+                const vehicleMarker = L.marker.arrowCircle(
+                    [latitude, longitude],
+                    {
+                        iconOptions: {
+                            stroke: routeById[routeId].routeTextColour,
+                            color: routeById[routeId].routeColour,
+                            size: 40,
+                            rotation: bearing || 0
+                        },
+                        pane: "vehiclePane",
+                        interactive: false,
+                        rotateWithView: true
+                    }
+                );
+                
+                const vehicleLabel = L.marker(
+                    [latitude, longitude],
+                    {
+                        icon: L.divIcon({
+                            html: vehicleLabelContent,
+                            tooltipAnchor: [9, 0],
+                            className: "vehicle-label"
+                        }),
+                        pane: "vehiclePane"
+                    }
+                ).bindTooltip(
+                    L.tooltip().setContent(vehicleTooltip)
+                ).bindPopup(
+                    vehicleConsistInfo + "No trip information.",
+                    { autoPan: false }
+                );
+                
+                vehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, mode));
+                
+                routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }
         }
         
@@ -286,7 +308,7 @@ async function updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime,
     }
     
     setTimeout(() => {
-        updatePositions(routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map, modes);
+        updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map);
     }, 1000);
 }
 

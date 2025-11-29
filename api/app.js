@@ -237,10 +237,8 @@ app.use("/positions",
     cors(),
     (req, res) => {
         const response = {
-                feed: {
-                header: {
-                    timestamp: metroTrainPositionCache.feed.header.timestamp.toInt()
-                },
+            timestamp: metroTrainPositionCache.feed.header.timestamp.toInt(),
+            feed: {
                 entity: []
             }
         };
