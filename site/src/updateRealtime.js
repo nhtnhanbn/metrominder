@@ -312,7 +312,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
     }, 1000);
 }
 
-async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes) {
+async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map) {
     tripStatus.textContent = "Retrieving trip updates...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
@@ -323,84 +323,90 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             stopMap.stopDepartures = [];
         }
 
-        for (const mode of modes) {
-            const response = await fetch(`${process.env.APIURL}/${mode}/trips`);
-            const feed = await response.json();
-            
-            tripUpdateTime = timeString(feed.feed.header.timestamp, true);
-            if ("entity" in feed.feed) for (const trip of feed.feed.entity) {
-                const tripUpdate = trip.tripUpdate;
-                const tripId = tripUpdate.trip.tripId;
-                const routeId = mode === "bus" ? tripId.slice(3, 6) : tripUpdate.trip.routeId;
-                if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate && routeId in routeById) {
-                    const stopTimeUpdate = tripUpdate.stopTimeUpdate;
+        
+        const params = new URLSearchParams();
+        for (const routeMap of routeMaps) {
+            if (map.hasLayer(routeMap.layerGroup)) {
+                params.append(routeMap.mode, routeMap.routeCode);
+            }
+        }
 
-                    let headsign = feed.headsignByTripId[tripId];
-                    if (headsign === undefined) {
-                        const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
-                        const lastStopMap = stopById[lastStop.stopId];
-                        if (lastStopMap.isStation()) {
-                            headsign = shortName(lastStopMap.stopName);
-                        } else {
-                            headsign = lastStopMap.stopName;
-                        }
-                    }
+        const response = await fetch(`${process.env.APIURL}/trips?${params}`);
+        const feed = await response.json();
+        
+        tripUpdateTime = timeString(feed.feed.header.timestamp, true);
+        if ("entity" in feed.feed) for (const trip of feed.feed.entity) {
+            const tripUpdate = trip.tripUpdate;
+            const tripId = tripUpdate.trip.tripId;
+            const routeId = mode === "bus" ? tripId.slice(3, 6) : tripUpdate.trip.routeId;
+            if (tripUpdate.trip.scheduleRelationship !== "CANCELED" && "stopTimeUpdate" in tripUpdate && routeId in routeById) {
+                const stopTimeUpdate = tripUpdate.stopTimeUpdate;
 
-                    let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
-                                            Service to ${headsign}
-                                        </h3>`;
+                let headsign = feed.headsignByTripId[tripId];
+                if (headsign === undefined) {
+                    const lastStop = stopTimeUpdate[stopTimeUpdate.length-1];
+                    const lastStopMap = stopById[lastStop.stopId];
+                    if (lastStopMap.isStation()) {
+                        headsign = shortName(lastStopMap.stopName);
+                    } else {
+                        headsign = lastStopMap.stopName;
+                    }
+                }
+
+                let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
+                                        Service to ${headsign}
+                                    </h3>`;
+                
+                if (tripId in vehicleByTripId) {
+                    vehiclePopup += vehicleByTripId[tripId].vehicleConsistInfo;
+                }
+                
+                let future = false;
+                for (const stop of stopTimeUpdate) {
+                    const stopMap = stopById[stop.stopId];
+                    const platform = (platformById[stop.stopId] || "").replace("Bay", "").trim();
                     
-                    if (tripId in vehicleByTripId) {
-                        vehiclePopup += vehicleByTripId[tripId].vehicleConsistInfo;
+                    if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
+                        stopMap.stopDepartures.push({
+                            routeMap: routeById[routeId],
+                            headsign: headsign,
+                            platform: platform,
+                            time: stop.departure.time
+                        });
                     }
                     
-                    let future = false;
-                    for (const stop of stopTimeUpdate) {
-                        const stopMap = stopById[stop.stopId];
-                        const platform = (platformById[stop.stopId] || "").replace("Bay", "").trim();
+                    if (tripId in vehicleByTripId && stop.arrival) {
+                        const vehicleMap = vehicleByTripId[tripId];
+                        const stopName = stopMap.isStation() ? shortName(stopMap.stopName) : stopMap.stopName;
+                        const stopTime = timeString(stop.arrival.time);
                         
-                        if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
-                            stopMap.stopDepartures.push({
-                                routeMap: routeById[routeId],
-                                headsign: headsign,
-                                platform: platform,
-                                time: stop.departure.time
-                            });
-                        }
-                        
-                        if (tripId in vehicleByTripId && stop.arrival) {
-                            const vehicleMap = vehicleByTripId[tripId];
-                            const stopName = stopMap.isStation() ? shortName(stopMap.stopName) : stopMap.stopName;
-                            const stopTime = timeString(stop.arrival.time);
-                            
-                            if (future) {
-                                vehiclePopup += `<tr>
-                                                    <td style="text-align: left;">${stopName}</td>
-                                                    ${ vehicleMap.hasPlatforms() ? `<td>${platform}</td>` : "" }
-                                                    <td>${stopTime}</td>
+                        if (future) {
+                            vehiclePopup += `<tr>
+                                                <td style="text-align: left;">${stopName}</td>
+                                                ${ vehicleMap.hasPlatforms() ? `<td>${platform}</td>` : "" }
+                                                <td>${stopTime}</td>
+                                            </tr>`;
+                        } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
+                            vehicleMap.nextStopMap = stopMap;
+                            vehiclePopup += `<table>
+                                                <tr>
+                                                    <th style="text-align: left;">ARRIVING</td>
+                                                    ${platformTermByMode[vehicleMap.vehicleMode]}
+                                                    <th>TIME</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align: left;">${stopName}</td>
+                                                    ${ vehicleMap.hasPlatforms() ? `<th>${platform}</td>` : "" }
+                                                    <th>${stopTime}</td>
                                                 </tr>`;
-                            } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
-                                vehicleMap.nextStopMap = stopMap;
-                                vehiclePopup += `<table>
-                                                    <tr>
-                                                        <th style="text-align: left;">ARRIVING</td>
-                                                        ${platformTermByMode[vehicleMap.vehicleMode]}
-                                                        <th>TIME</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;">${stopName}</td>
-                                                        ${ vehicleMap.hasPlatforms() ? `<th>${platform}</td>` : "" }
-                                                        <th>${stopTime}</td>
-                                                    </tr>`;
-                                future = true;
-                            }
+                            future = true;
                         }
                     }
-                    vehiclePopup += `</table> <p>Trip update ${tripUpdateTime}</p>`;
-                    
-                    if (tripId in vehicleByTripId) {
-                        vehicleByTripId[tripId].vehicleLabel.setPopupContent(vehiclePopup);
-                    }
+                }
+                vehiclePopup += `</table> <p>Trip update ${tripUpdateTime}</p>`;
+                
+                if (tripId in vehicleByTripId) {
+                    vehicleByTripId[tripId].vehicleLabel.setPopupContent(vehiclePopup);
                 }
             }
         }
@@ -486,7 +492,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
     }
     
     setTimeout(() => {
-        updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map, modes);
+        updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
     }, 1000);
 };
 
