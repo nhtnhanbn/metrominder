@@ -325,9 +325,20 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
 
         
         const params = new URLSearchParams();
+
         for (const routeMap of routeMaps) {
             if (map.hasLayer(routeMap.layerGroup)) {
                 params.append(routeMap.mode, routeMap.routeCode);
+            }
+        }
+
+        for (const stopMap of stopMaps) {
+            if (map.hasLayer(stopMap.stopMarker)) {
+                for (const routeMap of stopMap.routeMaps) {
+                    if (!(params.has(routeMap.mode, routeMap.routeCode))) {
+                        params.append(routeMap.mode, routeMap.routeCode);
+                    }
+                }
             }
         }
 
