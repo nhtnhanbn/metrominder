@@ -42,5 +42,5 @@ import { stringify } from "csv-stringify/sync";
             record_delimiter: "\r"
         }
     );
-    await fs.writeFile("./gtfsschedule/1/routes.txt", `${header}\n${newRoutes}`);
+    await fs.writeFile("./gtfsschedule/1/routes.txt", `${header}${newRoutes}`);
 })();
