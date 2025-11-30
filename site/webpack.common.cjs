@@ -51,7 +51,7 @@ module.exports = {
             skipWaiting: true
         }),
         new WebpackPwaManifest({
-            publicPath: ".",
+            publicPath: "/",
             filename: "manifest.json",
             "name": "MetroMinder",
             "short_name": "MetroMinder live PTV map",
