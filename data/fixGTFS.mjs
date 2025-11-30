@@ -37,7 +37,10 @@ import { stringify } from "csv-stringify/sync";
     const header = rawRoutes.toString().split("\n")[0];
     const newRoutes = stringify(
         routes,
-        { quoted_string: true }
+        {
+            quoted_string: true,
+            record_delimiter: "\r"
+        }
     );
     await fs.writeFile("./gtfsschedule/1/routes.txt", `${header}\n${newRoutes}`);
 })();
