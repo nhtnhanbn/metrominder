@@ -428,7 +428,7 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             }
         }
         
-        for (const stopMap of stopMaps) {
+        for (const stopMap of stopMaps) if (map.hasLayer(stopMap.stopMarker)) {
             const stopMarker = stopMap.stopMarker;
             const stopPopup = createStopPopup(stopMap, routeMaps, stopById, map);
             
