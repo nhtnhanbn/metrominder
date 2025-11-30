@@ -73,7 +73,7 @@ async function addGeoJSON(routeMaps) {
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker
-            .register("./serviceWorker.js")
+            .register("/serviceWorker.js")
             .then((res) => console.log("serviceWorker.js registered", res))
             .catch((err) => console.log("serviceWorker.js not registered", err))
     })
