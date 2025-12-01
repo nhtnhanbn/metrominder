@@ -230,7 +230,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                         const stopMap = vehicleMap.nextStopMap;
                         bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
                     } else {
-                        bearing = 0;
+                        bearing = undefined;
                     }
                 }
 
@@ -256,7 +256,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                             stroke: routeById[routeId].routeTextColour,
                             color: routeById[routeId].routeColour,
                             size: 40,
-                            rotation: bearing || 0
+                            rotation: bearing
                         },
                         pane: "vehiclePane",
                         interactive: false,

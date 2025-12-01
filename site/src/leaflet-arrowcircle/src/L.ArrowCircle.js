@@ -21,7 +21,7 @@
       color: "#0080ff",
       size: 36,
       opacity: 1,
-      rotation: 0,
+      rotation: undefined,
     },
     initialize: function (options) {
       options = L.Util.setOptions(this, options);
@@ -71,6 +71,10 @@
 
       return `<path d="${pathDescription}" style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
     },
+    _createFullCircle: function () {
+      let radius = this.options.size / 4;
+      return `<circle cx="${this.iconAnchor.x}" cy="${this.iconAnchor.x}" r="${radius}"  style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
+    },
     _calculateArrowDimensions: function () {
       let circleRadius = this.options.size / 4;
       let width = this.options.size / 10;
@@ -87,9 +91,16 @@
       };
     },
     _createSVG: function () {
-      let group =
-        `<g transform="rotate(${this.options.rotation}, ${this.iconAnchor.x}, ${this.iconAnchor.y})">` +
-        `${this._createArrow()}${this._createCircle()}</g>`;
+      let group;
+      if (this.options.rotation === undefined) {
+        group =
+          `<g>` +
+          `${this._createFullCircle()}</g>`;
+      } else {
+        group =
+          `<g transform="rotate(${this.options.rotation}, ${this.iconAnchor.x}, ${this.iconAnchor.y})">` +
+          `${this._createArrow()}${this._createCircle()}</g>`;
+      }
       let className = this.options.className + "-svg";
 
       let style =
