@@ -37,58 +37,19 @@
 
       options.html = this._createSVG();
     },
-    _createArrow: function () {
-      let dims = this._calculateArrowDimensions();
-
-      let pathDescription =
-        `M ${dims.startX} ${dims.startY} ` +
-        `v -${dims.width} h -${dims.width / 2} ` +
-        `L ${this.iconAnchor.x} 0` +
-        `l ${dims.width} ${dims.pointerYLength} ` +
-        `h -${dims.width / 2} v ${dims.width}`;
-
-      return `<path d="${pathDescription}" style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
-    },
-    _createCircle: function () {
-      const getYIntercept = (x) => {
-        return Math.round(
-          Math.sqrt(
-            Math.pow(radius, 2) -
-              Math.pow(x, 2) -
-              Math.pow(this.iconAnchor.x, 2) +
-              2 * x * this.iconAnchor.x
-          )
-        );
-      };
-
-      let dims = this._calculateArrowDimensions();
+    _createDirectedCircle: function () {
       let radius = this.options.size / 4;
-      let yIntercept = getYIntercept(dims.startX);
 
       let pathDescription =
-        `M ${dims.startX} ${yIntercept}` +
-        `A ${radius} ${radius} 0 1 0 ${dims.startX + dims.width} ${yIntercept}`;
+        `M ${this.iconAnchor.x} ${this.iconAnchor.y-radius}` +
+        `A ${radius} ${radius} 0 1 0 ${this.iconAnchor.x+radius} ${this.iconAnchor.y}` +
+        `l 0 ${-radius} Z`;
 
       return `<path d="${pathDescription}" style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
     },
     _createFullCircle: function () {
       let radius = this.options.size / 4;
       return `<circle cx="${this.iconAnchor.x}" cy="${this.iconAnchor.x}" r="${radius}"  style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
-    },
-    _calculateArrowDimensions: function () {
-      let circleRadius = this.options.size / 4;
-      let width = this.options.size / 10;
-
-      let startX = this.iconAnchor.x - width / 2;
-      let startY = this.iconAnchor.y - circleRadius + this.options.size / 40;
-      let pointerYLength = startY - width;
-
-      return {
-        startX: startX,
-        startY: startY,
-        width: width,
-        pointerYLength: pointerYLength,
-      };
     },
     _createSVG: function () {
       let group;
@@ -98,8 +59,8 @@
           `${this._createFullCircle()}</g>`;
       } else {
         group =
-          `<g transform="rotate(${this.options.rotation}, ${this.iconAnchor.x}, ${this.iconAnchor.y})">` +
-          `${this._createArrow()}${this._createCircle()}</g>`;
+          `<g transform="rotate(${this.options.rotation-45}, ${this.iconAnchor.x}, ${this.iconAnchor.y})">` +
+          `${this._createDirectedCircle()}</g>`;
       }
       let className = this.options.className + "-svg";
 
