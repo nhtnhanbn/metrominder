@@ -21,6 +21,15 @@ import { parse } from "csv-parse/sync";
 
         for (const point of shapes) {
             if (data.features.length === 0 || data.features[data.features.length-1].properties.SHAPE_ID !== point.shape_id) {
+                let SHORT_NAME = "";
+                if (number === 3) {
+                    SHORT_NAME = point.shape_id.slice(2, point.shape_id.indexOf("-vpt"));
+                } else if (number === 4) {
+                    SHORT_NAME = point.shape_id.slice(3, point.shape_id.indexOf("-aus"));
+                } else if (point.shape_id[6] === 'R') {
+                    SHORT_NAME = "Replacement Bus";
+                }
+
                 data.features.push({
                     "type" : "Feature",
                     "geometry" : {
@@ -29,7 +38,7 @@ import { parse } from "csv-parse/sync";
                     },
                     "properties" : {
                         "SHAPE_ID" : point.shape_id,
-                        "SHORT_NAME" : point.shape_id[6] === 'R' ? "Replacement Bus" : point.shape_id.slice(2, point.shape_id.indexOf("-vpt")),
+                        "SHORT_NAME" : SHORT_NAME,
                         "MODE" : MODE[number]
                     }
                 });
