@@ -36,12 +36,13 @@ const nClassName = {
 };
 
 const xt1Name = {
-    1626: "Iramoo",
-    1630: "Westernport",
-    1633: "Flash",
-    1636: "Melbourne Rocks",
-    1637: "Croydon West",
-    1663: "Don Corrie",
+    "1626T": "Iramoo",
+    "1630T": "Westernport",
+    "1633T": "Flash",
+    "1636T": "Melbourne Rocks",
+    "1637T": "Croydon West",
+    "1663T": "Don Corrie",
+    "1667T": "Barring"
 };
 
 const alstomTreadComengNumbers = [
@@ -91,7 +92,7 @@ function createConsistInfo(mode, vehicle, routeId) {
 
     if ("vehicle" in vehicle.vehicle) {
         if (mode === "metroTrain") {
-            const consist = vehicle.vehicle.vehicle.id;
+            let consist = vehicle.vehicle.vehicle.id;
             const splitConsist = consist.split("-");
             let carCode = splitConsist.find((car) => {
                 return car[car.length-1] === 'T';
@@ -113,9 +114,17 @@ function createConsistInfo(mode, vehicle, routeId) {
                 } else if (2500 <= carNumber && carNumber < 2600) {
                     vehicleModelName = "Siemens Nexas";
                     vehicleModelCode = "SIE";
+                    if (splitConsist.includes("2555T") || splitConsist.includes("2560T")) {
+                        vehicleModelName += "</b> <i>Ride with Pride</i><b>";
+                    }
                 } else if (1300 <= carNumber && carNumber < 1700) {
                     vehicleModelName = "X'Trapolis 100";
                     vehicleModelCode = "XT1";
+                    for (const car of splitConsist) {
+                        if (car in xt1Name) {
+                            vehicleModelName += `</b> <i>${xt1Name[car]}</i><b>`;
+                        }
+                    }
                 } else if (8100 <= carNumber && carNumber < 8900) {
                     vehicleModelName = "X'Trapolis 2.0";
                     vehicleModelCode = "XT2";
@@ -128,6 +137,9 @@ function createConsistInfo(mode, vehicle, routeId) {
                     carCount = 7;
                     vehicleModelName = "High Capacity Metro Train";
                     vehicleModelCode = "HCM";
+                    if (carNumber % 100 === 24) {
+                        consist += " <i>Wurundjeri Biik</i>";
+                    }
                 } else if (7000 <= carNumber && carNumber < 7030) {
                     carCount = 1;
                     vehicleModelName = "Sprinter";
