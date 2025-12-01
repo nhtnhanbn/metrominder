@@ -44,6 +44,41 @@ const xt1Name = {
     1663: "Don Corrie",
 };
 
+const alstomTreadComengNumbers = [
+    1011,
+    1012,
+    1013,
+    1020,
+    1021,
+    1022,
+    1025,
+    1030,
+    1032,
+    1037,
+    1038,
+    1057,
+    1058,
+    1060,
+    1080,
+    1081,
+    1084,
+    1088,
+    1090,
+    1092,
+    1094,
+    1095,
+    1096,
+    1105,
+    1112,
+    1114,
+    1117,
+    1119,
+    1196,
+    1197,
+    1198,
+    1199
+];
+
 const platformTermByMode = {
     "metroTrain": "<th>PLATFORM</th>",
     "regionTrain": "<th>PLATFORM</th>",
@@ -68,8 +103,13 @@ function createConsistInfo(mode, vehicle, routeId) {
                 
                 const carNumber = parseInt(carCode.slice(0, -1));
                 if (1000 <= carNumber && carNumber < 1200) {
-                    vehicleModelName = "Comeng";
-                    vehicleModelCode = "COM";
+                    if (alstomTreadComengNumbers.includes(carNumber) || (1131 <= carNumber && carNumber <= 1164) || (1166 <= carNumber && carNumber <= 1190)) {
+                        vehicleModelName = "Alstom Comeng";
+                        vehicleModelCode = "ACM";
+                    } else {
+                        vehicleModelName = "EDI Comeng";
+                        vehicleModelCode = "ECM";
+                    }
                 } else if (2500 <= carNumber && carNumber < 2600) {
                     vehicleModelName = "Siemens Nexas";
                     vehicleModelCode = "SIE";
@@ -155,6 +195,10 @@ function createConsistInfo(mode, vehicle, routeId) {
                     vehicleModelCode = "N";
                     consist = `${carCode} <i>${nClassName[carCode]}</i>`;
                     break;
+                default:
+                    vehicleModelName = "Sprinter";
+                    vehicleModelCode = "SPR";
+                    consist = carCode;
             }
             
             if (carCount) {
