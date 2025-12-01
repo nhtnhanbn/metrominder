@@ -49,7 +49,7 @@
     },
     _createFullCircle: function () {
       let radius = this.options.size / 4;
-      return `<circle cx="${this.iconAnchor.x}" cy="${this.iconAnchor.x}" r="${radius}"  style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
+      return `<circle cx="${this.iconAnchor.x}" cy="${this.iconAnchor.x}" r="${radius}" style="stroke: ${this.options.stroke}; fill: ${this.options.color}; opacity: ${this.options.opacity};"/>`;
     },
     _createSVG: function () {
       let group;

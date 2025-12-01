@@ -25,7 +25,7 @@ import { timeString } from "./stringConverters.js";
 import { createIndexLayerTree } from "./indexLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
-import { LControlWatermark, LControlInfo } from "./leafletControls.js";
+import { LControlWatermark, LControlInfo, LControlTrain, LControlTram } from "./leafletControls.js";
 import metroTrainStopIcon from "./PICTO_MODE_Train.svg";
 import regionTrainStopIcon from "./PICTO_MODE_RegionalTrain.svg";
 import tramStopIcon from "./PICTO_MODE_Tram.svg";
@@ -159,6 +159,14 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
 })).addTo(map);
 
 (new LControlInfo({
+    position: "topright"
+})).addTo(map);
+
+(new LControlTram({
+    position: "topright"
+})).addTo(map);
+
+(new LControlTrain({
     position: "topright"
 })).addTo(map);
 

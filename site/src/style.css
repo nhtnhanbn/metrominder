@@ -119,6 +119,6 @@ span.leaflet-layerstree-header-label {
     font-style: normal;
 }
 
-.leaflet-bar-part {
-    font-size: 26px;
+.unclear {
+    clear: none;
 }

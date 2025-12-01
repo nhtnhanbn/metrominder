@@ -20,7 +20,7 @@ import { timeString } from "./stringConverters.js";
 import { createMetroTramLayerTree } from "./metroTramLayerTree.js";
 import { updatePositions, updateTrips } from "./updateRealtime.js";
 import { createStopPopup } from "./stopPopup.js";
-import { LControlWatermark, LControlInfo } from "./leafletControls.js";
+import { LControlWatermark, LControlInfo, LControlOmni, LControlTrain } from "./leafletControls.js";
 import stopIcon from "./PICTO_MODE_Tram.svg";
 import "./style.css";
 
@@ -100,6 +100,14 @@ map.rotateControl.getContainer().addEventListener("mouseup", () => {
 })).addTo(map);
 
 (new LControlInfo({
+    position: "topright"
+})).addTo(map);
+
+(new LControlTrain({
+    position: "topright"
+})).addTo(map);
+
+(new LControlOmni({
     position: "topright"
 })).addTo(map);
 
