@@ -130,8 +130,19 @@ function createConsistInfo(mode, vehicle, routeId) {
                 case 'V':
                     vehicleModelName = "VLocity";
                     vehicleModelCode = "VLO";
+                    
+                    const initial = carCode[1], offset = carCode.slice(-2), vehicleNumber = parseInt(`${parseInt(initial)-1}${offset}`);
 
-                    const initial = carCode[1], offset = carCode.slice(-2), set = `VL${parseInt(`${parseInt(initial)-1}${offset}`)}`;
+                    let vehicleType;
+                    if (76 <= vehicleNumber && vehicleNumber <= 79) {
+                        vehicleType = "VR";
+                    } else if (93 <= vehicleNumber && vehicleNumber <= 98) {
+                        vehicleType = "VS";
+                    } else {
+                        vehicleType = "VL";
+                    }
+
+                    const set = `${vehicleType}${vehicleNumber}`;
                     if (set === "VL9") {
                         consist = `${set} <i>Michelle Payne</i>: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
                     } else {
