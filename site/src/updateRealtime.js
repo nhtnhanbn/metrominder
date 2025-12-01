@@ -380,61 +380,62 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
                         headsign = lastStopMap.stopName;
                     }
                 }
-
-                let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
-                                        Service to ${headsign}
-                                    </h3>`;
                 
                 if (tripId in vehicleByTripId) {
-                    vehiclePopup += vehicleByTripId[tripId].vehicleConsistInfo;
-                }
-                
-                let future = false;
-                for (const stop of stopTimeUpdate) {
-                    const stopMap = stopById[stop.stopId];
-                    const platform = (platformById[stop.stopId] || "").replace("Bay", "").trim();
+                    const vehicleMap = vehicleByTripId[tripId];
+
+                    let vehiclePopup = `<h3 style="background-color: ${routeById[routeId].routeColour}; color: ${routeById[routeId].routeTextColour};">
+                                            Service to ${headsign}
+                                        </h3>
+                                        ${vehicleMap.vehicleConsistInfo}
+                                        <table>
+                                            <tr>
+                                                <th style="text-align: left;">ARRIVING</td>
+                                                ${platformTermByMode[vehicleMap.vehicleMode]}
+                                                <th>TIME</td>
+                                            </tr>`;
                     
-                    if (stop.departure && stop.departure.time >= Math.floor(Date.now()/1000)) {
-                        stopMap.stopDepartures.push({
-                            routeMap: routeById[routeId],
-                            headsign: headsign,
-                            platform: platform,
-                            time: stop.departure.time
-                        });
-                    }
-                    
-                    if (tripId in vehicleByTripId && stop.arrival) {
-                        const vehicleMap = vehicleByTripId[tripId];
+                    let future = false;
+                    for (const stop of stopTimeUpdate) {
+                        const stopMap = stopById[stop.stopId];
+                        const platform = (platformById[stop.stopId] || "").replace("Bay", "").trim();
+                        const arrivalTime = parseInt("arrival" in stop ? stop.arrival.time : stop.departure.time);
                         const stopName = stopMap.isStation() ? shortName(stopMap.stopName) : stopMap.stopName;
-                        const stopTime = timeString(stop.arrival.time);
+                        const stopTime = timeString(arrivalTime);
                         
-                        if (future) {
+                        if (!future && arrivalTime + 60 >= Math.floor(Date.now()/1000)) {
+                            vehicleMap.nextStopMap = stopMap;
+                            vehiclePopup += `<tr>
+                                                <th style="text-align: left;">${stopName}</td>
+                                                ${ vehicleMap.hasPlatforms() ? `<th>${platform}</td>` : "" }
+                                                <th>${stopTime}</td>
+                                            </tr>`;
+                            future = true;
+                        } else {
                             vehiclePopup += `<tr>
                                                 <td style="text-align: left;">${stopName}</td>
                                                 ${ vehicleMap.hasPlatforms() ? `<td>${platform}</td>` : "" }
                                                 <td>${stopTime}</td>
                                             </tr>`;
-                        } else if (stop.arrival.time >= Math.floor(Date.now()/1000)) {
-                            vehicleMap.nextStopMap = stopMap;
-                            vehiclePopup += `<table>
-                                                <tr>
-                                                    <th style="text-align: left;">ARRIVING</td>
-                                                    ${platformTermByMode[vehicleMap.vehicleMode]}
-                                                    <th>TIME</td>
-                                                </tr>
-                                                <tr>
-                                                    <th style="text-align: left;">${stopName}</td>
-                                                    ${ vehicleMap.hasPlatforms() ? `<th>${platform}</td>` : "" }
-                                                    <th>${stopTime}</td>
-                                                </tr>`;
-                            future = true;
                         }
                     }
-                }
-                vehiclePopup += `</table> <p>Trip update ${tripUpdateTime}</p>`;
-                
-                if (tripId in vehicleByTripId) {
+                    vehiclePopup += `</table> <p>Trip update ${tripUpdateTime}</p>`;
+                    
                     vehicleByTripId[tripId].vehicleLabel.setPopupContent(vehiclePopup);
+                }
+                
+                for (const stop of stopTimeUpdate) {
+                    const stopMap = stopById[stop.stopId];
+                    const platform = (platformById[stop.stopId] || "").replace("Bay", "").trim();
+                    const departureTime = parseInt("departure" in stop ? stop.departure.time : stop.arrival.time);
+                    if (departureTime + 60 >= Math.floor(Date.now()/1000)) {
+                        stopMap.stopDepartures.push({
+                            routeMap: routeById[routeId],
+                            headsign: headsign,
+                            platform: platform,
+                            time: departureTime
+                        });
+                    }
                 }
             }
         }
