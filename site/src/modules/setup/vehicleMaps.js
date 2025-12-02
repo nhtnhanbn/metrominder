@@ -1,5 +1,5 @@
 class VehicleMap {
-    constructor(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleMode) {
+    constructor(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, vehicleMode) {
         this.tripId = tripId;
         this.routeCode = routeCode;
         this.vehicleModelCode = vehicleModelCode;
@@ -7,6 +7,7 @@ class VehicleMap {
         this.vehicleLabel = vehicleLabel;
         this.vehicleLabelContent = vehicleLabelContent;
         this.vehicleConsistInfo = vehicleConsistInfo;
+        this.vehicleIcon = vehicleIcon;
         this.vehicleMode = vehicleMode;
         this.live = true;
     }

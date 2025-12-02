@@ -295,7 +295,7 @@ function createConsistInfo(mode, vehicle, routeId) {
 
     vehicleConsistInfo += "</div>";
     
-    return { vehicleConsistInfo, vehicleModelCode };
+    return { vehicleConsistInfo, vehicleModelCode, vehicleIcon };
 }
 
 async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map) {
@@ -369,13 +369,23 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                 vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
                                         .slideTo([latitude, longitude]);
             } else {
-                const { vehicleConsistInfo, vehicleModelCode } = createConsistInfo(mode, vehicle, routeId);
+                const { vehicleConsistInfo, vehicleModelCode, vehicleIcon } = createConsistInfo(mode, vehicle, routeId);
                 
                 const vehicleLabelContent = document.createElement("div");
                 if (state.vehicleMarkerLabelSelection === "route") {
                     vehicleLabelContent.textContent = routeCode;
-                } else {
+                } else if (state.vehicleMarkerLabelSelection === "mode") {
                     vehicleLabelContent.textContent = vehicleModelCode;
+                } else {
+                    if (vehicleIcon) {
+                        vehicleLabelContent.textContent = "";
+                        const iconImg = document.createElement("img");
+                        iconImg.src = vehicleIcon;
+                        iconImg.className = "label-icon";
+                        vehicleLabelContent.appendChild(iconImg);
+                    } else {
+                        vehicleLabelContent.textContent = vehicleModelCode;
+                    }
                 }
                 vehicleLabelContent.style.color = routeById[routeId].routeTextColour;
                                 
@@ -411,7 +421,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                     { autoPan: false }
                 );
                 
-                vehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, mode));
+                vehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, mode));
                 
                 routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }

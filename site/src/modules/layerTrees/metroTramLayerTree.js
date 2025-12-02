@@ -51,6 +51,30 @@ function createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, s
                             }
                         }
                     }]
+                },
+                {
+                    label: `<label title="Display tram markers as tram icons">
+                                <input class="marker-radio" type="radio" name="labels" value="icon">
+                                Icon
+                            </label>`,
+                    eventedClasses: [{
+                        className: "marker-radio",
+                        event: "change",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            state.vehicleMarkerLabelSelection = "icon";
+                            for (const vehicleMap of vehicleMaps) {
+                                if (vehicleMap.vehicleIcon) {
+                                    vehicleMap.vehicleLabelContent.textContent = "";
+                                    const iconImg = document.createElement("img");
+                                    iconImg.src = vehicleMap.vehicleIcon;
+                                    iconImg.className = "label-icon";
+                                    vehicleMap.vehicleLabelContent.appendChild(iconImg);
+                                } else {
+                                    vehicleMap.vehicleLabelContent.textContent = vehicleMap.vehicleModelCode;
+                                }
+                            }
+                        }
+                    }]
                 }
             ]
         },

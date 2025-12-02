@@ -127,6 +127,11 @@ span.leaflet-layerstree-header-label {
     height: 39px;
 }
 
+.label-icon {
+    height: 12px;
+    padding: 3px;
+}
+
 .consist-container {
     display: flex;
     align-items: center;
