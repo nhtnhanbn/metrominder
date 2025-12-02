@@ -220,7 +220,10 @@ function createConsistInfo(mode, vehicle, routeId) {
             if (vehicleIcon) {
                 vehicleConsistInfo += `<img src=${vehicleIcon} class=popup-icon />`;
             }
-            vehicleConsistInfo += `<p><b>${vehicleModelCode}-Class</b> ${vehicle.vehicle.vehicle.id}</p>`;
+            vehicleConsistInfo += `<div>
+                                       <p style="margin-bottom: 0"><b>${vehicleModelCode}-Class</b></p>
+                                       <p style="margin-top: 0">${vehicle.vehicle.vehicle.id}</p>
+                                   </div>`;
         } else if (mode === "regionTrain") {
             const carCode = vehicle.vehicle.vehicle.id;
             let consist, carCount, vehicleModelName;
