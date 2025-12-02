@@ -122,3 +122,14 @@ span.leaflet-layerstree-header-label {
 .unclear {
     clear: none;
 }
+
+.popup-icon {
+    height: 26px;
+}
+
+.consist-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+}
