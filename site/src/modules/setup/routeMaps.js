@@ -1,9 +1,9 @@
 import { metroTrainRouteMaps, regionTrainRouteMaps } from "./routeMapsInitial.js";
-import metroTrainRouteData from "../../data/gtfsschedule/2/routes.txt";
-import metroTramRouteData from "../../data/gtfsschedule/3/routes.txt";
-import regionTrainRouteData from "../../data/gtfsschedule/1/routes.txt";
-import busRouteData from "../../data/gtfsschedule/4/routes.txt";
-import stopRoutes from "../../data/stopRoutes.json";
+import metroTrainRouteData from "../../../../data/gtfsschedule/2/routes.txt";
+import metroTramRouteData from "../../../../data/gtfsschedule/3/routes.txt";
+import regionTrainRouteData from "../../../../data/gtfsschedule/1/routes.txt";
+import busRouteData from "../../../../data/gtfsschedule/4/routes.txt";
+import stopRoutes from "../../../../data/stopRoutes.json";
 
 class MetroTramRouteMap {
     constructor(routeCode) {

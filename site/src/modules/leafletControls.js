@@ -1,6 +1,6 @@
-import omnIcon from "./combinedPT.svg";
-import trainIcon from "./combinedTrain.svg";
-import tramIcon from "./PICTO_MODE_Tram.svg";
+import omnIcon from "../static/combinedPT.svg";
+import trainIcon from "../static/combinedTrain.svg";
+import tramIcon from "../static/PICTO_MODE_Tram.svg";
 
 const LControlWatermark = L.Control.extend({
     onAdd: (map) => {

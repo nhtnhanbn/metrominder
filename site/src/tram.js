@@ -13,15 +13,15 @@ import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { LocateControl } from "leaflet.locatecontrol";
 import metroTramGeojson from "../../data/metroTramRoutes.geojson";
 import metroTramStopData from "../../data/gtfsschedule/3/stops.txt";
-import { createRouteStructures } from "./routeMaps.js";
-import { createStopStructures } from "./stopMaps.js";
-import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
-import { timeString } from "./stringConverters.js";
-import { createMetroTramLayerTree } from "./metroTramLayerTree.js";
-import { updatePositions, updateTrips } from "./updateRealtime.js";
-import { createStopPopup } from "./stopPopup.js";
-import { LControlWatermark, LControlInfo, LControlOmni, LControlTrain } from "./leafletControls.js";
-import stopIcon from "./PICTO_MODE_Tram.svg";
+import { createRouteStructures } from "./modules/setup/routeMaps.js";
+import { createStopStructures } from "./modules/setup/stopMaps.js";
+import { vehicleMaps, vehicleByTripId } from "./modules/setup/vehicleMaps.js";
+import { timeString } from "./modules/stringConverters.js";
+import { createMetroTramLayerTree } from "./modules/layerTrees/metroTramLayerTree.js";
+import { updatePositions, updateTrips } from "./modules/updateRealtime.js";
+import { createStopPopup } from "./modules/stopPopup.js";
+import { LControlWatermark, LControlInfo, LControlOmni, LControlTrain } from "./modules/leafletControls.js";
+import stopIcon from "./static/PICTO_MODE_Tram.svg";
 import "./style.css";
 
 if ("serviceWorker" in navigator) {

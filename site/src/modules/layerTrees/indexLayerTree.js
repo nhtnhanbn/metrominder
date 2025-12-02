@@ -1,4 +1,4 @@
-import { setRoutes, addRoutes } from "./routeFilters.js";
+import { setRoutes, addRoutes } from "../routeFilters.js";
 
 function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, layerGroupByMode, state) {
     setInterval(() => {

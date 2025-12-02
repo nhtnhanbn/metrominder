@@ -1,4 +1,4 @@
-import { setRoutes } from "./routeFilters.js";
+import { setRoutes } from "../routeFilters.js";
 
 function createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state) {
     setInterval(() => {

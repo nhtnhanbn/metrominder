@@ -1,5 +1,5 @@
 import "./leaflet-arrowcircle/src/L.ArrowCircle.js";
-import { VehicleMap } from "./vehicleMaps.js";
+import { VehicleMap } from "./setup/vehicleMaps.js";
 import { timeString, shortName } from "./stringConverters.js";
 import { createStopPopup } from "./stopPopup.js";
 

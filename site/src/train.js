@@ -15,16 +15,16 @@ import metroTrainGeojson from "../../data/metroTrainRoutes.geojson";
 import regionTrainGeojson from "../../data/regionTrainRoutes.geojson";
 import metroTrainStopData from "../../data/gtfsschedule/2/stops.txt";
 import regionTrainStopData from "../../data/gtfsschedule/1/stops.txt";
-import { createRouteStructures } from "./routeMaps.js";
-import { createStopStructures } from "./stopMaps.js";
-import { vehicleMaps, vehicleByTripId } from "./vehicleMaps.js";
-import { timeString } from "./stringConverters.js";
-import { createTrainLayerTree } from "./trainLayerTree.js";
-import { updatePositions, updateTrips } from "./updateRealtime.js";
-import { createStopPopup } from "./stopPopup.js";
-import { LControlWatermark, LControlInfo, LControlOmni, LControlTram } from "./leafletControls.js";
-import metroTrainStopIcon from "./PICTO_MODE_Train.svg";
-import regionTrainStopIcon from "./PICTO_MODE_RegionalTrain.svg";
+import { createRouteStructures } from "./modules/setup/routeMaps.js";
+import { createStopStructures } from "./modules/setup/stopMaps.js";
+import { vehicleMaps, vehicleByTripId } from "./modules/setup/vehicleMaps.js";
+import { timeString } from "./modules/stringConverters.js";
+import { createTrainLayerTree } from "./modules/layerTrees/trainLayerTree.js";
+import { updatePositions, updateTrips } from "./modules/updateRealtime.js";
+import { createStopPopup } from "./modules/stopPopup.js";
+import { LControlWatermark, LControlInfo, LControlOmni, LControlTram } from "./modules/leafletControls.js";
+import metroTrainStopIcon from "./static/PICTO_MODE_Train.svg";
+import regionTrainStopIcon from "./static/PICTO_MODE_RegionalTrain.svg";
 import "./style.css";
 
 if ("serviceWorker" in navigator) {
