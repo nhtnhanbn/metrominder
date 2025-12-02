@@ -29,6 +29,8 @@ npm run dev --env APIURL="YOUR API URL HERE"
 
 GTFS Schedule and GTFS Realtime data and transport mode pictograms © State of Victoria ([Department of Transport and Planning](https://opendata.transport.vic.gov.au/organization/public-transport)) licensed under a [Creative Commons Attribution 4.0 International licence](https://creativecommons.org/licenses/by/4.0).
 
+[Vehicle icons](https://github.com/TransportVic/TransportVic2/tree/master/application/static/images-raw/icons) used with permission from [TransportVic](https://transportvic.me).
+
 Rolling stock information, fleet numbers and names from [Metro Trains Melbourne](https://cmsportal.metrotrains.com.au/docnum.aspx?id=A8520) and [Vicsig](https://vicsig.net/suburban/fleet).
 
 Map tiles © [OpenStreetMap](https://openstreetmap.org/copyright).
