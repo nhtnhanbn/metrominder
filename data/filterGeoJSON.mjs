@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { metroTrainRouteMaps, regionTrainRouteMaps } from "../site/src/routeMapsInitial.js";
+import { metroTrainRouteMaps, regionTrainRouteMaps } from "../site/src/modules/setup/routeMapsInitial.js";
 
 const ROUNDER = 10000; // round coordinates to 4 decimal places
 
