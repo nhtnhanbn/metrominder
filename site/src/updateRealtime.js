@@ -257,14 +257,14 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
             const routeId = vehicle.vehicle.trip.routeId;
 
             let mode;
-            switch (tripId.slice(0, 2)) {
-                case "01":
+            switch (routeId.slice(0, 14)) {
+                case "aus:vic:vic-01":
                     mode = "regionTrain";
                     break;
-                case "02":
+                case "aus:vic:vic-02":
                     mode = "metroTrain";
                     break;
-                case "03":
+                case "aus:vic:vic-03":
                     mode = "metroTram";
                     break;
                 default:
@@ -416,14 +416,14 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             const tripId = tripUpdate.trip.tripId;
 
             let mode;
-            switch (tripId.slice(0, 2)) {
-                case "01":
+            switch (tripUpdate.trip.routeId.slice(0, 14)) {
+                case "aus:vic:vic-01":
                     mode = "regionTrain";
                     break;
-                case "02":
+                case "aus:vic:vic-02":
                     mode = "metroTrain";
                     break;
-                case "03":
+                case "aus:vic:vic-03":
                     mode = "metroTram";
                     break;
                 default:
