@@ -5,7 +5,7 @@ import tramIcon from "./PICTO_MODE_Tram.svg";
 const LControlWatermark = L.Control.extend({
     onAdd: (map) => {
         const title = L.DomUtil.create("a", "watermark");
-        title.title = "About MetroMinder";
+        title.title = "About Nhan's MetroMinder";
         
         const metro = L.DomUtil.create("span", null, title);
         metro.style.fontWeight = 1;
@@ -43,7 +43,7 @@ const LControlInfo = L.Control.extend({
                               "/>
                           </svg>`;
         link.href = "#";
-        link.title = "About MetroMinder";
+        link.title = "About Nhan's MetroMinder";
 
         const about = document.querySelector("dialog");
         L.DomEvent.on(link, "click", (event) => {
