@@ -101,7 +101,7 @@ const platformTermByMode = {
 }
 
 function createConsistInfo(mode, vehicle, routeId) {
-    let vehicleConsistInfo = `<div class=consist-container>`, vehicleModelCode = "";
+    let vehicleConsistInfo = `<div class=consist-container>`, vehicleModelCode = "", vehicleIcon;
 
     if ("vehicle" in vehicle.vehicle) {
         if (mode === "metroTrain") {
@@ -124,14 +124,14 @@ function createConsistInfo(mode, vehicle, routeId) {
                         vehicleModelName = "EDI Comeng";
                         vehicleModelCode = "ECM";
                     }
-                    vehicleConsistInfo += `<img src=${comengIcon} class=popup-icon />`;
+                    vehicleIcon = comengIcon;
                 } else if (2500 <= carNumber && carNumber < 2600) {
                     vehicleModelName = "Siemens Nexas";
                     vehicleModelCode = "SIE";
                     if (splitConsist.includes("2555T") || splitConsist.includes("2560T")) {
                         vehicleModelName += "</b> <i>Ride with Pride</i><b>";
                     }
-                    vehicleConsistInfo += `<img src=${siemensIcon} class=popup-icon />`;
+                    vehicleIcon = siemensIcon;
                 } else if (1300 <= carNumber && carNumber < 1700) {
                     vehicleModelName = "X'Trapolis 100";
                     vehicleModelCode = "XT1";
@@ -140,7 +140,7 @@ function createConsistInfo(mode, vehicle, routeId) {
                             vehicleModelName += `</b> <i>${xt1Name[car]}</i><b>`;
                         }
                     }
-                    vehicleConsistInfo += `<img src=${xt1Icon} class=popup-icon />`;
+                    vehicleIcon = xt1Icon;
                 } else if (8100 <= carNumber && carNumber < 8900) {
                     vehicleModelName = "X'Trapolis 2.0";
                     vehicleModelCode = "XT2";
@@ -156,12 +156,12 @@ function createConsistInfo(mode, vehicle, routeId) {
                     if (carNumber % 100 === 24) {
                         consist += " <i>Wurundjeri Biik</i>";
                     }
-                    vehicleConsistInfo += `<img src=${hcmtIcon} class=popup-icon />`;
+                    vehicleIcon = hcmtIcon;
                 } else if (7000 <= carNumber && carNumber < 7030) {
                     carCount = 1;
                     vehicleModelName = "Sprinter";
                     vehicleModelCode = "SPR";
-                    vehicleConsistInfo += `<img src=${sprinterIcon} class=popup-icon />`;
+                    vehicleIcon = sprinterIcon;
                 }
             }
             
@@ -169,7 +169,11 @@ function createConsistInfo(mode, vehicle, routeId) {
                 carCount = 1;
                 vehicleModelName = "Sprinter";
                 vehicleModelCode = "SPR";
-                vehicleConsistInfo += `<img src=${sprinterIcon} class=popup-icon />`;
+                vehicleIcon = sprinterIcon;
+            }
+
+            if (vehicleIcon) {
+                vehicleConsistInfo += `<img src=${vehicleIcon} class=popup-icon />`;
             }
             
             vehicleConsistInfo += `<div>
@@ -194,23 +198,27 @@ function createConsistInfo(mode, vehicle, routeId) {
             vehicleModelCode = vehicle.vehicle.vehicle.label;
             switch (vehicleModelCode[0]) {
                 case 'A':
-                    vehicleConsistInfo += `<img src=${aIcon} class=popup-icon />`;
+                    vehicleIcon = aIcon;
                     break;
                 case 'B':
-                    vehicleConsistInfo += `<img src=${bIcon} class=popup-icon />`;
+                    vehicleIcon = bIcon;
                     break;
                 case 'C':
-                    vehicleConsistInfo += `<img src=${cIcon} class=popup-icon />`;
+                    vehicleIcon = cIcon;
                     break;
                 case 'D':
-                    vehicleConsistInfo += `<img src=${dIcon} class=popup-icon />`;
+                    vehicleIcon = dIcon;
                     break;
                 case 'E':
-                    vehicleConsistInfo += `<img src=${eIcon} class=popup-icon />`;
+                    vehicleIcon = eIcon;
                     break;
                 case 'Z':
-                    vehicleConsistInfo += `<img src=${zIcon} class=popup-icon />`;
+                    vehicleIcon = zIcon;
                     break;
+            }
+
+            if (vehicleIcon) {
+                vehicleConsistInfo += `<img src=${vehicleIcon} class=popup-icon />`;
             }
             vehicleConsistInfo += `<p><b>${vehicleModelCode}-Class</b> ${vehicle.vehicle.vehicle.id}</p>`;
         } else if (mode === "regionTrain") {
@@ -238,22 +246,26 @@ function createConsistInfo(mode, vehicle, routeId) {
                         consist = `${set}: ${initial}1${offset}-${initial}3${offset}-${initial}2${offset}`;
                     }
 
-                    vehicleConsistInfo += `<img src=${vlocityIcon} class=popup-icon />`;
+                    vehicleIcon = vlocityIcon;
 
                     break;
                 case 'N':
                     vehicleModelName = "N-Set";
                     vehicleModelCode = "N";
                     consist = `${carCode} <i>${nClassName[carCode]}</i>`;
-                    vehicleConsistInfo += `<img src=${nIcon} class=popup-icon />`;
+                    vehicleIcon = nIcon;
                     break;
                 default:
                     vehicleModelName = "Sprinter";
                     vehicleModelCode = "SPR";
                     consist = carCode;
-                    vehicleConsistInfo += `<img src=${sprinterIcon} class=popup-icon />`;
+                    vehicleIcon = sprinterIcon;
             }
-            
+
+            if (vehicleIcon) {
+                vehicleConsistInfo += `<img src=${vehicleIcon} class=popup-icon />`;
+            }
+
             vehicleConsistInfo += `<div>
                                        <p style="margin-bottom: 0">
                                            <b>`;
