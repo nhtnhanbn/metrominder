@@ -449,10 +449,6 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
         positionStatus.textContent = "Failed to retrieve positions.";
         map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     }
-    
-    setTimeout(() => {
-        updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map);
-    }, 1000);
 }
 
 async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map) {
@@ -662,10 +658,6 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
         tripStatus.textContent = "Failed to retrieve trip updates.";
         map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     }
-    
-    setTimeout(() => {
-        updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
-    }, 1000);
 };
 
 async function updateAlerts(alertStatus, map, modes) {
@@ -688,7 +680,6 @@ async function updateAlerts(alertStatus, map, modes) {
         alertStatus.textContent = "Failed to retrieve service alerts.";
         map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     }
-
 
     setTimeout(() => {
         updateAlerts(alertStatus, map, modes);

@@ -228,4 +228,10 @@ for (const element of [positionStatus, tripStatus, clock, dtpAttribution, leafle
 }
 
 updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map);
-updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
+setInterval(() => {
+    updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map);
+}, 1000);
+
+setInterval(() => {
+    updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
+}, 1000);
