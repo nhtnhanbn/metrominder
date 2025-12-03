@@ -257,7 +257,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
             label: "<b>Presets<b>",
             children: [
                 {
-                    label: `<button class="preset-button colour-button" title="Pakenham and Sunbury lines" style="background-color: #279FD5;">
+                    label: `<button class="preset-button colour-button" title="Pakenham and Sunbury lines (Summer Start)" style="background-color: #279FD5;">
                                 Metro Tunnel
                             </button>`,
                     eventedClasses: [{

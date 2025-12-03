@@ -421,7 +421,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                     { autoPan: false }
                 );
                 
-                vehicleMaps.add(new VehicleMap(tripId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, mode));
+                vehicleMaps.add(new VehicleMap(tripId, routeId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, mode));
                 
                 routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }
@@ -430,7 +430,10 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
         for (const vehicleMap of vehicleMaps) {
             if (!(vehicleMap.live)) {
                 vehicleMap.vehicleMarker.remove();
+                vehicleMap.vehicleMarker.removeFrom(routeById[vehicleMap.routeId].layerGroup);
                 vehicleMap.vehicleLabel.remove();
+                vehicleMap.vehicleLabel.removeFrom(routeById[vehicleMap.routeId].layerGroup);
+                vehicleMaps.delete(vehicleMap);
                 delete vehicleByTripId[vehicleMap.tripId];
             } else {
                 vehicleMap.live = false;
