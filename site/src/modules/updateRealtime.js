@@ -374,7 +374,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                 const vehicleLabelContent = document.createElement("div");
                 if (state.vehicleMarkerLabelSelection === "route") {
                     vehicleLabelContent.textContent = routeCode;
-                } else if (state.vehicleMarkerLabelSelection === "mode") {
+                } else if (state.vehicleMarkerLabelSelection === "model") {
                     vehicleLabelContent.textContent = vehicleModelCode;
                 } else {
                     if (vehicleIcon) {
