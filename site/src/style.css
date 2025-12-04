@@ -138,3 +138,16 @@ span.leaflet-layerstree-header-label {
     justify-content: center;
     gap: 13px;
 }
+
+.leaflet-control-search .search-input {
+    height: 20px;
+}
+
+.leaflet-control-search .search-button {
+	background-size: 21px;
+}
+
+.leaflet-control-search .search-button:hover {
+    background: url('../node_modules/leaflet-search/images/search-icon.png') no-repeat 4px -21px #fafafa;
+	background-size: 21px;
+}
