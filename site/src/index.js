@@ -378,10 +378,18 @@ if (storageAvailable("sessionStorage")) {
         stopLayer.addTo(map);
     }
 
+    if (sessionStorage.getItem("indexBounds")) {
+        map.fitBounds(
+            Object.values(JSON.parse(sessionStorage.getItem("indexBounds"))),
+            { animate: false }
+        );
+    }
+
     setInterval(() => {
         sessionStorage.setItem("indexVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
         sessionStorage.setItem("indexState", JSON.stringify(state));
         sessionStorage.setItem("indexShowStops", JSON.stringify(map.hasLayer(stopLayer)));
+        sessionStorage.setItem("indexBounds", JSON.stringify(map.getBounds()));
     }, 1000);
 } else {
     setDefaultRoutes();

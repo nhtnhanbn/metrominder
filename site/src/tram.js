@@ -265,10 +265,18 @@ if (storageAvailable("sessionStorage")) {
         stopLayer.addTo(map);
     }
 
+    if (sessionStorage.getItem("tramBounds")) {
+        map.fitBounds(
+            Object.values(JSON.parse(sessionStorage.getItem("tramBounds"))),
+            { animate: false }
+        );
+    }
+
     setInterval(() => {
         sessionStorage.setItem("tramVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
         sessionStorage.setItem("tramState", JSON.stringify(state));
         sessionStorage.setItem("tramShowStops", JSON.stringify(map.hasLayer(stopLayer)));
+        sessionStorage.setItem("tramBounds", JSON.stringify(map.getBounds()));
     }, 1000);
 } else {
     setDefaultRoutes();
