@@ -140,6 +140,62 @@ function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                             addRoutes("vic:rail:HUN", stopById, routeMaps, map);
                         }
                     }]
+                },
+                {
+                    label: `<button class="preset-button" title="Bus routes 150, 180, 190, 406, 410, 420, 941, 943, 947 and 949">
+                                Western region Night Buses
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            for (const routeId of [150, 180, 190, 406, 410, 420, 941, 943, 947, 949]) {
+                                routeById[`${routeId}`].layerGroup.addTo(map);
+                            }
+                        }
+                    }]
+                },
+                {
+                    label: `<button class="preset-button" title="Bus routes 250, 357, 386, 951, 953 and 959">
+                                Northern region Night Buses
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            for (const routeId of [250, 357, 386, 951, 953, 959]) {
+                                routeById[`${routeId}`].layerGroup.addTo(map);
+                            }
+                        }
+                    }]
+                },
+                {
+                    label: `<button class="preset-button" title="Bus routes 207, 670, 703, 900, 901, 905, 907, 908, 965 and 967">
+                                Eastern region Night Buses
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            for (const routeId of [207, 670, 703, 900, 901, 905, 907, 908, 965, 967]) {
+                                routeById[`${routeId}`].layerGroup.addTo(map);
+                            }
+                        }
+                    }]
+                },
+                {
+                    label: `<button class="preset-button" title="Bus routes 630, 693, 703, 788, 833, 900, 978, 979, 981 and 982">
+                                South eastern region Night Buses
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            for (const routeId of [630, 693, 703, 788, 833, 900, 978, 979, 981, 982]) {
+                                routeById[`${routeId}`].layerGroup.addTo(map);
+                            }
+                        }
+                    }]
                 }
             ]
         }

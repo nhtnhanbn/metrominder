@@ -347,6 +347,24 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                             routeById["aus:vic:vic-02-FKN:"].layerGroup.addTo(map);
                         }
                     }]
+                },
+                {
+                    label: `<button class="preset-button colour-button" title="All metropolitan train lines except Stony Point, Flemington Racecourse and City Circle lines" style="background-color: #0072CE;">
+                                Night Trains
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            addRoutes("vic:rail:NPT", stopById, routeMaps, map);
+                            routeById["aus:vic:vic-02-SUY:"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-CGB:"].layerGroup.addTo(map);
+                            routeById["aus:vic:vic-02-UFD:"].layerGroup.addTo(map);
+                            addRoutes("vic:rail:CHL", stopById, routeMaps, map);
+                            addRoutes("vic:rail:BLY", stopById, routeMaps, map);
+                            addRoutes("vic:rail:SYR", stopById, routeMaps, map);
+                        }
+                    }]
                 }
             ]
         }

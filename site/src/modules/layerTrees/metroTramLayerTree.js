@@ -104,6 +104,20 @@ function createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, s
                             addRoutes("19489", stopById, routeMaps, map);
                         }
                     }]
+                },
+                {
+                    label: `<button class="preset-button" title="Routes 19, 67, 75, 86, 96 and 109">
+                                Night Trams
+                            </button>`,
+                    eventedClasses: [{
+                        className: "preset-button",
+                        event: "click",
+                        selectAll: (ev, domNode, treeNode, map) => {
+                            for (const routeCode of [19, 67, 75, 86, 96, 109]) {
+                                routeById[`aus:vic:vic-03-${routeCode}:`].layerGroup.addTo(map);
+                            }
+                        }
+                    }]
                 }
             ]
         }
