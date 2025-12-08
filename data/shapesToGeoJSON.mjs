@@ -25,7 +25,7 @@ import { parse } from "csv-parse/sync";
                 if (number === 3) {
                     SHORT_NAME = point.shape_id.slice(2, point.shape_id.indexOf("-vpt"));
                 } else if (number === 4) {
-                    SHORT_NAME = point.shape_id.slice(3, point.shape_id.indexOf("-aus"));
+                    SHORT_NAME = point.shape_id.slice(point.shape_id.indexOf("-")+1, point.shape_id.indexOf("-aus"));
                 } else if (point.shape_id[6] === 'R') {
                     SHORT_NAME = "Replacement Bus";
                 }

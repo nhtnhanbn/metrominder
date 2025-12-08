@@ -33,9 +33,8 @@ class MetroTramRouteMap extends RouteMap {
 }
 
 class BusRouteMap extends RouteMap {
-    constructor(routeCode) {
-        // routeCode same as short name
-        super(routeCode, routeCode, "bus");
+    constructor(routeId) {
+        super(routeId.slice(routeId.indexOf("-")+1, routeId.indexOf("-aus")), routeId, "bus");
     }
 }
 

@@ -9,14 +9,14 @@ import { parse } from "csv-parse/sync";
         const trips = parse(rawTrips, { bom: true, columns: true });
         const tripRoute = {};
         for (const trip of trips) {
-            tripRoute[trip.trip_id] = number === 4 ? trip.route_id.slice(3, 6) : trip.route_id;
+            tripRoute[trip.trip_id] = trip.route_id;
         }
         console.log(`Processed trips for ${number}.`)
 
         const rawRoutes = await fs.readFile(`./gtfsschedule/${number}/routes.txt`);
         const routes = parse(rawRoutes, { bom: true, columns: true });
         for (const route of routes) {
-            stopRoutes[number === 4 ? route.route_short_name : route.route_id] = new Set();
+            stopRoutes[route.route_id] = new Set();
         }
         console.log(`Processed routes for ${number}.`)
         
@@ -31,7 +31,7 @@ import { parse } from "csv-parse/sync";
         console.log(`Processed stop times for ${number}.`)
 
         for (const route of routes) {
-            const routeId = number === 4 ? route.route_short_name : route.route_id;
+            const routeId = route.route_id;
             stopRoutes[routeId] = Array.from(stopRoutes[routeId]);
         }
         console.log(`Arrayified for ${number}.`)

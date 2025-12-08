@@ -46,13 +46,20 @@ setInterval(() => {
     }
 }, 1000);
 
-const headsignByTripId = {};
+const routeIdByTripId = {}, headsignByTripId = {}, busRouteIdByRouteCode = {};
 (async () => {
     for (let number = 1; number <= 4; number++) {
         const rawTripData = await fs.readFile(`../data/gtfsschedule/${number}/trips.txt`);
         const tripData = parse(rawTripData, { bom: true, columns: true });
         for (const tripDatum of tripData) {
+            const routeId = tripDatum.route_id;
+
+            routeIdByTripId[tripDatum.trip_id] = routeId;
             headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
+
+            if (number === 4) {
+                busRouteIdByRouteCode[routeId.slice(routeId.indexOf("-")+1, routeId.indexOf("-aus"))] = routeId;
+            }
         }
     }
 })();
@@ -111,6 +118,14 @@ async function updateCache(cache, endpoint) {
             }
         }
 
+        for (const entity of cache.feed.entity) {
+            if (entity.vehicle) {
+                entity.vehicle.trip.routeId = routeIdByTripId[entity.id];
+            } else if (entity.tripUpdate) {
+                entity.tripUpdate.trip.routeId = routeIdByTripId[entity.id];
+            }
+        }
+
         cache.timestamp = Date.now();
     } catch (error) {
         console.log(error);
@@ -130,7 +145,7 @@ function routeCodeToId(mode, routeCode) {
             routeId = `aus:vic:vic-03-${routeCode}:`;
             break;
         case "bus":
-            routeId = routeCode;
+            routeId = busRouteIdByRouteCode[routeCode];
             break;
     }
     return routeId;

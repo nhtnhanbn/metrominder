@@ -44,10 +44,9 @@ function createRouteStructures(modes, geojsons) {
             for (const routeDatum of busRouteData.sort((a, b) => {
                 return parseInt(a.route_short_name) - parseInt(b.route_short_name);
             })) {
-                const routeCode = routeDatum.route_short_name;
-                const routeMap = new BusRouteMap(routeCode);
+                const routeMap = new BusRouteMap(routeDatum.route_id);
                 routeMaps.add(routeMap);
-                routeByModeCode[mode][routeCode] = routeMap;
+                routeByModeCode[mode][routeMap.routeCode] = routeMap;
             }
         }
     }
@@ -57,7 +56,7 @@ function createRouteStructures(modes, geojsons) {
     }
 
     for (const routeDatum of routeData) {
-        const routeId = routeDatum.route_id[0] === 'a' ? routeDatum.route_id : routeDatum.route_short_name;
+        const routeId = routeDatum.route_id;
         if (routeId in routeById) {
             const routeMap = routeById[routeId];
             routeMap.routeShortName = routeDatum.route_short_name;

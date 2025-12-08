@@ -462,7 +462,6 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             stopMap.stopDepartures = [];
         }
 
-        
         const params = new URLSearchParams();
 
         for (const routeMap of routeMaps) {
