@@ -289,7 +289,7 @@ function createConsistInfo(mode, vehicle, routeId) {
                     </div>`;
         } else if (mode === "bus") {
             vehicleConsistInfo = `<p>${vehicle.vehicle.vehicle.id}</p>`;
-            vehicleModelCode = routeId;
+            vehicleModelCode = routeId.slice(routeId.indexOf("-")+1, routeId.indexOf("-aus"));
         }
     }
 
