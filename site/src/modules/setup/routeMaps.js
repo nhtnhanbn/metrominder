@@ -5,6 +5,7 @@ import metroTramRouteData from "../../../../data/gtfsschedule/3/routes.txt";
 import regionTrainRouteData from "../../../../data/gtfsschedule/1/routes.txt";
 import busRouteData from "../../../../data/gtfsschedule/4/routes.txt";
 import stopRoutes from "../../../../data/stopRoutes.json";
+import { busRouteCodeFromId } from "../stringConverters.js";
 
 function createRouteStructures(modes, geojsons) {
     const routeById = {}, routeByModeCode = {};
@@ -56,7 +57,7 @@ function createRouteStructures(modes, geojsons) {
     }
 
     for (const routeDatum of routeData) {
-        const routeId = routeDatum.route_id;
+        const routeId = routeDatum.route_id[0] === 'a' ? routeDatum.route_id : busRouteCodeFromId(routeDatum.route_id);
         if (routeId in routeById) {
             const routeMap = routeById[routeId];
             routeMap.routeShortName = routeDatum.route_short_name;

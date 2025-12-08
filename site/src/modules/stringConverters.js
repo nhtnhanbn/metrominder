@@ -22,4 +22,8 @@ function shortName(stopName) {
                    .trim();
 }
 
-export { timeString, shortName };
+function busRouteCodeFromId(routeId) {
+    return routeId.slice(routeId.indexOf("-")+1, routeId.indexOf("-aus"));
+}
+
+export { timeString, shortName, busRouteCodeFromId };

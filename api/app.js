@@ -5,6 +5,7 @@ import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { createHmac } from "crypto";
 import fs from "fs/promises";
 import { parse } from "csv-parse/sync";
+import { busRouteCodeFromId } from "../site/src/modules/stringConverters.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -46,7 +47,7 @@ setInterval(() => {
     }
 }, 1000);
 
-const routeIdByTripId = {}, headsignByTripId = {}, busRouteIdByRouteCode = {};
+const routeIdByTripId = {}, headsignByTripId = {};
 (async () => {
     for (let number = 1; number <= 4; number++) {
         const rawTripData = await fs.readFile(`../data/gtfsschedule/${number}/trips.txt`);
@@ -54,12 +55,8 @@ const routeIdByTripId = {}, headsignByTripId = {}, busRouteIdByRouteCode = {};
         for (const tripDatum of tripData) {
             const routeId = tripDatum.route_id;
 
-            routeIdByTripId[tripDatum.trip_id] = routeId;
+            routeIdByTripId[tripDatum.trip_id] = number === 4 ? busRouteCodeFromId(routeId) : routeId;
             headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
-
-            if (number === 4) {
-                busRouteIdByRouteCode[routeId.slice(routeId.indexOf("-")+1, routeId.indexOf("-aus"))] = routeId;
-            }
         }
     }
 })();
@@ -145,7 +142,7 @@ function routeCodeToId(mode, routeCode) {
             routeId = `aus:vic:vic-03-${routeCode}:`;
             break;
         case "bus":
-            routeId = busRouteIdByRouteCode[routeCode];
+            routeId = routeCode;
             break;
     }
     return routeId;
