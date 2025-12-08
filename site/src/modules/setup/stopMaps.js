@@ -57,7 +57,7 @@ function createStopStructures(modes, routeMaps, stopDatas) {
         stopById[stopMap.stopId] = stopByName[stopMap.stopName];
     }
     
-    for (const routeMap of routeMaps) {
+    for (const routeMap of Array.from(routeMaps).toReversed()) {
         for (const stopId of routeMap.stopIds) {
             if (stopId in stopById) {
                 stopById[stopId].routeMaps.add(routeMap);

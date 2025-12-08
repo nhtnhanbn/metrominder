@@ -36,7 +36,7 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const modes = ["regionTrain", "metroTrain"]; // in reverse order of stop marker pictogram priority
+const modes = ["metroTrain", "regionTrain"]; // in order of decreasing priority
 const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     regionTrainGeojson: regionTrainGeojson
