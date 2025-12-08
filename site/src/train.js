@@ -36,7 +36,7 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const modes = ["metroTrain", "regionTrain"];
+const modes = ["regionTrain", "metroTrain"]; // in reverse order of stop marker pictogram priority
 const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     regionTrainGeojson: regionTrainGeojson
@@ -152,8 +152,13 @@ searchLayer.remove();
 for (const stopMap of stopMaps) {
     let stopIcon = regionTrainStopIcon;
     for (const routeMap of stopMap.routeMaps) {
-        if (routeMap.routeId[13] === '2') {
-            stopIcon = metroTrainStopIcon;
+        switch (routeMap.mode) {
+            case "metroTrain":
+                stopIcon = metroTrainStopIcon;
+                break;
+            case "regionTrain":
+                stopIcon = regionTrainStopIcon;
+                break;
         }
     }
 
@@ -184,7 +189,7 @@ for (const routeMap of routeMaps) {
         routeMap.geojson,
         {
             style: { color: routeMap.routeColour },
-            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+            pane: routeMap.mode === "metroTrain" ? "metroRoutePane": "regionRoutePane"
         }
     ).addTo(routeMap.layerGroup);
     

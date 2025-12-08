@@ -32,24 +32,12 @@ import tramStopIcon from "./static/PICTO_MODE_Tram.svg";
 import busStopIcon from "./static/PICTO_MODE_Bus.svg";
 import "./style.css";
 
-function computeMode(routeId) {
-    if (routeId[0] !== 'a') {
-        return "bus";
-    } else if (routeId[13] === '1') {
-        return "regionTrain";
-    } else if (routeId[13] === '2') {
-        return "metroTrain";
-    } else if (routeId[13] === '3') {
-        return "metroTram";
-    }
-}
-
 function addGeoJSONLayer(routeMap) {
     routeMap.geojsonLayer = L.geoJSON(
         routeMap.geojson,
         {
             style: { color: routeMap.routeColour },
-            pane: routeMap.routeId[13] === '2' ? "metroRoutePane": "regionRoutePane"
+            pane: routeMap.mode === "metroTrain" ? "metroRoutePane": "regionRoutePane"
         }
     );
     routeMap.geojsonLayer.addTo(routeMap.layerGroup);
@@ -79,7 +67,7 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const modes = ["metroTrain", "regionTrain", "bus", "metroTram"];
+const modes = ["bus", "metroTram", "regionTrain", "metroTrain"]; // in reverse order of stop marker pictogram priority
 const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     metroTramGeojson: metroTramGeojson,
@@ -245,7 +233,7 @@ for (const routeMap of routeMaps) {
         }
     });
 
-    routeMap.layerGroup.addTo(layerGroupByMode[computeMode(routeMap.routeId)]);
+    routeMap.layerGroup.addTo(layerGroupByMode[routeMap.mode]);
     addGeoJSONLayer(routeMap);
 
     const dummyLayer = L.circleMarker(
@@ -258,7 +246,7 @@ for (const routeMap of routeMaps) {
         }
     );
 
-    if (["metroTrain", "regionTrain"].includes(computeMode(routeMap.routeId))) {
+    if (["metroTrain", "regionTrain"].includes(routeMap.mode)) {
         dummyLayer.options.title = `${routeMap.routeShortName} line` || " ";
         if (routeMap.routeCode === "vPK") {
             dummyLayer.options.title += " (V/Line)";
@@ -271,14 +259,17 @@ for (const routeMap of routeMaps) {
 }
 
 for (const stopMap of stopMaps) {
-    let stopIcon = regionTrainStopIcon;
+    let stopIcon;
     for (const routeMap of stopMap.routeMaps) {
-        switch (computeMode(routeMap.routeId)) {
+        switch (routeMap.mode) {
             case "bus":
                 stopIcon = busStopIcon;
                 break;
             case "metroTrain":
                 stopIcon = metroTrainStopIcon;
+                break;
+            case "regionTrain":
+                stopIcon = regionTrainStopIcon;
                 break;
             case "metroTram":
                 stopIcon = tramStopIcon;
