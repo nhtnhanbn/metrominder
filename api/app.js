@@ -34,7 +34,7 @@ setInterval(() => {
     for (const tripCache of [metroTrainTripCache, metroTramTripCache, regionTrainTripCache, busTripCache]) {
         if ("feed" in tripCache && "entity" in tripCache.feed) {
             for (const trip of tripCache.feed.entity) {
-                const routeId = tripCache === busTripCache ? trip.tripUpdate.trip.tripId.slice(3, 6) : trip.tripUpdate.trip.routeId;
+                const routeId = trip.tripUpdate.trip.routeId;
 
                 if (!(routeId in tripsByRouteId)) {
                     tripsByRouteId[routeId] = [];
