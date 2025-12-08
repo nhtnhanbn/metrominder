@@ -21,6 +21,7 @@ import { createMetroTramLayerTree } from "./modules/layerTrees/metroTramLayerTre
 import { updatePositions, updateTrips } from "./modules/updateRealtime.js";
 import { createStopPopup } from "./modules/stopPopup.js";
 import { LControlWatermark, LControlInfo, LControlOmni, LControlTrain } from "./modules/leafletControls.js";
+import { storageAvailable } from "./modules/webStorage.js";
 import stopIcon from "./static/PICTO_MODE_Tram.svg";
 import "./style.css";
 
@@ -161,6 +162,7 @@ for (const stopMap of stopMaps) {
     stopMarker.addTo(searchLayer);
 }
 
+const visibleRouteIds = new Set();
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
     L.geoJSON(
@@ -176,6 +178,8 @@ for (const routeMap of routeMaps) {
                 stopMarker.addTo(stopLayer);
             }
         }
+
+        visibleRouteIds.add(routeMap.routeId);
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
@@ -188,9 +192,9 @@ for (const routeMap of routeMaps) {
                 }
             }
         }
-    });
 
-    routeMap.layerGroup.addTo(map);
+        visibleRouteIds.delete(routeMap.routeId);
+    });
 }
 
 L.control.layers.tree(null, createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state), {
@@ -235,3 +239,24 @@ setInterval(() => {
 setInterval(() => {
     updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
 }, 1000);
+
+function setDefaultRoutes() {
+    for (const routeMap of routeMaps) {
+        routeMap.layerGroup.addTo(map);
+    }
+}
+
+if (storageAvailable("sessionStorage")) {
+    if (sessionStorage.getItem("tramVisibleRouteIds")) {
+        for (const routeId of JSON.parse(sessionStorage.getItem("tramVisibleRouteIds"))) {
+            routeById[routeId].layerGroup.addTo(map);
+        }
+    } else {
+        setDefaultRoutes();
+    }
+    setInterval(() => {
+        sessionStorage.setItem("tramVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
+    }, 1000);
+} else {
+    setDefaultRoutes();
+}

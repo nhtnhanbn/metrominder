@@ -23,6 +23,7 @@ import { createTrainLayerTree } from "./modules/layerTrees/trainLayerTree.js";
 import { updatePositions, updateTrips } from "./modules/updateRealtime.js";
 import { createStopPopup } from "./modules/stopPopup.js";
 import { LControlWatermark, LControlInfo, LControlOmni, LControlTram } from "./modules/leafletControls.js";
+import { storageAvailable } from "./modules/webStorage.js";
 import metroTrainStopIcon from "./static/PICTO_MODE_Train.svg";
 import regionTrainStopIcon from "./static/PICTO_MODE_RegionalTrain.svg";
 import "./style.css";
@@ -183,6 +184,7 @@ for (const stopMap of stopMaps) {
     stopMarker.addTo(searchLayer);
 }
 
+const visibleRouteIds = new Set();
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
     L.geoJSON(
@@ -201,6 +203,8 @@ for (const routeMap of routeMaps) {
                 stopMarker.addTo(stopLayer);
             }
         }
+
+        visibleRouteIds.add(routeMap.routeId);
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
@@ -213,9 +217,9 @@ for (const routeMap of routeMaps) {
                 }
             }
         }
-    });
 
-    routeMap.layerGroup.addTo(map);
+        visibleRouteIds.delete(routeMap.routeId);
+    });
 }
 
 L.control.layers.tree(null, createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state), {
@@ -260,3 +264,24 @@ setInterval(() => {
 setInterval(() => {
     updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
 }, 1000);
+
+function setDefaultRoutes() {
+    for (const routeMap of routeMaps) {
+        routeMap.layerGroup.addTo(map);
+    }
+}
+
+if (storageAvailable("sessionStorage")) {
+    if (sessionStorage.getItem("trainVisibleRouteIds")) {
+        for (const routeId of JSON.parse(sessionStorage.getItem("trainVisibleRouteIds"))) {
+            routeById[routeId].layerGroup.addTo(map);
+        }
+    } else {
+        setDefaultRoutes();
+    }
+    setInterval(() => {
+        sessionStorage.setItem("trainVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
+    }, 1000);
+} else {
+    setDefaultRoutes();
+}

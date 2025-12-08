@@ -27,6 +27,7 @@ import { updatePositions, updateTrips } from "./modules/updateRealtime.js";
 import { createStopPopup } from "./modules/stopPopup.js";
 import { LControlWatermark, LControlInfo, LControlTrain, LControlTram } from "./modules/leafletControls.js";
 import { addRoutes } from "./modules/routeFilters.js";
+import { storageAvailable } from "./modules/webStorage.js";
 import metroTrainStopIcon from "./static/PICTO_MODE_Train.svg";
 import regionTrainStopIcon from "./static/PICTO_MODE_RegionalTrain.svg";
 import tramStopIcon from "./static/PICTO_MODE_Tram.svg";
@@ -205,6 +206,7 @@ const layerGroupByMode = {
     bus: L.layerGroup()
 };
 
+const visibleRouteIds = new Set();
 for (const routeMap of routeMaps) {
     routeMap.layerGroup = L.layerGroup();
 
@@ -220,6 +222,8 @@ for (const routeMap of routeMaps) {
                 stopMarker.addTo(stopLayer);
             }
         }
+
+        visibleRouteIds.add(routeMap.routeId);
     });
     
     routeMap.layerGroup.addEventListener("remove", () => {
@@ -232,6 +236,8 @@ for (const routeMap of routeMaps) {
                 }
             }
         }
+
+        visibleRouteIds.delete(routeMap.routeId);
     });
 
     routeMap.layerGroup.addTo(layerGroupByMode[routeMap.mode]);
@@ -343,10 +349,27 @@ setInterval(() => {
     updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
 }, 1000);
 
-addRoutes("19809", stopById, routeMaps, map);
-addRoutes("22446", stopById, routeMaps, map);
-addRoutes("vic:rail:DNG", stopById, routeMaps, map);
-addRoutes("vic:rail:THL", stopById, routeMaps, map);
-routeById["aus:vic:vic-03-75:"].layerGroup.addTo(map);
-routeById["aus:vic:vic-03-86:"].layerGroup.addTo(map);
-routeById["G01"].layerGroup.addTo(map);
+function setDefaultRoutes() {
+    addRoutes("19809", stopById, routeMaps, map);
+    addRoutes("22446", stopById, routeMaps, map);
+    addRoutes("vic:rail:DNG", stopById, routeMaps, map);
+    addRoutes("vic:rail:THL", stopById, routeMaps, map);
+    routeById["aus:vic:vic-03-75:"].layerGroup.addTo(map);
+    routeById["aus:vic:vic-03-86:"].layerGroup.addTo(map);
+    routeById["G01"].layerGroup.addTo(map);
+}
+
+if (storageAvailable("sessionStorage")) {
+    if (sessionStorage.getItem("indexVisibleRouteIds")) {
+        for (const routeId of JSON.parse(sessionStorage.getItem("indexVisibleRouteIds"))) {
+            routeById[routeId].layerGroup.addTo(map);
+        }
+    } else {
+        setDefaultRoutes();
+    }
+    setInterval(() => {
+        sessionStorage.setItem("indexVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
+    }, 1000);
+} else {
+    setDefaultRoutes();
+}
