@@ -1,31 +1,10 @@
+import { MetroTramRouteMap, BusRouteMap } from "./routeMapClasses.js";
 import { metroTrainRouteMaps, regionTrainRouteMaps } from "./routeMapsInitial.js";
 import metroTrainRouteData from "../../../../data/gtfsschedule/2/routes.txt";
 import metroTramRouteData from "../../../../data/gtfsschedule/3/routes.txt";
 import regionTrainRouteData from "../../../../data/gtfsschedule/1/routes.txt";
 import busRouteData from "../../../../data/gtfsschedule/4/routes.txt";
 import stopRoutes from "../../../../data/stopRoutes.json";
-
-class MetroTramRouteMap {
-    constructor(routeCode) {
-        // routeCode same as short name
-        this.routeCode = routeCode;
-        this.routeId = `aus:vic:vic-03-${routeCode}:`;
-        this.geojson = [];
-        this.stopIds = [];
-        this.mode = "metroTram";
-    }
-}
-
-class BusRouteMap {
-    constructor(routeCode) {
-        // routeCode same as short name
-        this.routeId = routeCode;
-        this.routeCode = routeCode;
-        this.geojson = [];
-        this.stopIds = [];
-        this.mode = "bus";
-    }
-}
 
 function createRouteStructures(modes, geojsons) {
     const routeById = {}, routeByModeCode = {};

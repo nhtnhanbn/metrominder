@@ -1,27 +1,4 @@
-class MetroTrainRouteMap {
-    constructor(routeCode, shapeIds) {
-        this.routeCode = routeCode;
-        this.routeId = `aus:vic:vic-02-${routeCode}:`;
-        this.shapeIds = shapeIds.map((shapeId) => {
-            return `2-${this.routeCode}-vpt-${shapeId}`;
-        });
-        this.geojson = [];
-        this.stopIds = [];
-        this.mode = "metroTrain";
-    }
-}
-class RegionTrainRouteMap {
-    constructor(routeCode, shapeIds) {
-        this.routeCode = routeCode;
-        this.routeId = `aus:vic:vic-01-${routeCode}:`;
-        this.shapeIds = shapeIds.map((shapeId) => {
-            return `1-${this.routeCode}-mjp-${shapeId}`;
-        });
-        this.geojson = [];
-        this.stopIds = [];
-        this.mode = "regionTrain";
-    }
-}
+import { MetroTrainRouteMap, RegionTrainRouteMap } from "./routeMapClasses.js";
 
 const metroTrainRouteMaps = new Set([
     new MetroTrainRouteMap("ALM", ["1.12.H", "1.22.H"]),
