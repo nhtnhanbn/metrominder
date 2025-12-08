@@ -286,9 +286,14 @@ if (storageAvailable("sessionStorage")) {
         }
     }
 
+    if (sessionStorage.getItem("trainShowStops") && JSON.parse(sessionStorage.getItem("trainShowStops"))) {
+        stopLayer.addTo(map);
+    }
+
     setInterval(() => {
         sessionStorage.setItem("trainVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
         sessionStorage.setItem("trainState", JSON.stringify(state));
+        sessionStorage.setItem("trainShowStops", JSON.stringify(map.hasLayer(stopLayer)));
     }, 1000);
 } else {
     setDefaultRoutes();

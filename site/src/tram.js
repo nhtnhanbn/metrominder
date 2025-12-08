@@ -261,9 +261,14 @@ if (storageAvailable("sessionStorage")) {
         }
     }
 
+    if (sessionStorage.getItem("tramShowStops") && JSON.parse(sessionStorage.getItem("tramShowStops"))) {
+        stopLayer.addTo(map);
+    }
+
     setInterval(() => {
         sessionStorage.setItem("tramVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
         sessionStorage.setItem("tramState", JSON.stringify(state));
+        sessionStorage.setItem("tramShowStops", JSON.stringify(map.hasLayer(stopLayer)));
     }, 1000);
 } else {
     setDefaultRoutes();
