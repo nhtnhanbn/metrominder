@@ -40,6 +40,10 @@ dialog {
     width: 80%;
 }
 
+dialog a:visited {
+    color: blue;
+}
+
 html, body, #map {
     height: 100%;
     width: 100vw;
