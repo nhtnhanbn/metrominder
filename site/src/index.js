@@ -26,6 +26,7 @@ import { createIndexLayerTree } from "./modules/layerTrees/indexLayerTree.js";
 import { updatePositions, updateTrips } from "./modules/updateRealtime.js";
 import { createStopPopup } from "./modules/stopPopup.js";
 import { LControlWatermark, LControlInfo, LControlTrain, LControlTram } from "./modules/leafletControls.js";
+import { addRoutes } from "./modules/routeFilters.js";
 import metroTrainStopIcon from "./static/PICTO_MODE_Train.svg";
 import regionTrainStopIcon from "./static/PICTO_MODE_RegionalTrain.svg";
 import tramStopIcon from "./static/PICTO_MODE_Tram.svg";
@@ -67,7 +68,7 @@ if ("serviceWorker" in navigator) {
     })
 };
 
-const modes = ["bus", "metroTram", "regionTrain", "metroTrain"]; // in reverse order of stop marker pictogram priority
+const modes = ["metroTrain", "regionTrain", "metroTram", "bus"]; // in order of decreasing priority
 const { routeMaps, routeById } = createRouteStructures(modes, {
     metroTrainGeojson: metroTrainGeojson,
     metroTramGeojson: metroTramGeojson,
@@ -341,3 +342,10 @@ setInterval(() => {
 setInterval(() => {
     updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTripId, platformById, tripStatus, attributionPrefix, map);
 }, 1000);
+
+addRoutes("19809", stopById, routeMaps, map);
+addRoutes("22446", stopById, routeMaps, map);
+addRoutes("vic:rail:DNG", stopById, routeMaps, map);
+addRoutes("vic:rail:THL", stopById, routeMaps, map);
+routeById["aus:vic:vic-03-75:"].layerGroup.addTo(map);
+routeById["aus:vic:vic-03-86:"].layerGroup.addTo(map);
