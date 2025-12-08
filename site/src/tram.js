@@ -254,8 +254,16 @@ if (storageAvailable("sessionStorage")) {
     } else {
         setDefaultRoutes();
     }
+
+    if (sessionStorage.getItem("tramState")) {
+        for (const [key, value] of Object.entries(JSON.parse(sessionStorage.getItem("tramState")))) {
+            state[key] = value;
+        }
+    }
+
     setInterval(() => {
         sessionStorage.setItem("tramVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
+        sessionStorage.setItem("tramState", JSON.stringify(state));
     }, 1000);
 } else {
     setDefaultRoutes();

@@ -279,8 +279,16 @@ if (storageAvailable("sessionStorage")) {
     } else {
         setDefaultRoutes();
     }
+
+    if (sessionStorage.getItem("trainState")) {
+        for (const [key, value] of Object.entries(JSON.parse(sessionStorage.getItem("trainState")))) {
+            state[key] = value;
+        }
+    }
+
     setInterval(() => {
         sessionStorage.setItem("trainVisibleRouteIds", JSON.stringify([...visibleRouteIds]));
+        sessionStorage.setItem("trainState", JSON.stringify(state));
     }, 1000);
 } else {
     setDefaultRoutes();
