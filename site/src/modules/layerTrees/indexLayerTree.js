@@ -1,4 +1,4 @@
-import { setRoutes, addRoutes } from "../routeFilters.js";
+import { addRoutes } from "../routeFilters.js";
 
 function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, layerGroupByMode, state) {
     setInterval(() => {
@@ -77,7 +77,7 @@ function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
             label: `<div class="leaflet-control-layers-separator"></div>`
         },
         {
-            label: "Use search for individual routes and buses."
+            label: "Use search for buses and individual routes."
         },
         {
             label: "<b>All railways<b>",
@@ -135,7 +135,7 @@ function createIndexLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("19809", stopById, routeMaps, map);
+                            addRoutes("19809", stopById, routeMaps, map);
                             addRoutes("22446", stopById, routeMaps, map);
                             addRoutes("vic:rail:HUN", stopById, routeMaps, map);
                         }

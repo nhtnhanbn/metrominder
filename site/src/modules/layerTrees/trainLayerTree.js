@@ -1,4 +1,4 @@
-import { setRoutes } from "../routeFilters.js";
+import { addRoutes } from "../routeFilters.js";
 
 function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state) {
     setInterval(() => {
@@ -264,7 +264,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:THL", stopById, routeMaps, map);
+                            addRoutes("vic:rail:THL", stopById, routeMaps, map);
                         }
                     }]
                 },
@@ -276,8 +276,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:MCE", stopById, routeMaps, map);
-                            routeById["aus:vic:vic-02-RCE:"].layerGroup.remove();
+                            addRoutes("vic:rail:MCE", stopById, routeMaps, map);
                         }
                     }]
                 },
@@ -289,7 +288,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:RMD", stopById, routeMaps, map);
+                            addRoutes("vic:rail:RMD", stopById, routeMaps, map);
                             routeById["aus:vic:vic-02-WER:"].layerGroup.addTo(map);
                             routeById["aus:vic:vic-02-WIL:"].layerGroup.addTo(map);
                         }
@@ -303,7 +302,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:SYR", stopById, routeMaps, map);
+                            addRoutes("vic:rail:SYR", stopById, routeMaps, map);
                             routeById["aus:vic:vic-02-WER:"].layerGroup.addTo(map);
                             routeById["aus:vic:vic-02-WIL:"].layerGroup.addTo(map);
                         }
@@ -317,7 +316,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:CFD", stopById, routeMaps, map);
+                            addRoutes("vic:rail:CFD", stopById, routeMaps, map);
                             routeById["aus:vic:vic-02-WER:"].layerGroup.addTo(map);
                             routeById["aus:vic:vic-02-WIL:"].layerGroup.addTo(map);
                         }
@@ -331,9 +330,8 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:NME", stopById, routeMaps, map);
+                            addRoutes("vic:rail:NME", stopById, routeMaps, map);
                             routeById["aus:vic:vic-02-FKN:"].layerGroup.addTo(map);
-                            routeById["aus:vic:vic-02-RCE:"].layerGroup.remove();
                         }
                     }]
                 },
@@ -345,7 +343,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("vic:rail:FSY", stopById, routeMaps, map);
+                            addRoutes("vic:rail:FSY", stopById, routeMaps, map);
                             routeById["aus:vic:vic-02-FKN:"].layerGroup.addTo(map);
                         }
                     }]

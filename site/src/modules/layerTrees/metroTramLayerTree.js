@@ -1,4 +1,4 @@
-import { setRoutes } from "../routeFilters.js";
+import { addRoutes } from "../routeFilters.js";
 
 function createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopLayer, state) {
     setInterval(() => {
@@ -101,7 +101,7 @@ function createMetroTramLayerTree(routeMaps, routeById, stopById, vehicleMaps, s
                         className: "preset-button",
                         event: "click",
                         selectAll: (ev, domNode, treeNode, map) => {
-                            setRoutes("19489", stopById, routeMaps, map);
+                            addRoutes("19489", stopById, routeMaps, map);
                         }
                     }]
                 }
