@@ -151,7 +151,7 @@ searchLayer.remove();
 
 for (const stopMap of stopMaps) {
     let stopIcon = regionTrainStopIcon;
-    for (const routeMap of stopMap.routeMaps) {
+    for (const routeMap of Array.from(stopMap.routeMaps).toReversed()) {
         switch (routeMap.mode) {
             case "metroTrain":
                 stopIcon = metroTrainStopIcon;

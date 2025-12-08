@@ -261,7 +261,7 @@ for (const routeMap of routeMaps) {
 
 for (const stopMap of stopMaps) {
     let stopIcon;
-    for (const routeMap of stopMap.routeMaps) {
+    for (const routeMap of Array.from(stopMap.routeMaps).toReversed()) {
         switch (routeMap.mode) {
             case "bus":
                 stopIcon = busStopIcon;
