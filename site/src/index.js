@@ -349,3 +349,4 @@ addRoutes("vic:rail:DNG", stopById, routeMaps, map);
 addRoutes("vic:rail:THL", stopById, routeMaps, map);
 routeById["aus:vic:vic-03-75:"].layerGroup.addTo(map);
 routeById["aus:vic:vic-03-86:"].layerGroup.addTo(map);
+routeById["G01"].layerGroup.addTo(map);
