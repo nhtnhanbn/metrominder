@@ -14,6 +14,11 @@ class StopMap {
     }
 }
 
+const streamLinkByStopId = {
+    "vic:rail:SUN": "https://sunshinerailcam.wongm.com",
+    "vic:rail:SYR": "https://youtube.com/live/knY-8mJ8_8U"
+};
+
 function createStopStructures(modes, routeMaps, stopDatas) {
     let stopData = [];
     for (const mode of modes) {
@@ -38,6 +43,10 @@ function createStopStructures(modes, routeMaps, stopDatas) {
         
         if (parent_station === "") {
             const stopMap = new StopMap(stop_id, stop_name, stop_lat, stop_lon, platform_code !== undefined);
+            if (stop_id in streamLinkByStopId) {
+                stopMap.streamLink = streamLinkByStopId[stop_id];
+            }
+
             stopMaps.add(stopMap);
             stopById[stop_id] = stopMap;
             stopByName[stop_name] = stopMap;
