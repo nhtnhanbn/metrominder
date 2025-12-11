@@ -5,7 +5,6 @@ import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { createHmac } from "crypto";
 import fs from "fs/promises";
 import { parse } from "csv-parse/sync";
-import { busRouteCodeFromId } from "../site/src/modules/stringConverters.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -53,9 +52,6 @@ const routeIdByTripId = {}, headsignByTripId = {};
         const rawTripData = await fs.readFile(`../data/gtfsschedule/${number}/trips.txt`);
         const tripData = parse(rawTripData, { bom: true, columns: true });
         for (const tripDatum of tripData) {
-            const routeId = tripDatum.route_id;
-
-            routeIdByTripId[tripDatum.trip_id] = number === 4 ? busRouteCodeFromId(routeId) : routeId;
             headsignByTripId[tripDatum.trip_id] = tripDatum.trip_headsign;
         }
     }
@@ -116,10 +112,14 @@ async function updateCache(cache, endpoint) {
         }
 
         for (const entity of cache.feed.entity) {
-            if (entity.vehicle) {
-                entity.vehicle.trip.routeId = routeIdByTripId[entity.id];
-            } else if (entity.tripUpdate) {
-                entity.tripUpdate.trip.routeId = routeIdByTripId[entity.id];
+            const tripId = entity.id;
+            if (tripId[0] !== '0') { // bus
+                const routeId = tripId.slice(tripId.indexOf("-")+1, tripId.indexOf("--"));
+                if (entity.vehicle) {
+                    entity.vehicle.trip.routeId = routeId;
+                } else if (entity.tripUpdate) {
+                    entity.tripUpdate.trip.routeId = routeId;
+                }
             }
         }
 
