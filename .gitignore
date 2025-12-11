@@ -13,3 +13,4 @@ node_modules/
 stop_times.txt
 shapes.txt
 *Zone.Identifier
+*.zip
