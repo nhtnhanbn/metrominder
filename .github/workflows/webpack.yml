@@ -33,6 +33,7 @@ jobs:
       run: |
         npm install
         ./updateGTFS.sh
+        ./processGTFS.sh
       working-directory: data
 
     - name: Build
