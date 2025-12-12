@@ -288,7 +288,7 @@ function createConsistInfo(mode, vehicle, routeId) {
                         </p>
                     </div>`;
         } else if (mode === "bus") {
-            vehicleConsistInfo = `<p>${vehicle.vehicle.vehicle.id}</p>`;
+            vehicleConsistInfo = `<p><b>Bus</b> ${vehicle.vehicle.vehicle.id}</p>`;
             vehicleModelCode = routeId;
         }
     }
