@@ -10,13 +10,11 @@ function createStopPopup(stopMap, routeMaps, stopById, map) {
     header.textContent = stopName;
 
     if ("streamLink" in stopMap) {
-        const stream = document.createElement("button");
+        const stream = document.createElement("a");
         stream.textContent = "📺";
         stream.title = "Go to webcam livestream...";
         stream.className = "nonbutton";
-        stream.addEventListener("click", () => {
-            location.href = stopMap.streamLink;
-        });
+        stream.href = stopMap.streamLink;
 
         header.textContent += " ";
         header.appendChild(stream);
