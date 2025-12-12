@@ -582,66 +582,6 @@ async function updateTrips(routeMaps, routeById, stopMaps, stopById, vehicleByTr
             const stopMarker = stopMap.stopMarker;
             const stopPopup = createStopPopup(stopMap, routeMaps, stopById, map);
             
-            const stopDepartures = stopMap.stopDepartures;
-            if (stopDepartures.length > 0) {
-                stopDepartures.sort((a, b) => {
-                    return parseInt(a.time) - parseInt(b.time);
-                });
-                
-                const table = document.createElement("table");
-                
-                const header = document.createElement("tr");
-
-                let columns;
-                if (stopMap.hasPlatforms || stopMap.isStation()) {
-                    if (stopMap.isStation()) {
-                        columns = ["DEPARTING", "PLATFORM", "TIME"];
-                    } else {
-                        columns = ["DEPARTING", "BAY", "TIME"];
-                    }
-                } else {
-                    columns = ["DEPARTING", "TIME"];
-                }
-
-                for (const column of columns) {
-                    const cell = document.createElement("th");
-                    cell.textContent = column;
-                    header.appendChild(cell);
-                }
-                table.appendChild(header);
-                
-                for (const stopDeparture of stopDepartures) {
-                    const row = document.createElement("tr");
-                    
-                    const serviceCell = document.createElement("td");
-                    if (stopMap.isStation()) {
-                        serviceCell.textContent = stopDeparture.headsign;
-                    } else {
-                        serviceCell.textContent = `${stopDeparture.routeMap.routeShortName} ${stopDeparture.headsign}`;
-                    }
-                    serviceCell.style.backgroundColor = stopDeparture.routeMap.routeColour;
-                    serviceCell.style.color = stopDeparture.routeMap.routeTextColour;
-                    row.appendChild(serviceCell);
-                    
-                    if (stopMap.hasPlatforms || stopMap.isStation()) {
-                        const platformCell = document.createElement("td");
-                        platformCell.textContent = stopDeparture.platform;
-                        row.appendChild(platformCell);
-                    }
-                    
-                    const timeCell = document.createElement("td");
-                    timeCell.textContent = timeString(stopDeparture.time);
-                    row.appendChild(timeCell);
-                    
-                    table.appendChild(row);
-                }
-                stopPopup.appendChild(table);
-            } else {
-                const text = document.createElement("div");
-                text.textContent = "No departing services.";
-                stopPopup.appendChild(text);
-            }
-            
             const updateTime = document.createElement("p");
             updateTime.textContent = `Trip updates ${tripUpdateTime}`;
             stopPopup.appendChild(updateTime);
