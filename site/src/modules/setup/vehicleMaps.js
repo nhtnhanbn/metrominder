@@ -1,5 +1,6 @@
 class VehicleMap {
-    constructor(tripId, routeId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, vehicleMode) {
+    constructor(vehicleId, tripId, routeId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, vehicleMode, timestamp) {
+        this.vehicleId = vehicleId;
         this.tripId = tripId;
         this.routeId = routeId;
         this.routeCode = routeCode;
@@ -10,6 +11,7 @@ class VehicleMap {
         this.vehicleConsistInfo = vehicleConsistInfo;
         this.vehicleIcon = vehicleIcon;
         this.vehicleMode = vehicleMode;
+        this.timestamp = timestamp;
         this.live = true;
     }
 
@@ -17,6 +19,6 @@ class VehicleMap {
         return this.vehicleMode === "metroTrain" || this.vehicleMode === "regionTrain" || this.vehicleMode === "bus";
     }
 }
-const vehicleMaps = new Set(), vehicleByTripId = {};
+const vehicleMaps = new Set(), vehicleById = {}, vehicleByTripId = {};
 
-export { VehicleMap, vehicleMaps, vehicleByTripId };
+export { VehicleMap, vehicleMaps, vehicleById, vehicleByTripId };

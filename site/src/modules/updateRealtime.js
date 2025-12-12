@@ -298,7 +298,7 @@ function createConsistInfo(mode, vehicle, routeId) {
     return { vehicleConsistInfo, vehicleModelCode, vehicleIcon };
 }
 
-async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map) {
+async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleById, vehicleByTripId, dtpTime, positionStatus, attributionPrefix, state, map) {
     positionStatus.textContent = "Retrieving positions...";
     map.attributionControl.setPrefix(attributionPrefix.outerHTML);
     
@@ -320,6 +320,8 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
             let { latitude, longitude, bearing } = vehicle.vehicle.position;
             const tripId = vehicle.vehicle.trip.tripId;
             const routeId = vehicle.vehicle.trip.routeId;
+            const vehicleId = "vehicle" in vehicle.vehicle ? vehicle.vehicle.vehicle.id : tripId;
+            const timestamp = parseInt(vehicle.vehicle.timestamp);
 
             let mode;
             switch (routeId.slice(0, 14)) {
@@ -344,30 +346,33 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
             const routeCode = routeById[routeId].routeCode;
             const vehicleTooltip = `Position at ${timeString(vehicle.vehicle.timestamp, true)}`;
             
-            if (tripId in vehicleByTripId) {
-                const vehicleMap = vehicleByTripId[tripId];
-                vehicleMap.live = true;
+            if (vehicleId in vehicleById) {
+                const vehicleMap = vehicleById[vehicleId];
+                if (timestamp >= vehicleMap.timestamp) {
+                    vehicleMap.timestamp = timestamp;
+                    vehicleMap.live = true;
 
-                if (bearing === undefined) {
-                    const { lat, lng } = vehicleMap.vehicleMarker.getLatLng();
-                    if (lat !== undefined && lng !== undefined && (latitude !== lat || longitude !== lng)) {
-                        vehicleMap.bearing = calculateBearing(lat, lng, latitude, longitude);
+                    if (bearing === undefined) {
+                        const { lat, lng } = vehicleMap.vehicleMarker.getLatLng();
+                        if (lat !== undefined && lng !== undefined && (latitude !== lat || longitude !== lng)) {
+                            vehicleMap.bearing = calculateBearing(lat, lng, latitude, longitude);
+                        }
+                        
+                        if ("bearing" in vehicleMap) {
+                            bearing = vehicleMap.bearing;
+                        } else if ("nextStopMap" in vehicleMap) {
+                            const stopMap = vehicleMap.nextStopMap;
+                            bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
+                        } else {
+                            bearing = undefined;
+                        }
                     }
-                    
-                    if ("bearing" in vehicleMap) {
-                        bearing = vehicleMap.bearing;
-                    } else if ("nextStopMap" in vehicleMap) {
-                        const stopMap = vehicleMap.nextStopMap;
-                        bearing = calculateBearing(latitude, longitude, stopMap.stopLat, stopMap.stopLon);
-                    } else {
-                        bearing = undefined;
-                    }
+
+                    vehicleMap.vehicleMarker.setRotation(bearing)
+                                            .slideTo([latitude, longitude]);
+                    vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
+                                            .slideTo([latitude, longitude]);
                 }
-
-                vehicleMap.vehicleMarker.setRotation(bearing)
-                                        .slideTo([latitude, longitude]);
-                vehicleMap.vehicleLabel.setTooltipContent(vehicleTooltip)
-                                        .slideTo([latitude, longitude]);
             } else {
                 const { vehicleConsistInfo, vehicleModelCode, vehicleIcon } = createConsistInfo(mode, vehicle, routeId);
                 
@@ -421,7 +426,7 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                     { autoPan: false }
                 );
                 
-                vehicleMaps.add(new VehicleMap(tripId, routeId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, mode));
+                vehicleMaps.add(new VehicleMap(vehicleId, tripId, routeId, routeCode, vehicleModelCode, vehicleMarker, vehicleLabel, vehicleLabelContent, vehicleConsistInfo, vehicleIcon, mode, timestamp));
                 
                 routeById[routeId].layerGroup.addLayer(vehicleMarker).addLayer(vehicleLabel);
             }
@@ -434,9 +439,11 @@ async function updatePositions(routeMaps, routeById, vehicleMaps, vehicleByTripI
                 vehicleMap.vehicleLabel.remove();
                 vehicleMap.vehicleLabel.removeFrom(routeById[vehicleMap.routeId].layerGroup);
                 vehicleMaps.delete(vehicleMap);
+                delete vehicleById[vehicleMap.vehicleId];
                 delete vehicleByTripId[vehicleMap.tripId];
             } else {
                 vehicleMap.live = false;
+                vehicleById[vehicleMap.vehicleId] = vehicleMap;
                 vehicleByTripId[vehicleMap.tripId] = vehicleMap;
             }
         }

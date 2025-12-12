@@ -9,6 +9,9 @@ module.exports = (env) => merge(common, {
     ],
     devtool: "eval-source-map",
     devServer: {
-        watchFiles: ["./src/template.html"]
+        watchFiles: ["./src/template.html"],
+        client: {
+            overlay: false
+        }
     }
 });
