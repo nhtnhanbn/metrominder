@@ -1,11 +1,11 @@
 import "leaflet/dist/leaflet.css";
 import "leaflet-search/src/leaflet-search.css";
 import "leaflet-search";
-import L from "leaflet";
+import L, { layerGroup } from "leaflet";
 import trainGeojson from "../../data/fullTrainRoutes.geojson";
 import "./style.css";
 
-const map = L.map("map").fitBounds([[-38.4, 145.6], [-37.5, 144.5]]);
+const map = L.map("map").fitBounds([[-38.1, 145.6], [-36, 144.5]]);
 
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -40,6 +40,7 @@ let foundMarker;
 searchLayer.remove();
 
 const geojsonLayers = new Set();
+const layerGroupByRouteCode = {};
 for (const feature of trainGeojson.features) if (feature.properties.SHAPE_ID) {
     const geojsonLayer = L.geoJSON(feature);
     geojsonLayer.bindTooltip(feature.properties.SHAPE_ID);
@@ -47,7 +48,7 @@ for (const feature of trainGeojson.features) if (feature.properties.SHAPE_ID) {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.addEventListener("click", () => {
-        geojsonLayer.remove();
+        geojsonLayer.removeFrom(map);
     });
     geojsonLayer.bindPopup(deleteButton);
 
@@ -67,13 +68,30 @@ for (const feature of trainGeojson.features) if (feature.properties.SHAPE_ID) {
     dummyLayer.addTo(searchLayer);
     geojsonLayer.addTo(map);
     geojsonLayers.add(geojsonLayer);
+
+    const routeCode = feature.properties.SHAPE_ID.slice(2, 5);
+    if (!(routeCode in layerGroupByRouteCode)) {
+        layerGroupByRouteCode[routeCode] = L.featureGroup();
+        const dummyLayerGroup = L.circleMarker(
+            [0, 0],
+            {
+                radius: 0,
+                opacity: 0,
+                title: routeCode,
+                routeLayer: layerGroupByRouteCode[routeCode],
+                bounds: [[-38.1, 145.6], [-36, 144.5]]
+            }
+        );
+        dummyLayerGroup.addTo(searchLayer);
+    }
+    geojsonLayer.addTo(layerGroupByRouteCode[routeCode]);
 }
 
 const clearButton = document.createElement("button");
 clearButton.textContent = "Clear all";
 clearButton.addEventListener("click", () => {
     for (const geojsonLayer of geojsonLayers) {
-        geojsonLayer.remove();
+        geojsonLayer.removeFrom(map);
     }
 });
 document.querySelector(".leaflet-top.leaflet-right").appendChild(clearButton);

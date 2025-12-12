@@ -143,8 +143,7 @@ function createTrainLayerTree(routeMaps, routeById, stopById, vehicleMaps, stopL
             selectAllCheckbox: true,
             children: [
                 layerLeafByCode["BDE"],
-                layerLeafByCode["TRN"],
-                layerLeafByCode["vPK"]
+                layerLeafByCode["TRN"]
             ]
         },
         {
