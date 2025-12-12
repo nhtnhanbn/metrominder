@@ -10,15 +10,15 @@ const metroTrainRouteMaps = new Set([
     new MetroTrainRouteMap("HBE", ["1.19.H", "1.5.H"]),
     new MetroTrainRouteMap("LIL", ["1.24.H", "1.101.H"]),
     new MetroTrainRouteMap("MDD", ["1.3.H", "1.10.H"]),
-    new MetroTrainRouteMap("PKM", ["1.10.H", "1.1.R", "28.29.H"]),
+    new MetroTrainRouteMap("PKM", ["1.10.H", "1.1.R", "31.31.H"]),
     new MetroTrainRouteMap("SHM", ["1.2.H"]),
     new MetroTrainRouteMap("STY", ["1.2.H"]),
-    new MetroTrainRouteMap("SUY", ["1.2.H", "1.35.H", "28.19.R"]),
+    new MetroTrainRouteMap("SUY", ["1.2.H", "1.35.H", "31.63.H"]),
     new MetroTrainRouteMap("UFD", ["1.10.H", "1.2.H"]),
     new MetroTrainRouteMap("WER", ["1.1.R", "1.15.R"]),
     new MetroTrainRouteMap("WIL", ["1.1.R"]),
-    new MetroTrainRouteMap("RCE", ["1.1.R", "28.9.R"]),
-    new MetroTrainRouteMap("CCL", ["54.1.H"])
+    new MetroTrainRouteMap("RCE", ["1.1.R", "31.6.H"]),
+    new MetroTrainRouteMap("CCL", ["55.1.H"])
 ]);
 
 const regionTrainRouteMaps = new Set([
